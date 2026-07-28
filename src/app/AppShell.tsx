@@ -1,4 +1,5 @@
 import { Sidebar } from '@/app/Sidebar';
+import { AnkiView } from '@/features/anki/AnkiView';
 import { DocsView } from '@/features/docs/DocsView';
 import { useStore } from '@/store/StoreProvider';
 
@@ -19,7 +20,7 @@ export function AppShell() {
       <Sidebar />
       <main className="min-w-0 flex-1 overflow-hidden">
         {tab === 'docs' && <DocsView />}
-        {tab === 'anki' && <Placeholder title="Anki" />}
+        {tab === 'anki' && <AnkiView />}
         {tab === 'jetpunk' && <Placeholder title="JetPunk" />}
         {tab === 'quizypedia' && <Placeholder title="Quizypedia" />}
         {tab === 'jeutv' && <Placeholder title="Jeu TV" />}
