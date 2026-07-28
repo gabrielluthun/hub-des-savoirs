@@ -1,4 +1,5 @@
 import { Sidebar } from '@/app/Sidebar';
+import { DocsView } from '@/features/docs/DocsView';
 import { useStore } from '@/store/StoreProvider';
 
 function Placeholder({ title }: { title: string }) {
@@ -17,7 +18,7 @@ export function AppShell() {
     <div className="flex h-full min-h-0 bg-background text-foreground">
       <Sidebar />
       <main className="min-w-0 flex-1 overflow-hidden">
-        {tab === 'docs' && <Placeholder title="Google Docs" />}
+        {tab === 'docs' && <DocsView />}
         {tab === 'anki' && <Placeholder title="Anki" />}
         {tab === 'jetpunk' && <Placeholder title="JetPunk" />}
         {tab === 'quizypedia' && <Placeholder title="Quizypedia" />}
