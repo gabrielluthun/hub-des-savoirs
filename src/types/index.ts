@@ -1,0 +1,108 @@
+export type TabId =
+  | 'docs'
+  | 'anki'
+  | 'jetpunk'
+  | 'quizypedia'
+  | 'jeutv'
+  | 'settings';
+
+export type ThemeMode = 'dark' | 'light';
+
+export type GeminiModel =
+  | 'gemini-3.5-flash-lite'
+  | 'gemini-3.5-flash'
+  | 'gemini-3.6-flash'
+  | 'gemini-3.1-pro';
+
+export const GEMINI_MODELS: GeminiModel[] = [
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.1-pro',
+];
+
+export const DEFAULT_GEMINI_MODEL: GeminiModel = 'gemini-3.5-flash-lite';
+
+export type Difficulty = 'facile' | 'moyen' | 'difficile' | 'expert';
+
+export type QuizSource = 'all' | 'docs' | 'anki' | 'jetpunk';
+
+export interface AppSettings {
+  apiKey: string;
+  model: GeminiModel;
+  theme: ThemeMode;
+  quizypediaEnabled: boolean;
+  soundEnabled: boolean;
+  activeTab: TabId;
+}
+
+export interface HubDocument {
+  id: string;
+  title: string;
+  googleDocsUrl: string;
+  content: string;
+  updatedAt: string;
+}
+
+export interface AnkiCard {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface JetPunkItem {
+  id: string;
+  prompt: string;
+  answer: string;
+}
+
+export interface JetPunkList {
+  id: string;
+  title: string;
+  category: string;
+  durationSec: number;
+  items: JetPunkItem[];
+}
+
+export interface GameHistoryEntry {
+  id: string;
+  score: number;
+  total: number;
+  difficulty: Difficulty;
+  playedAt: string;
+}
+
+export interface GeneratedQuestion {
+  question: string;
+  options?: string[];
+  answer: string;
+  explanation: string;
+}
+
+export interface AppState {
+  settings: AppSettings;
+  docs: HubDocument[];
+  activeDocId: string | null;
+  ankiCards: AnkiCard[];
+  jetpunkLists: JetPunkList[];
+  activeJetpunkListId: string | null;
+  gameHistory: GameHistoryEntry[];
+}
+
+export type AppAction =
+  | { type: 'SET_TAB'; tab: TabId }
+  | { type: 'UPDATE_SETTINGS'; patch: Partial<AppSettings> }
+  | { type: 'ADD_DOC'; doc: HubDocument }
+  | { type: 'UPDATE_DOC'; id: string; patch: Partial<HubDocument> }
+  | { type: 'DELETE_DOC'; id: string }
+  | { type: 'SET_ACTIVE_DOC'; id: string | null }
+  | { type: 'ADD_ANKI_CARD'; card: AnkiCard }
+  | { type: 'ADD_ANKI_CARDS'; cards: AnkiCard[] }
+  | { type: 'UPDATE_ANKI_CARD'; id: string; patch: Partial<AnkiCard> }
+  | { type: 'DELETE_ANKI_CARD'; id: string }
+  | { type: 'ADD_JETPUNK_LIST'; list: JetPunkList }
+  | { type: 'UPDATE_JETPUNK_LIST'; id: string; patch: Partial<JetPunkList> }
+  | { type: 'DELETE_JETPUNK_LIST'; id: string }
+  | { type: 'SET_ACTIVE_JETPUNK_LIST'; id: string | null }
+  | { type: 'ADD_GAME_HISTORY'; entry: GameHistoryEntry }
+  | { type: 'HYDRATE'; state: AppState };
