@@ -1,7 +1,20 @@
+import { Toaster } from 'sonner';
+import { AppShell } from '@/app/AppShell';
+import { StoreProvider } from '@/store/StoreProvider';
+
 export default function App() {
   return (
-    <div className="dark flex h-full items-center justify-center bg-background text-foreground">
-      <p className="font-display text-2xl">Hub du Savoir</p>
-    </div>
+    <StoreProvider>
+      <AppShell />
+      <Toaster
+        theme="dark"
+        position="bottom-right"
+        toastOptions={{
+          classNames: {
+            toast: 'bg-card border-border text-foreground',
+          },
+        }}
+      />
+    </StoreProvider>
   );
 }
