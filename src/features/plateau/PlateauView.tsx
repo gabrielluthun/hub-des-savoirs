@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { toast } from 'sonner';
-import { GameHistory } from '@/features/jeutv/GameHistory';
-import { GamePlay } from '@/features/jeutv/GamePlay';
-import { GameSetup } from '@/features/jeutv/GameSetup';
+import { GameHistory } from '@/features/plateau/GameHistory';
+import { GamePlay } from '@/features/plateau/GamePlay';
+import { GameSetup } from '@/features/plateau/GameSetup';
 import { generateQuizQuestions } from '@/lib/gemini';
 import { buildQuizContext } from '@/lib/quiz-context';
 import { createId } from '@/lib/utils';
@@ -17,7 +17,7 @@ import {
 } from '@/store/selectors';
 import type { Difficulty, GeneratedQuestion, QuizSource } from '@/types';
 
-export function JeuTvView() {
+export function PlateauView() {
   const { state, dispatch } = useStore();
   const docs = selectDocs(state);
   const ankiCards = selectAnkiCards(state);
