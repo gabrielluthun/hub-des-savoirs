@@ -3,7 +3,7 @@ export type TabId =
   | 'anki'
   | 'jetpunk'
   | 'quizypedia'
-  | 'jeutv'
+  | 'plateau'
   | 'settings';
 
 export type ThemeMode = 'dark' | 'light';

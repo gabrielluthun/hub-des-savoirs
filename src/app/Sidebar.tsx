@@ -22,7 +22,7 @@ const NAV_ITEMS: {
   { id: 'anki', label: 'Anki', icon: Layers },
   { id: 'jetpunk', label: 'JetPunk', icon: ListChecks },
   { id: 'quizypedia', label: 'Quizypedia', icon: HelpCircle },
-  { id: 'jeutv', label: 'Jeu TV', icon: MonitorPlay, badge: 'IA' },
+  { id: 'plateau', label: 'Plateau', icon: MonitorPlay, badge: 'IA' },
 ];
 
 export function Sidebar() {

@@ -1,5 +1,9 @@
-import type { AppState, GeminiModel } from '@/types';
+import type { AppState, GeminiModel, TabId } from '@/types';
 import { DEFAULT_GEMINI_MODEL, GEMINI_MODELS } from '@/types';
+
+const LEGACY_TAB_MAP: Record<string, TabId> = {
+  jeutv: 'plateau',
+};
 
 const LEGACY_MODEL_MAP: Record<string, GeminiModel> = {
   'gemini-2.0-flash': 'gemini-3.5-flash',
@@ -28,12 +32,19 @@ export function migrateGeminiModel(model: string): GeminiModel {
   return DEFAULT_GEMINI_MODEL;
 }
 
+export function migrateActiveTab(tab: string): TabId {
+  if (LEGACY_TAB_MAP[tab]) return LEGACY_TAB_MAP[tab];
+  const valid: TabId[] = ['docs', 'anki', 'jetpunk', 'quizypedia', 'plateau', 'settings'];
+  return (valid as string[]).includes(tab) ? (tab as TabId) : 'docs';
+}
+
 export function migrateState(state: AppState): AppState {
   return {
     ...state,
     settings: {
       ...state.settings,
       model: migrateGeminiModel(state.settings.model),
+      activeTab: migrateActiveTab(state.settings.activeTab),
     },
   };
 }
