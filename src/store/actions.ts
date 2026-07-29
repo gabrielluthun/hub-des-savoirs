@@ -71,6 +71,17 @@ export const setActiveJetpunkList = (id: string | null) => ({
   id,
 });
 
+export const addJetpunkHistory = (entry: {
+  id: string;
+  listId: string;
+  listTitle: string;
+  score: number;
+  total: number;
+  durationSec: number;
+  elapsedSec: number;
+  playedAt: string;
+}) => ({ type: 'ADD_JETPUNK_HISTORY' as const, entry });
+
 export const addGameHistory = (entry: {
   id: string;
   score: number;

@@ -68,6 +68,7 @@ export function createDefaultState(): AppState {
       },
     ],
     activeJetpunkListId: listId,
+    jetpunkHistory: [],
     gameHistory: [],
   };
 }
@@ -76,8 +77,15 @@ export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createDefaultState();
-    const parsed = JSON.parse(raw) as AppState;
-    return migrateState({ ...createDefaultState(), ...parsed, settings: { ...createDefaultState().settings, ...parsed.settings } });
+    const parsed = JSON.parse(raw) as Partial<AppState>;
+    const defaults = createDefaultState();
+    return migrateState({
+      ...defaults,
+      ...parsed,
+      settings: { ...defaults.settings, ...parsed.settings },
+      jetpunkHistory: parsed.jetpunkHistory ?? [],
+      gameHistory: parsed.gameHistory ?? [],
+    });
   } catch {
     return createDefaultState();
   }

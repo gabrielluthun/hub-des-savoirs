@@ -72,6 +72,17 @@ export interface GameHistoryEntry {
   playedAt: string;
 }
 
+export interface JetPunkHistoryEntry {
+  id: string;
+  listId: string;
+  listTitle: string;
+  score: number;
+  total: number;
+  durationSec: number;
+  elapsedSec: number;
+  playedAt: string;
+}
+
 export interface GeneratedQuestion {
   question: string;
   options?: string[];
@@ -86,6 +97,7 @@ export interface AppState {
   ankiCards: AnkiCard[];
   jetpunkLists: JetPunkList[];
   activeJetpunkListId: string | null;
+  jetpunkHistory: JetPunkHistoryEntry[];
   gameHistory: GameHistoryEntry[];
 }
 
@@ -104,5 +116,6 @@ export type AppAction =
   | { type: 'UPDATE_JETPUNK_LIST'; id: string; patch: Partial<JetPunkList> }
   | { type: 'DELETE_JETPUNK_LIST'; id: string }
   | { type: 'SET_ACTIVE_JETPUNK_LIST'; id: string | null }
+  | { type: 'ADD_JETPUNK_HISTORY'; entry: JetPunkHistoryEntry }
   | { type: 'ADD_GAME_HISTORY'; entry: GameHistoryEntry }
   | { type: 'HYDRATE'; state: AppState };

@@ -3,7 +3,7 @@ import { Menu } from 'lucide-react';
 import { Sidebar } from '@/app/Sidebar';
 import { AnkiView } from '@/features/anki/AnkiView';
 import { DocsView } from '@/features/docs/DocsView';
-import { JetPunkView } from '@/features/jetpunk/JetPunkView';
+import { JetPunkView } from '@/features/jetpunk/JetpunkView';
 import { PlateauView } from '@/features/plateau/PlateauView';
 import { QuizypediaView } from '@/features/quizypedia/QuizypediaView';
 import { SettingsView } from '@/features/settings/SettingsView';

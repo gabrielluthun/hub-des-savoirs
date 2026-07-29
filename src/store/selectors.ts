@@ -9,4 +9,5 @@ export const selectAnkiCards = (state: AppState) => state.ankiCards;
 export const selectJetpunkLists = (state: AppState) => state.jetpunkLists;
 export const selectActiveJetpunkList = (state: AppState): JetPunkList | null =>
   state.jetpunkLists.find((list) => list.id === state.activeJetpunkListId) ?? null;
+export const selectJetpunkHistory = (state: AppState) => state.jetpunkHistory ?? [];
 export const selectGameHistory = (state: AppState) => state.gameHistory;

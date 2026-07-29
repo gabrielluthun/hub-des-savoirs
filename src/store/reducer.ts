@@ -70,6 +70,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'SET_ACTIVE_JETPUNK_LIST':
       return { ...state, activeJetpunkListId: action.id };
+    case 'ADD_JETPUNK_HISTORY':
+      return {
+        ...state,
+        jetpunkHistory: [action.entry, ...(state.jetpunkHistory ?? [])].slice(0, 100),
+      };
     case 'ADD_GAME_HISTORY':
       return {
         ...state,

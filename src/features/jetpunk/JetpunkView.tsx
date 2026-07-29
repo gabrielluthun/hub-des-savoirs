@@ -1,19 +1,26 @@
-import { useCallback, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Play, Target, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Historique } from '@/features/jetpunk/Historique';
 import { ListEditor } from '@/features/jetpunk/ListEditor';
 import { ListSidebar } from '@/features/jetpunk/ListSidebar';
 import { QuizRunner } from '@/features/jetpunk/QuizRunner';
+import type { QuizResult } from '@/features/jetpunk/Stats';
 import { Button, Input, Select } from '@/components/ui/primitives';
 import { createId } from '@/lib/utils';
 import {
+  addJetpunkHistory,
   addJetpunkList,
   deleteJetpunkList,
   setActiveJetpunkList,
   updateJetpunkList,
 } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
-import { selectActiveJetpunkList, selectJetpunkLists } from '@/store/selectors';
+import {
+  selectActiveJetpunkList,
+  selectJetpunkHistory,
+  selectJetpunkLists,
+} from '@/store/selectors';
 
 const DURATION_OPTIONS = [
   { label: '1 min', value: 60 },
@@ -27,17 +34,34 @@ export function JetPunkView() {
   const { state, dispatch } = useStore();
   const lists = selectJetpunkLists(state);
   const activeList = selectActiveJetpunkList(state);
+  const history = selectJetpunkHistory(state) ?? [];
   const [quizOpen, setQuizOpen] = useState(false);
-  const [lastScore, setLastScore] = useState(0);
 
-  const handleQuizClose = useCallback(
-    (score: number) => {
-      setQuizOpen(false);
-      setLastScore(score);
-      toast.success(`Score : ${score} / ${activeList?.items.length ?? 0}`);
-    },
-    [activeList?.items.length]
-  );
+  const listHistory = useMemo(() => {
+    if (!activeList) return [];
+    return history.filter((entry) => entry.listId === activeList.id);
+  }, [activeList, history]);
+  const previousBest =
+    listHistory.length > 0
+      ? Math.max(...listHistory.map((entry) => entry.score))
+      : null;
+  const lastScore = listHistory[0]?.score ?? 0;
+
+  const handleQuizFinish = (result: QuizResult) => {
+    if (!activeList) return;
+    dispatch(
+      addJetpunkHistory({
+        id: createId(),
+        listId: activeList.id,
+        listTitle: activeList.title,
+        score: result.score,
+        total: result.total,
+        durationSec: result.durationSec,
+        elapsedSec: result.elapsedSec,
+        playedAt: new Date().toISOString(),
+      })
+    );
+  };
 
   const handleAddList = () => {
     dispatch(
@@ -145,9 +169,17 @@ export function JetPunkView() {
             <Play className="h-4 w-4" />
             Démarrer le quiz
           </Button>
-          <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-            <Target className="h-4 w-4" />
-            {lastScore} / {activeList.items.length}
+          <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+            {previousBest !== null ? (
+              <span className="tabular-nums">
+                Record {previousBest}/
+                {listHistory[0]?.total ?? activeList.items.length}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-2 tabular-nums">
+              <Target className="h-4 w-4" />
+              {lastScore} / {activeList.items.filter((item) => item.answer.trim()).length}
+            </span>
           </div>
         </div>
 
@@ -180,14 +212,27 @@ export function JetPunkView() {
             )
           }
         />
+
+        <div className="mt-8">
+          <Historique
+            entries={listHistory}
+            title="Historique de cette liste"
+            limit={10}
+          />
+        </div>
       </div>
 
       {quizOpen ? (
         <QuizRunner
+          title={activeList.title}
           durationSec={activeList.durationSec}
-          answers={activeList.items.map((item) => item.answer).filter(Boolean)}
-          onClose={handleQuizClose}
+          items={activeList.items}
+          previousBest={previousBest}
+          recentAttempts={listHistory}
+          onFinish={handleQuizFinish}
+          onClose={() => setQuizOpen(false)}
         />
       ) : null}
     </div>
-  )};
+  );
+}

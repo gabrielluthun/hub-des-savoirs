@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Stats, type QuizResult } from '@/features/jetpunk/Stats';
 import { Button, Input } from '@/components/ui/primitives';
+import type { JetPunkHistoryEntry, JetPunkItem } from '@/types';
 
 interface QuizRunnerProps {
+  title: string;
   durationSec: number;
-  answers: string[];
-  onClose: (score: number) => void;
+  items: JetPunkItem[];
+  previousBest: number | null;
+  recentAttempts: JetPunkHistoryEntry[];
+  onFinish: (result: QuizResult) => void;
+  onClose: () => void;
 }
 
 function normalize(value: string): string {
@@ -15,104 +21,205 @@ function normalize(value: string): string {
     .toLowerCase();
 }
 
-export function QuizRunner({ durationSec, answers, onClose }: QuizRunnerProps) {
+export function QuizRunner({
+  title,
+  durationSec,
+  items,
+  previousBest,
+  recentAttempts,
+  onFinish,
+  onClose,
+}: QuizRunnerProps) {
+  const playableItems = useMemo(
+    () => items.filter((item) => item.answer.trim()),
+    [items]
+  );
   const [remaining, setRemaining] = useState(durationSec);
   const [input, setInput] = useState('');
-  const [found, setFound] = useState<string[]>([]);
-  const closedRef = useRef(false);
+  const [foundIds, setFoundIds] = useState<Set<string>>(() => new Set());
+  const [summary, setSummary] = useState<{
+    result: QuizResult;
+    previousBest: number | null;
+  } | null>(null);
+  const endedRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const foundIdsRef = useRef(foundIds);
+  const remainingRef = useRef(remaining);
 
-  const remainingAnswers = useMemo(() => {
-    const foundSet = new Set(found.map(normalize));
-    return answers.filter((answer) => !foundSet.has(normalize(answer)));
-  }, [answers, found]);
+  foundIdsRef.current = foundIds;
+  remainingRef.current = remaining;
 
-  const finish = (score: number) => {
-    if (closedRef.current) return;
-    closedRef.current = true;
-    onClose(score);
+  const score = foundIds.size;
+  const total = playableItems.length;
+  const allFound = score >= total && total > 0;
+  const playing = summary === null;
+
+  const endQuiz = () => {
+    if (endedRef.current) return;
+    endedRef.current = true;
+    const timeLeft = remainingRef.current;
+    const elapsedSec = timeLeft <= 0 ? durationSec : Math.max(0, durationSec - timeLeft);
+    const next: QuizResult = {
+      score: foundIdsRef.current.size,
+      total,
+      durationSec,
+      elapsedSec,
+      foundIds: [...foundIdsRef.current],
+    };
+    setSummary({ result: next, previousBest });
+    onFinish(next);
   };
 
   useEffect(() => {
-    if (remaining <= 0 || remainingAnswers.length === 0) return;
+    if (!playing) return;
+    inputRef.current?.focus();
+  }, [playing]);
+
+  useEffect(() => {
+    if (!playing || remaining <= 0 || allFound) return;
     const timer = window.setInterval(() => {
       setRemaining((value) => value - 1);
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [remaining, remainingAnswers.length]);
+  }, [playing, remaining, allFound]);
 
   useEffect(() => {
-    if (remaining <= 0 || remainingAnswers.length === 0) {
-      finish(found.length);
+    if (!playing) return;
+    if (remaining <= 0 || allFound) {
+      endQuiz();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, remainingAnswers.length, found.length]);
+  }, [playing, remaining, allFound]);
+
+  const tryMatch = (raw: string) => {
+    const guess = normalize(raw);
+    if (!guess) return false;
+
+    const match = playableItems.find(
+      (item) => !foundIds.has(item.id) && normalize(item.answer) === guess
+    );
+    if (!match) return false;
+
+    setFoundIds((prev) => new Set(prev).add(match.id));
+    setInput('');
+    return true;
+  };
+
+  const handleReplay = () => {
+    endedRef.current = false;
+    setSummary(null);
+    setRemaining(durationSec);
+    setInput('');
+    setFoundIds(new Set());
+  };
+
+  if (summary) {
+    return (
+      <Stats
+        title={title}
+        items={items}
+        result={summary.result}
+        previousBest={summary.previousBest}
+        recentAttempts={recentAttempts}
+        onReplay={handleReplay}
+        onClose={onClose}
+      />
+    );
+  }
 
   const minutes = Math.floor(Math.max(remaining, 0) / 60);
   const seconds = Math.max(remaining, 0) % 60;
 
-  const tryAnswer = () => {
-    const guess = normalize(input);
-    if (!guess) return;
-    const match = remainingAnswers.find((answer) => normalize(answer) === guess);
-    if (match) {
-      setFound((prev) => [...prev, match]);
-      setInput('');
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      <header className="shrink-0 border-b border-border px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Quiz chronométré
             </p>
-            <h3 className="font-display text-xl font-semibold">
-              {found.length} / {answers.length}
-            </h3>
+            <h2 className="truncate font-display text-lg font-semibold sm:text-xl">
+              {title}
+            </h2>
           </div>
-          <p className="font-mono text-lg tabular-nums">
-            {minutes}:{seconds.toString().padStart(2, '0')}
-          </p>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <p className="font-display text-xl font-semibold tabular-nums">
+              {score} / {total}
+            </p>
+            <p className="font-mono text-xl tabular-nums">
+              {minutes}:{seconds.toString().padStart(2, '0')}
+            </p>
+          </div>
         </div>
 
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            tryAnswer();
-          }}
-        >
+        <div className="mx-auto mt-3 w-full max-w-5xl">
           <Input
+            ref={inputRef}
             autoFocus
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setInput(next);
+              tryMatch(next);
+            }}
             placeholder="Tapez une réponse…"
+            className="h-12 text-base"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
           />
-          <Button type="submit">Valider</Button>
-        </form>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {found.map((answer) => (
-            <span
-              key={answer}
-              className="rounded-full bg-secondary px-3 py-1 text-xs text-foreground"
-            >
-              {answer}
-            </span>
-          ))}
         </div>
+      </header>
 
-        <Button
-          type="button"
-          variant="ghost"
-          className="mt-5 w-full"
-          onClick={() => finish(found.length)}
-        >
-          Terminer
-        </Button>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+        <div className="mx-auto w-full max-w-5xl overflow-x-auto rounded-xl border border-border">
+          <table className="w-full min-w-[320px] border-collapse text-sm">
+            <thead>
+              <tr className="bg-secondary text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="w-12 px-3 py-2.5">#</th>
+                <th className="px-3 py-2.5">Indice</th>
+                <th className="px-3 py-2.5">Réponse</th>
+              </tr>
+            </thead>
+            <tbody>
+              {playableItems.map((item, index) => {
+                const found = foundIds.has(item.id);
+                return (
+                  <tr
+                    key={item.id}
+                    className="border-t border-border even:bg-card/40"
+                  >
+                    <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                      {index + 1}
+                    </td>
+                    <td className="px-3 py-2 text-foreground">
+                      {item.prompt.trim() || '—'}
+                    </td>
+                    <td
+                      className={
+                        found
+                          ? 'px-3 py-2 font-medium text-foreground'
+                          : 'px-3 py-2 text-transparent select-none'
+                      }
+                    >
+                      {found ? item.answer : '\u00a0'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <footer className="shrink-0 border-t border-border px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl justify-center">
+          <Button type="button" variant="ghost" onClick={endQuiz}>
+            Terminer
+          </Button>
+        </div>
+      </footer>
     </div>
   );
 }

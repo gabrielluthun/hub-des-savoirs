@@ -41,6 +41,7 @@ export function migrateActiveTab(tab: string): TabId {
 export function migrateState(state: AppState): AppState {
   return {
     ...state,
+    jetpunkHistory: state.jetpunkHistory ?? [],
     settings: {
       ...state.settings,
       model: migrateGeminiModel(state.settings.model),
