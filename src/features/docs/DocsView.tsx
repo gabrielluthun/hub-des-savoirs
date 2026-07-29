@@ -66,8 +66,8 @@ export function DocsView() {
       dispatch(setTab('settings'));
       return;
     }
-    dispatch(setTab('jeutv'));
-    toast.message('Jeu TV', {
+    dispatch(setTab('plateau'));
+    toast.message('Plateau', {
       description: 'Lancez une partie avec la source « Notes Google Docs ».',
     });
   };
