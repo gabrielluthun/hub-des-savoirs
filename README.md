@@ -45,7 +45,9 @@ npm run preview
 
 ## Données
 
-Tout est offline-first dans le navigateur. Aucun backend. La clé Gemini ne quitte pas `localStorage`.
+- **Stockage :** les données restent sur **ce navigateur / cet appareil**. 
+Un autre appareil, un autre profil, ou le mode privé = état vide (ou distinct).
+- **GitHub Pages :** même modèle : chaque visiteur gère ses propres données locales ; le site hébergé ne lit ni n’enregistre rien côté serveur.
 
 ## Licence
 
