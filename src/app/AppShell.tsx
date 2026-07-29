@@ -2,6 +2,7 @@ import { Sidebar } from '@/app/Sidebar';
 import { AnkiView } from '@/features/anki/AnkiView';
 import { DocsView } from '@/features/docs/DocsView';
 import { JetPunkView } from '@/features/jetpunk/JetPunkView';
+import { JeuTvView } from '@/features/jeutv/JeuTvView';
 import { QuizypediaView } from '@/features/quizypedia/QuizypediaView';
 import { useStore } from '@/store/StoreProvider';
 
@@ -25,7 +26,7 @@ export function AppShell() {
         {tab === 'anki' && <AnkiView />}
         {tab === 'jetpunk' && <JetPunkView />}
         {tab === 'quizypedia' && <QuizypediaView />}
-        {tab === 'jeutv' && <Placeholder title="Jeu TV" />}
+        {tab === 'jeutv' && <JeuTvView />}
         {tab === 'settings' && <Placeholder title="Paramètres" />}
       </main>
     </div>
