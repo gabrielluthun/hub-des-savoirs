@@ -1,6 +1,7 @@
 import { Sidebar } from '@/app/Sidebar';
 import { AnkiView } from '@/features/anki/AnkiView';
 import { DocsView } from '@/features/docs/DocsView';
+import { JetPunkView } from '@/features/jetpunk/JetPunkView';
 import { useStore } from '@/store/StoreProvider';
 
 function Placeholder({ title }: { title: string }) {
@@ -21,7 +22,7 @@ export function AppShell() {
       <main className="min-w-0 flex-1 overflow-hidden">
         {tab === 'docs' && <DocsView />}
         {tab === 'anki' && <AnkiView />}
-        {tab === 'jetpunk' && <Placeholder title="JetPunk" />}
+        {tab === 'jetpunk' && <JetPunkView />}
         {tab === 'quizypedia' && <Placeholder title="Quizypedia" />}
         {tab === 'jeutv' && <Placeholder title="Jeu TV" />}
         {tab === 'settings' && <Placeholder title="Paramètres" />}
