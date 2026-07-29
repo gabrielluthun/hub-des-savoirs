@@ -28,7 +28,7 @@ export function DocsView() {
     setSavingLabel('Sauvegarde…');
     const timer = window.setTimeout(() => setSavingLabel('Sauvegardé'), 400);
     return () => window.clearTimeout(timer);
-  }, [activeDoc?.content, activeDoc?.title, activeDoc?.googleDocsUrl]);
+  }, [activeDoc]);
 
   const docId = activeDoc ? extractGoogleDocId(activeDoc.googleDocsUrl) : null;
 
@@ -89,7 +89,7 @@ export function DocsView() {
   }
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0 flex-col md:flex-row">
       <DocumentList
         docs={docs}
         activeDocId={activeDoc.id}
@@ -97,7 +97,7 @@ export function DocsView() {
         onAdd={handleAdd}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
           <input
             value={activeDoc.title}
