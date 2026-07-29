@@ -4,15 +4,8 @@ import { DocsView } from '@/features/docs/DocsView';
 import { JetPunkView } from '@/features/jetpunk/JetPunkView';
 import { PlateauView } from '@/features/plateau/PlateauView';
 import { QuizypediaView } from '@/features/quizypedia/QuizypediaView';
+import { SettingsView } from '@/features/settings/SettingsView';
 import { useStore } from '@/store/StoreProvider';
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex h-full flex-1 items-center justify-center p-8">
-      <p className="text-sm text-muted-foreground">{title} — en cours de chargement…</p>
-    </div>
-  );
-}
 
 export function AppShell() {
   const { state } = useStore();
@@ -27,7 +20,7 @@ export function AppShell() {
         {tab === 'jetpunk' && <JetPunkView />}
         {tab === 'quizypedia' && <QuizypediaView />}
         {tab === 'plateau' && <PlateauView />}
-        {tab === 'settings' && <Placeholder title="Paramètres" />}
+        {tab === 'settings' && <SettingsView />}
       </main>
     </div>
   );
