@@ -68,7 +68,7 @@ export function JetPunkView() {
   }
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0 flex-col md:flex-row">
       <ListSidebar
         lists={lists}
         activeListId={activeList.id}
@@ -76,7 +76,7 @@ export function JetPunkView() {
         onAdd={handleAddList}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-5">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <input
             value={activeList.title}
