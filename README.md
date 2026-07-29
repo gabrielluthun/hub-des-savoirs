@@ -1,10 +1,10 @@
 # Hub du Savoir
 
-SPA locale de révision / culture générale : notes Google Docs, cartes Anki, listes JetPunk, module Quizypedia (feature flag), et **Plateau** (quiz télé généré par Gemini).
+SPA locale de révision / culture générale : notes Google Docs, cartes Anki, listes JetPunk, module Quizypedia, et **Plateau** (quiz IA à partir de vos ressources).
 
 ## Stack
 
-- React 19 + Create React App 5 + CRACO (alias `@/`)
+- React 19 + Vite + TypeScript 7
 - Tailwind CSS 3 (dark via classe `.dark`, variables HSL)
 - Fonts : Outfit, IBM Plex Sans, JetBrains Mono
 - Lucide React + Sonner
@@ -22,13 +22,14 @@ SPA locale de révision / culture générale : notes Google Docs, cartes Anki, l
 
 ```bash
 npm install
-npm start
+npm run dev
 ```
 
 Build production :
 
 ```bash
 npm run build
+npm run preview
 ```
 
 ## Modules
