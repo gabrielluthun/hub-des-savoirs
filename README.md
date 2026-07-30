@@ -15,7 +15,7 @@ Pas disponible sur iOS / Android.
 | Fonts | Outfit, IBM Plex Sans, JetBrains Mono |
 | Icônes / toasts | Lucide React, Sonner |
 | État | Context + `useReducer` (`StoreProvider`) |
-| Persistance | `localStorage` — clé `gk-hub-state-v1` |
+| Persistance | `localStorage`|
 | IA | Gemini REST (`generativelanguage.googleapis.com/v1beta`) via `fetch` |
 | Modèle par défaut | `gemini-3.5-flash-lite` |
 
