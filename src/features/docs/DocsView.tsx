@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
 import { MarkdownEditor } from '@/features/docs/MarkdownEditor';
 import { OutlinePanel } from '@/features/docs/OutlinePanel';
 import { TagEditor } from '@/features/docs/components/editor/TagEditor';
+import { DocsHelp } from '@/features/docs/components/help/DocsHelpDialog';
 import { hashContent } from '@/features/docs/lib/content-hash';
 import {
   buildGoogleDocsEmbedUrl,
@@ -163,6 +163,20 @@ export function DocsView() {
     });
   };
 
+  const handleDeleteDoc = (id: string) => {
+    void (async () => {
+      const doc = docs.find((entry) => entry.id === id);
+      const label = doc?.title?.trim() || 'ce document';
+      const confirmed = await confirmAction(
+        `Supprimer « ${label} » ? Cette action est définitive.`,
+        { title: 'Supprimer le document', okLabel: 'Supprimer' }
+      );
+      if (!confirmed) return;
+      dispatch(deleteDoc(id));
+      toast.success('Document supprimé.');
+    })();
+  };
+
   if (!activeDoc) {
     return (
       <div className="flex h-full">
@@ -171,6 +185,7 @@ export function DocsView() {
           activeDocId={null}
           onSelect={(id) => dispatch(setActiveDoc(id))}
           onAdd={handleAdd}
+          onDelete={handleDeleteDoc}
         />
         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
           Aucun document sélectionné.
@@ -186,27 +201,18 @@ export function DocsView() {
         activeDocId={activeDoc.id}
         onSelect={(id) => dispatch(setActiveDoc(id))}
         onAdd={handleAdd}
+        onDelete={handleDeleteDoc}
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="space-y-3 border-b border-border px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <input
               value={activeDoc.title}
               onChange={(e) => dispatch(updateDoc(activeDoc.id, { title: e.target.value }))}
-              className="w-full bg-transparent font-display text-xl font-semibold outline-none"
+              className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none"
             />
-            <button
-              type="button"
-              onClick={() => {
-                dispatch(deleteDoc(activeDoc.id));
-                toast.success('Document supprimé.');
-              }}
-              className="rounded-lg p-2 text-destructive hover:bg-destructive/10"
-              aria-label="Supprimer le document"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <DocsHelp />
           </div>
           <TagEditor
             tags={activeDoc.tags ?? []}
