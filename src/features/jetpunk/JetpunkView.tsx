@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
 import { QuizLaunchBar } from '@/features/jetpunk/components/QuizLaunchBar';
+import { useJetpunkExport } from '@/features/jetpunk/hooks/useJetpunkExport';
 import { ListEditor } from '@/features/jetpunk/ListEditor';
 import { ListSidebar } from '@/features/jetpunk/ListSidebar';
 import { QuizRunner } from '@/features/jetpunk/QuizRunner';
@@ -11,7 +13,7 @@ import {
   computeItemMissStats,
   pickFocusItems,
 } from '@/features/jetpunk/lib/item-stats';
-import { Input } from '@/components/ui/primitives';
+import { Button, Input } from '@/components/ui/primitives';
 import { createId } from '@/lib/utils';
 import type { JetPunkItem } from '@/types';
 import {
@@ -33,6 +35,7 @@ export function JetPunkView() {
   const lists = selectJetpunkLists(state);
   const activeList = selectActiveJetpunkList(state);
   const history = selectJetpunkHistory(state) ?? [];
+  const { exportList, exportAll } = useJetpunkExport();
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizItems, setQuizItems] = useState<JetPunkItem[] | null>(null);
 
@@ -84,16 +87,18 @@ export function JetPunkView() {
     toast.success('Liste supprimée.');
   };
 
+  const sidebarProps = {
+    lists,
+    onSelect: (id: string) => dispatch(setActiveJetpunkList(id)),
+    onAdd: handleAddList,
+    onDelete: handleDeleteList,
+    onExportAll: () => exportAll(lists),
+  };
+
   if (!activeList) {
     return (
       <div className="flex h-full">
-        <ListSidebar
-          lists={lists}
-          activeListId={null}
-          onSelect={(id) => dispatch(setActiveJetpunkList(id))}
-          onAdd={handleAddList}
-          onDelete={handleDeleteList}
-        />
+        <ListSidebar {...sidebarProps} activeListId={null} />
         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
           Aucune liste sélectionnée.
         </div>
@@ -103,13 +108,7 @@ export function JetPunkView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
-      <ListSidebar
-        lists={lists}
-        activeListId={activeList.id}
-        onSelect={(id) => dispatch(setActiveJetpunkList(id))}
-        onAdd={handleAddList}
-        onDelete={handleDeleteList}
-      />
+      <ListSidebar {...sidebarProps} activeListId={activeList.id} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
         <input
@@ -140,6 +139,15 @@ export function JetPunkView() {
           <span className="text-xs text-muted-foreground">
             {activeList.items.length} élément{activeList.items.length !== 1 ? 's' : ''}
           </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => exportList(activeList)}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Exporter .json
+          </Button>
         </div>
 
         <QuizLaunchBar
