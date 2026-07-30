@@ -19,6 +19,7 @@ import { deckExists } from '@/features/anki/lib/organization';
 import { deckIsUnder, decksEqual } from '@/features/anki/lib/decks';
 import { getDueCards } from '@/features/anki/lib/srs/schedule';
 import { ankiCardsToJetpunkList } from '@/lib/anki-jetpunk-transfer';
+import { confirmAction } from '@/lib/confirm';
 import { Button, Input } from '@/components/ui/primitives';
 import {
   addAnkiDeck,
@@ -124,23 +125,29 @@ export function AnkiView() {
   };
 
   const handleDeleteDeck = (name: string) => {
-    const count = filters.deckCounts[name] ?? 0;
-    const nested = filters.decks.filter(
-      (deck) => deckIsUnder(deck, name) && !decksEqual(deck, name)
-    ).length;
-    const message =
-      count === 0 && nested === 0
-        ? `Supprimer le deck « ${name} » ?`
-        : nested > 0
-          ? `Supprimer « ${name} », ses ${nested} sous-deck${nested > 1 ? 's' : ''} et ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`
-          : `Supprimer le deck « ${name} » et ses ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`;
-    if (!window.confirm(message)) return;
+    void (async () => {
+      const count = filters.deckCounts[name] ?? 0;
+      const nested = filters.decks.filter(
+        (deck) => deckIsUnder(deck, name) && !decksEqual(deck, name)
+      ).length;
+      const message =
+        count === 0 && nested === 0
+          ? `Supprimer le deck « ${name} » ?`
+          : nested > 0
+            ? `Supprimer « ${name} », ses ${nested} sous-deck${nested > 1 ? 's' : ''} et ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`
+            : `Supprimer le deck « ${name} » et ses ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`;
+      const confirmed = await confirmAction(message, {
+        title: 'Supprimer le deck',
+        okLabel: 'Supprimer',
+      });
+      if (!confirmed) return;
 
-    dispatch(removeAnkiDeck(name));
-    if (filters.selectedDeck && deckIsUnder(filters.selectedDeck, name)) {
-      filters.setSelectedDeck(null);
-    }
-    toast.success(`Deck « ${name} » supprimé.`);
+      dispatch(removeAnkiDeck(name));
+      if (filters.selectedDeck && deckIsUnder(filters.selectedDeck, name)) {
+        filters.setSelectedDeck(null);
+      }
+      toast.success(`Deck « ${name} » supprimé.`);
+    })();
   };
 
   return (
