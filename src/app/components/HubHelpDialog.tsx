@@ -29,7 +29,8 @@ const MODULES = [
   },
   {
     name: 'Paramètres',
-    description: 'Clé API Gemini, modèle, thème, et activation de Quizypedia.',
+    description:
+      'Clé API Gemini, modèle, thème, Quizypedia, et sauvegarde / restauration complète du Hub.',
   },
 ] as const;
 
