@@ -24,7 +24,7 @@ export async function confirmAction(
   if (isTauriRuntime()) {
     const { confirm } = await import('@tauri-apps/plugin-dialog');
     return confirm(message, {
-      title: options.title ?? 'Hub du Savoir',
+      title: options.title ?? 'Hub des Savoirs',
       kind: 'warning',
       okLabel: options.okLabel ?? 'OK',
       cancelLabel: options.cancelLabel ?? 'Annuler',
