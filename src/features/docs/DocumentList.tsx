@@ -1,5 +1,12 @@
+import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { DocumentListItem } from '@/features/docs/components/list/DocumentListItem';
+import { DocumentTagFilter } from '@/features/docs/components/list/DocumentTagFilter';
+import {
+  collectAllTags,
+  filterDocsByTags,
+  normalizeTag,
+} from '@/features/docs/lib/tags';
 import type { HubDocument } from '@/types';
 
 interface DocumentListProps {
@@ -10,6 +17,23 @@ interface DocumentListProps {
 }
 
 export function DocumentList({ docs, activeDocId, onSelect, onAdd }: DocumentListProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const allTags = useMemo(() => collectAllTags(docs), [docs]);
+  const visibleDocs = useMemo(
+    () => filterDocsByTags(docs, selectedTags),
+    [docs, selectedTags]
+  );
+
+  const toggleTag = (tag: string) => {
+    const normalized = normalizeTag(tag);
+    setSelectedTags((current) =>
+      current.includes(normalized)
+        ? current.filter((t) => t !== normalized)
+        : [...current, normalized]
+    );
+  };
+
   return (
     <div className="flex h-full w-full shrink-0 flex-col border-b border-border bg-background md:w-[260px] md:border-b-0 md:border-r">
       <div className="flex items-start justify-between px-4 pb-3 pt-5">
@@ -29,26 +53,28 @@ export function DocumentList({ docs, activeDocId, onSelect, onAdd }: DocumentLis
         </button>
       </div>
 
+      <DocumentTagFilter
+        allTags={allTags}
+        selectedTags={selectedTags}
+        onToggle={toggleTag}
+        onClear={() => setSelectedTags([])}
+      />
+
       <div className="flex max-h-40 gap-1 overflow-x-auto px-2 pb-3 md:max-h-none md:flex-1 md:flex-col md:space-y-1 md:overflow-y-auto md:pb-4">
-        {docs.map((doc) => {
-          const active = doc.id === activeDocId;
-          return (
-            <button
+        {visibleDocs.length === 0 ? (
+          <p className="px-2 py-3 text-xs text-muted-foreground">
+            Aucun document pour ce filtre.
+          </p>
+        ) : (
+          visibleDocs.map((doc) => (
+            <DocumentListItem
               key={doc.id}
-              type="button"
-              onClick={() => onSelect(doc.id)}
-              className={cn(
-                'min-w-[160px] rounded-xl px-3 py-2.5 text-left transition-colors md:min-w-0 md:w-full',
-                active ? 'bg-secondary' : 'hover:bg-secondary/50'
-              )}
-            >
-              <p className="truncate text-sm font-medium">{doc.title}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {doc.googleDocsUrl ? 'Lien Google Docs' : 'Notes locales'}
-              </p>
-            </button>
-          );
-        })}
+              doc={doc}
+              active={doc.id === activeDocId}
+              onSelect={onSelect}
+            />
+          ))
+        )}
       </div>
     </div>
   );
