@@ -1,7 +1,7 @@
 [package]
 name = "hub-du-savoir"
-version = "0.1.0"
-description = "Hub du Savoir — notes et quiz en local"
+version = "1.0.0"
+description = "Hub du Savoir"
 authors = ["you"]
 license = ""
 repository = ""
