@@ -70,13 +70,18 @@ export function AnkiView() {
   });
 
   const importParsedCards = (
-    parsed: { question: string; answer: string; mnemonic: string }[]
+    parsed: {
+      question: string;
+      answer: string;
+      deck: string;
+      mnemonic: string;
+      tags: string[];
+    }[]
   ) => {
     if (parsed.length === 0) {
       toast.error('Aucune carte valide à importer.');
       return;
     }
-    const deck = selectedDeck ?? DEFAULT_ANKI_DECK;
     dispatch(
       addAnkiCards(
         parsed.map((card) =>
@@ -84,8 +89,8 @@ export function AnkiView() {
             question: card.question,
             answer: card.answer,
             mnemonic: card.mnemonic,
-            deck,
-            tags: selectedTags,
+            deck: card.deck,
+            tags: card.tags,
           })
         )
       )
@@ -118,6 +123,10 @@ export function AnkiView() {
   const saveCard = () => {
     if (!draftQuestion.trim() || !draftAnswer.trim()) {
       toast.error('Question et réponse sont obligatoires.');
+      return;
+    }
+    if (!draftDeck.trim()) {
+      toast.error('Le deck est obligatoire.');
       return;
     }
     const deck = normalizeDeckName(draftDeck);
@@ -213,7 +222,7 @@ export function AnkiView() {
             </p>
             <h1 className="font-display text-2xl font-semibold">Anki — Éditeur & Export</h1>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Format .txt : Question;Réponse;Mnémotechnique (optionnelle).
+              Format .txt : Question;Réponse;Deck (;Mnémotechnique;Tags optionnels).
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
