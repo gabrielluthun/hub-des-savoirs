@@ -37,7 +37,7 @@ export function SettingsView() {
 
   const handleExportBackup = () => {
     const stamp = new Date().toISOString().slice(0, 10);
-    downloadJsonFile(`hub-du-savoir-backup-${stamp}.json`, serializeHubBackup(state));
+    downloadJsonFile(`hub-des-savoirs-backup-${stamp}.json`, serializeHubBackup(state));
     toast.success('Sauvegarde exportée (inclut la clé API si renseignée).');
   };
 
