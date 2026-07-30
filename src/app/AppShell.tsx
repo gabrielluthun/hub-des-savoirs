@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Sidebar } from '@/app/Sidebar';
 import { AnkiView } from '@/features/anki/AnkiView';
@@ -7,12 +7,20 @@ import { JetPunkView } from '@/features/jetpunk/JetpunkView';
 import { PlateauView } from '@/features/plateau/PlateauView';
 import { QuizypediaView } from '@/features/quizypedia/QuizypediaView';
 import { SettingsView } from '@/features/settings/SettingsView';
+import { setTab } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 
 export function AppShell() {
-  const { state } = useStore();
+  const { state, dispatch } = useStore();
   const tab = state.settings.activeTab;
+  const quizypediaEnabled = state.settings.quizypediaEnabled;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (tab === 'quizypedia' && !quizypediaEnabled) {
+      dispatch(setTab('settings'));
+    }
+  }, [tab, quizypediaEnabled, dispatch]);
 
   return (
     <div className="flex h-full min-h-0 bg-background text-foreground">
@@ -33,7 +41,7 @@ export function AppShell() {
           {tab === 'docs' && <DocsView />}
           {tab === 'anki' && <AnkiView />}
           {tab === 'jetpunk' && <JetPunkView />}
-          {tab === 'quizypedia' && <QuizypediaView />}
+          {tab === 'quizypedia' && quizypediaEnabled && <QuizypediaView />}
           {tab === 'plateau' && <PlateauView />}
           {tab === 'settings' && <SettingsView />}
         </main>
