@@ -39,6 +39,7 @@ export function createDefaultState(): AppState {
     ],
     activeDocId: docId,
     ankiCards: [],
+    ankiDecks: [],
     jetpunkLists: [
       {
         id: listId,

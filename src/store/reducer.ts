@@ -1,4 +1,12 @@
-import type { AppAction, AppState } from '@/types';
+import type { AppAction, AppState, AnkiCard } from '@/types';
+import { decksEqual, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
+
+function registerCardDecks(state: AppState, cards: AnkiCard[]): string[] {
+  return mergeDeckNames(
+    state.ankiDecks,
+    cards.map((card) => card.deck)
+  );
+}
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -32,21 +40,48 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_ACTIVE_DOC':
       return { ...state, activeDocId: action.id };
     case 'ADD_ANKI_CARD':
-      return { ...state, ankiCards: [action.card, ...state.ankiCards] };
-    case 'ADD_ANKI_CARDS':
-      return { ...state, ankiCards: [...action.cards, ...state.ankiCards] };
-    case 'UPDATE_ANKI_CARD':
       return {
         ...state,
-        ankiCards: state.ankiCards.map((card) =>
-          card.id === action.id ? { ...card, ...action.patch } : card
-        ),
+        ankiCards: [action.card, ...state.ankiCards],
+        ankiDecks: registerCardDecks(state, [action.card]),
       };
+    case 'ADD_ANKI_CARDS':
+      return {
+        ...state,
+        ankiCards: [...action.cards, ...state.ankiCards],
+        ankiDecks: registerCardDecks(state, action.cards),
+      };
+    case 'UPDATE_ANKI_CARD': {
+      const ankiCards = state.ankiCards.map((card) =>
+        card.id === action.id ? { ...card, ...action.patch } : card
+      );
+      const deckFromPatch =
+        typeof action.patch.deck === 'string' ? [action.patch.deck] : [];
+      return {
+        ...state,
+        ankiCards,
+        ankiDecks: mergeDeckNames(state.ankiDecks, deckFromPatch),
+      };
+    }
     case 'DELETE_ANKI_CARD':
       return {
         ...state,
         ankiCards: state.ankiCards.filter((card) => card.id !== action.id),
       };
+    case 'ADD_ANKI_DECK': {
+      const name = normalizeDeckName(action.name);
+      if (!name) return state;
+      return { ...state, ankiDecks: mergeDeckNames(state.ankiDecks, [name]) };
+    }
+    case 'REMOVE_ANKI_DECK': {
+      const name = normalizeDeckName(action.name);
+      if (!name) return state;
+      return {
+        ...state,
+        ankiDecks: (state.ankiDecks ?? []).filter((deck) => !decksEqual(deck, name)),
+        ankiCards: state.ankiCards.filter((card) => !decksEqual(card.deck ?? '', name)),
+      };
+    }
     case 'ADD_JETPUNK_LIST':
       return {
         ...state,

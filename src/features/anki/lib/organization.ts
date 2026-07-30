@@ -1,18 +1,12 @@
-import { decksEqual, DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
+import { decksEqual, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
 import { dedupeTags, normalizeTag } from '@/features/anki/lib/tags';
 import type { AnkiCard } from '@/types';
 
-export function collectDecks(cards: AnkiCard[]): string[] {
-  const byKey = new Map<string, string>();
-  for (const card of cards) {
-    const name = normalizeDeckName(card.deck ?? DEFAULT_ANKI_DECK);
-    const key = name.toLowerCase();
-    if (!byKey.has(key)) byKey.set(key, name);
-  }
-  if (!byKey.has(DEFAULT_ANKI_DECK.toLowerCase())) {
-    byKey.set(DEFAULT_ANKI_DECK.toLowerCase(), DEFAULT_ANKI_DECK);
-  }
-  return [...byKey.values()].sort((a, b) => a.localeCompare(b, 'fr'));
+export function collectDecks(cards: AnkiCard[], registered: string[] = []): string[] {
+  return mergeDeckNames(
+    registered,
+    cards.map((card) => card.deck ?? '')
+  );
 }
 
 export function collectCardTags(cards: AnkiCard[]): string[] {
@@ -24,7 +18,7 @@ export function filterCardsByDeck(
   deck: string | null
 ): AnkiCard[] {
   if (!deck) return cards;
-  return cards.filter((card) => decksEqual(card.deck ?? DEFAULT_ANKI_DECK, deck));
+  return cards.filter((card) => decksEqual(card.deck ?? '', deck));
 }
 
 /** OR filter: empty selection = all cards. */
@@ -59,4 +53,9 @@ export function filterCards(
 
 export function countCardsInDeck(cards: AnkiCard[], deck: string): number {
   return filterCardsByDeck(cards, deck).length;
+}
+
+export function deckExists(decks: string[], name: string): boolean {
+  const normalized = normalizeDeckName(name);
+  return decks.some((deck) => decksEqual(deck, normalized));
 }

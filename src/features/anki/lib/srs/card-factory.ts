@@ -8,7 +8,7 @@ export function createAnkiCard(input: {
   question: string;
   answer: string;
   mnemonic?: string;
-  deck?: string;
+  deck: string;
   tags?: string[];
   id?: string;
 }): AnkiCard {
@@ -17,7 +17,7 @@ export function createAnkiCard(input: {
     question: input.question,
     answer: input.answer,
     mnemonic: input.mnemonic?.trim() ?? '',
-    deck: normalizeDeckName(input.deck ?? DEFAULT_ANKI_DECK),
+    deck: normalizeDeckName(input.deck),
     tags: dedupeTags(input.tags ?? []),
     ...createDefaultSrsFields(),
   };
@@ -28,7 +28,7 @@ export function withDefaultSrs(card: AnkiCard): AnkiCard {
   return {
     ...card,
     mnemonic: card.mnemonic ?? '',
-    deck: normalizeDeckName(card.deck ?? DEFAULT_ANKI_DECK),
+    deck: normalizeDeckName(card.deck ?? '') || DEFAULT_ANKI_DECK,
     tags: Array.isArray(card.tags) ? dedupeTags(card.tags) : [],
     dueAt: card.dueAt ?? defaults.dueAt,
     intervalDays: card.intervalDays ?? defaults.intervalDays,

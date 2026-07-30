@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
+import { normalizeDeckName } from '@/features/anki/lib/decks';
 import { createAnkiCard } from '@/features/anki/lib/srs/card-factory';
 import { addAnkiCard, updateAnkiCard } from '@/store/actions';
 import type { AnkiCard } from '@/types';
@@ -18,7 +18,7 @@ export function useAnkiCardEditor(params: {
   const [draftQuestion, setDraftQuestion] = useState('');
   const [draftAnswer, setDraftAnswer] = useState('');
   const [draftMnemonic, setDraftMnemonic] = useState('');
-  const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
+  const [draftDeck, setDraftDeck] = useState('');
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
 
@@ -27,7 +27,7 @@ export function useAnkiCardEditor(params: {
     setDraftQuestion('');
     setDraftAnswer('');
     setDraftMnemonic('');
-    setDraftDeck(selectedDeck ?? DEFAULT_ANKI_DECK);
+    setDraftDeck(selectedDeck ?? '');
     setDraftTags([...selectedTags]);
     setShowEditor(true);
   };
@@ -37,7 +37,7 @@ export function useAnkiCardEditor(params: {
     setDraftQuestion(card.question);
     setDraftAnswer(card.answer);
     setDraftMnemonic(card.mnemonic ?? '');
-    setDraftDeck(card.deck || DEFAULT_ANKI_DECK);
+    setDraftDeck(card.deck ?? '');
     setDraftTags([...(card.tags ?? [])]);
     setShowEditor(true);
   };

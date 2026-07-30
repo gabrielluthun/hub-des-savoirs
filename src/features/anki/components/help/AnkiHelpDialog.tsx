@@ -6,22 +6,78 @@ interface AnkiHelpDialogProps {
   onClose: () => void;
 }
 
+const FIELD_GUIDE = [
+  {
+    name: 'Question',
+    required: true,
+    description: 'Ce que tu te poses avant de retourner la carte.',
+  },
+  {
+    name: 'Réponse',
+    required: true,
+    description: 'Ce que tu dois retrouver.',
+  },
+  {
+    name: 'Deck',
+    required: true,
+    description: 'Le paquet où ranger la carte (ex. Histoire, Géo).',
+  },
+  {
+    name: 'Mnémotechnique',
+    required: false,
+    description: 'Une astuce pour t’en souvenir — tu peux laisser vide.',
+  },
+  {
+    name: 'Tags',
+    required: false,
+    description: 'Des libellés pour filtrer plus tard, séparés par des virgules.',
+  },
+] as const;
+
 const EXAMPLES = [
   {
-    line: 'Capitale du Japon;Tokyo;Défaut',
-    label: 'Minimum (Q / R / Deck)',
+    title: 'Le plus simple',
+    why: 'Trois infos suffisent : question, réponse, deck.',
+    line: 'Capitale du Japon;Tokyo;Nom du deck',
+    parts: [
+      { label: 'Question', value: 'Capitale du Japon' },
+      { label: 'Réponse', value: 'Tokyo' },
+      { label: 'Deck', value: 'Nom du deck' },
+    ],
   },
   {
+    title: 'Avec un vrai paquet',
+    why: 'Change le nom du deck pour organiser tes révisions.',
     line: 'Roi dit le Saint;Louis IX;Histoire',
-    label: 'Avec un deck nommé',
+    parts: [
+      { label: 'Question', value: 'Roi dit le Saint' },
+      { label: 'Réponse', value: 'Louis IX' },
+      { label: 'Deck', value: 'Histoire' },
+    ],
   },
   {
-    line: 'Capitale du Japon;Tokyo;Géo;To-kyo comme ticket;asie,capitales',
-    label: 'Complet (mnémotechnique + tags)',
+    title: 'Carte complète',
+    why: 'Astuce + tags pour te souvenir et retrouver la carte facilement.',
+    line: 'Capitale du Japon;Tokyo;Géo;Kyoto inversé (ancienne capitale);asie,capitales',
+    parts: [
+      { label: 'Question', value: 'Capitale du Japon' },
+      { label: 'Réponse', value: 'Tokyo' },
+      { label: 'Deck', value: 'Géo' },
+      { label: 'Mnémotechnique', value: 'Kyoto inversé (ancienne capitale)' },
+      { label: 'Tags', value: 'asie, capitales' },
+    ],
   },
   {
-    line: 'Capitale du Japon;Tokyo;Défaut;;asie,capitales',
-    label: 'Tags sans mnémotechnique (champ vide)',
+    title: 'Tags sans mnémotechnique',
+    why: 'Laisse le 4ᵉ champ vide (deux points-virgules d’affilée), puis ajoute les tags.',
+    line: 'Capitale du Japon;Tokyo;Nom du deck;;asie,capitales',
+    parts: [
+      { label: 'Question', value: 'Capitale du Japon' },
+      { label: 'Réponse', value: 'Tokyo' },
+      { label: 'Deck', value: 'Nom du deck' },
+      { label: 'Mnémotechnique', value: '(vide)' },
+      { label: 'Tags', value: 'asie, capitales' },
+    ],
   },
 ] as const;
 
@@ -37,13 +93,13 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg"
+        className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Documentation
+              Premiers pas
             </p>
             <h2 id="anki-help-title" className="font-display text-xl font-semibold">
               Comment ça marche ?
@@ -54,60 +110,105 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
           </Button>
         </div>
 
-        <div className="space-y-5 overflow-y-auto px-5 py-4 text-sm">
+        <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
           <section className="space-y-2">
-            <h3 className="font-medium">Format .txt</h3>
-            <p className="rounded-xl bg-secondary/60 px-3 py-2 font-mono text-xs leading-relaxed">
-              Question;Réponse;Deck;Mnémotechnique;Tags
+            <p className="text-muted-foreground">
+              Ici tu crées des <span className="text-foreground">cartes de révision</span> : une
+              question d’un côté, la réponse de l’autre. Tu peux les saisir une par une, ou les
+              importer / exporter en fichier <span className="text-foreground">.txt</span> pour
+              gagner du temps.
             </p>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                <span className="text-foreground">Question</span>,{' '}
-                <span className="text-foreground">Réponse</span> et{' '}
-                <span className="text-foreground">Deck</span> sont obligatoires.
-              </li>
-              <li>
-                <span className="text-foreground">Mnémotechnique</span> et{' '}
-                <span className="text-foreground">Tags</span> sont optionnels.
-              </li>
-              <li>Les tags se séparent par des virgules (ex. asie,capitales).</li>
-              <li>Une carte par ligne.</li>
-              <li>Les doublons (question normalisée : casse, accents, ponctuation) sont ignorés à
-                l’import.</li>
-            </ul>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Exemples</h3>
-            <div className="space-y-3">
-              {EXAMPLES.map((example) => (
-                <div key={example.line} className="rounded-xl border border-border px-3 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {example.label}
-                  </p>
-                  <p className="mt-1 break-all font-mono text-xs leading-relaxed">{example.line}</p>
+          <section className="space-y-3">
+            <div>
+              <h3 className="font-medium">Une ligne = une carte</h3>
+              <p className="mt-1 text-muted-foreground">
+                Chaque ligne du fichier (ou du collage à droite) décrit une carte. Les champs sont
+                séparés par un <span className="text-foreground">point-virgule</span> :
+              </p>
+            </div>
+            <p className="rounded-xl bg-secondary/60 px-3 py-2.5 font-mono text-xs leading-relaxed">
+              Question;Réponse;Deck;Mnémotechnique;Tags
+            </p>
+            <div className="space-y-2.5">
+              {FIELD_GUIDE.map((field) => (
+                <div key={field.name} className="flex gap-3">
+                  <div className="w-[7.5rem] shrink-0">
+                    <p className="font-medium">{field.name}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {field.required ? 'Obligatoire' : 'Optionnel'}
+                    </p>
+                  </div>
+                  <p className="text-muted-foreground">{field.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="space-y-2 text-muted-foreground">
-            <h3 className="font-medium text-foreground">Où l’utiliser ?</h3>
-            <ul className="list-disc space-y-1.5 pl-5">
+          <section className="space-y-3">
+            <div>
+              <h3 className="font-medium">Exemples concrets</h3>
+              <p className="mt-1 text-muted-foreground">
+                Copie-colle ces lignes telles quelles pour tester l’import.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {EXAMPLES.map((example) => (
+                <div key={example.line} className="rounded-xl border border-border px-3.5 py-3">
+                  <p className="font-medium">{example.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{example.why}</p>
+                  <p className="mt-2 break-all rounded-lg bg-secondary/50 px-2.5 py-2 font-mono text-xs leading-relaxed">
+                    {example.line}
+                  </p>
+                  <dl className="mt-2.5 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                    {example.parts.map((part) => (
+                      <div key={`${example.line}-${part.label}`}>
+                        <dt className="inline font-medium text-foreground">{part.label} : </dt>
+                        <dd className="inline">{part.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="font-medium">Dans l’interface</h3>
+            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
               <li>
-                <span className="text-foreground">Importer .txt</span> / coller en masse à droite
+                <span className="text-foreground">Nouvelle carte</span> sert à saisir une carte à
+                la main.
               </li>
               <li>
-                <span className="text-foreground">Exporter .txt</span> pour le filtre courant (deck /
-                tags)
+                <span className="text-foreground">Importer .txt</span> et{' '}
+                <span className="text-foreground">Coller en masse</span> ajoutent plusieurs cartes
+                d’un coup.
+              </li>
+              <li>
+                <span className="text-foreground">Exporter .txt</span> enregistre les cartes que tu
+                vois à l’écran (celles du paquet et des tags sélectionnés).
+              </li>
+              <li>
+                <span className="text-foreground">Réviser</span> lance une session sur les cartes à
+                revoir aujourd’hui, toujours dans cette sélection.
               </li>
             </ul>
+          </section>
+
+          <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
+            <p className="font-medium text-foreground">Astuce</p>
+            <p className="mt-1">
+              Si tu réimportes une carte dont la question existe déjà (même en changeant majuscules,
+              accents ou ponctuation), elle est ignorée pour éviter les doublons.
+            </p>
           </section>
         </div>
 
         <div className="border-t border-border px-5 py-3">
           <Button type="button" className="w-full" onClick={onClose}>
-            Compris
+            C’est clair
           </Button>
         </div>
       </div>

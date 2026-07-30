@@ -112,6 +112,7 @@ export interface AppState {
   docs: HubDocument[];
   activeDocId: string | null;
   ankiCards: AnkiCard[];
+  ankiDecks: string[];
   jetpunkLists: JetPunkList[];
   activeJetpunkListId: string | null;
   jetpunkHistory: JetPunkHistoryEntry[];
@@ -129,6 +130,8 @@ export type AppAction =
   | { type: 'ADD_ANKI_CARDS'; cards: AnkiCard[] }
   | { type: 'UPDATE_ANKI_CARD'; id: string; patch: Partial<AnkiCard> }
   | { type: 'DELETE_ANKI_CARD'; id: string }
+  | { type: 'ADD_ANKI_DECK'; name: string }
+  | { type: 'REMOVE_ANKI_DECK'; name: string }
   | { type: 'ADD_JETPUNK_LIST'; list: JetPunkList }
   | { type: 'UPDATE_JETPUNK_LIST'; id: string; patch: Partial<JetPunkList> }
   | { type: 'DELETE_JETPUNK_LIST'; id: string }

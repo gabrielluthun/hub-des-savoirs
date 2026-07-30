@@ -1,5 +1,4 @@
 import { Pencil, Trash2 } from 'lucide-react';
-import { DEFAULT_ANKI_DECK } from '@/features/anki/lib/decks';
 import { formatTagLabel } from '@/features/anki/lib/tags';
 import type { AnkiCard } from '@/types';
 
@@ -22,7 +21,7 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
     <div className="flex-1 space-y-2 overflow-y-auto pr-1">
       {cards.map((card) => {
         const tags = card.tags ?? [];
-        const deck = card.deck || DEFAULT_ANKI_DECK;
+        const deck = card.deck?.trim() ?? '';
         const mnemonic = card.mnemonic?.trim() ?? '';
         return (
           <div
@@ -36,9 +35,11 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
                 <p className="mt-1 text-xs italic text-muted-foreground/80">{mnemonic}</p>
               ) : null}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                  {deck}
-                </span>
+                {deck ? (
+                  <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {deck}
+                  </span>
+                ) : null}
                 {tags.slice(0, 4).map((tag) => (
                   <span
                     key={tag}
