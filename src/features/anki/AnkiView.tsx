@@ -5,10 +5,15 @@ import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
 import { DeckSidebar } from '@/features/anki/components/decks/DeckSidebar';
+import { DeduplicationReport } from '@/features/anki/components/import/DeduplicationReport';
 import { TxtImportButton } from '@/features/anki/components/import/TxtImportButton';
 import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
+import {
+  buildExistingQuestionKeys,
+  partitionByQuestionDeduplication,
+} from '@/features/anki/lib/import/deduplication';
 import {
   collectCardTags,
   collectDecks,
@@ -44,6 +49,11 @@ export function AnkiView() {
   const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
+  const [deduplicationReport, setDeduplicationReport] = useState<{
+    added: number;
+    skipped: number;
+    skippedQuestions: string[];
+  } | null>(null);
 
   const decks = useMemo(() => collectDecks(cards), [cards]);
   const allTags = useMemo(() => collectCardTags(cards), [cards]);
@@ -82,21 +92,45 @@ export function AnkiView() {
       toast.error('Aucune carte valide à importer.');
       return;
     }
-    dispatch(
-      addAnkiCards(
-        parsed.map((card) =>
-          createAnkiCard({
-            question: card.question,
-            answer: card.answer,
-            mnemonic: card.mnemonic,
-            deck: card.deck,
-            tags: card.tags,
-          })
-        )
-      )
+
+    const { unique, duplicates } = partitionByQuestionDeduplication(
+      parsed,
+      buildExistingQuestionKeys(cards)
     );
+
+    if (unique.length > 0) {
+      dispatch(
+        addAnkiCards(
+          unique.map((card) =>
+            createAnkiCard({
+              question: card.question,
+              answer: card.answer,
+              mnemonic: card.mnemonic,
+              deck: card.deck,
+              tags: card.tags,
+            })
+          )
+        )
+      );
+    }
+
+    setDeduplicationReport({
+      added: unique.length,
+      skipped: duplicates.length,
+      skippedQuestions: duplicates.map((card) => card.question),
+    });
+
+    if (unique.length === 0) {
+      toast.message('Tous les doublons ont été ignorés.');
+      return;
+    }
+
     toast.success(
-      `${parsed.length} carte${parsed.length > 1 ? 's' : ''} ajoutée${parsed.length > 1 ? 's' : ''}.`
+      `${unique.length} carte${unique.length > 1 ? 's' : ''} ajoutée${unique.length > 1 ? 's' : ''}${
+        duplicates.length > 0
+          ? ` (${duplicates.length} doublon${duplicates.length > 1 ? 's' : ''} ignoré${duplicates.length > 1 ? 's' : ''})`
+          : ''
+      }.`
     );
   };
 
@@ -256,6 +290,15 @@ export function AnkiView() {
             {scopedCards.length} carte{scopedCards.length !== 1 ? 's' : ''}
           </span>
         </div>
+
+        {deduplicationReport ? (
+          <DeduplicationReport
+            added={deduplicationReport.added}
+            skipped={deduplicationReport.skipped}
+            skippedQuestions={deduplicationReport.skippedQuestions}
+            onDismiss={() => setDeduplicationReport(null)}
+          />
+        ) : null}
 
         {showEditor ? (
           <div className="mb-4">
