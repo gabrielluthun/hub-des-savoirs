@@ -1,4 +1,4 @@
-import type { QuestionType } from '@/types';
+import type { PlayedQuizFact, QuestionType } from '@/types';
 import { QUESTION_TYPE_LABELS } from '@/features/plateau/lib/question-types';
 
 export function buildQuizPrompt(params: {
@@ -6,9 +6,11 @@ export function buildQuizPrompt(params: {
   count: number;
   difficulty: string;
   questionTypes: QuestionType[];
+  excludeFacts?: PlayedQuizFact[];
 }): string {
   const types = params.questionTypes;
   const typeList = types.map((type) => QUESTION_TYPE_LABELS[type]).join(', ');
+  const excludeFacts = params.excludeFacts ?? [];
 
   const typeRules: string[] = [];
   if (types.includes('qcm')) {
@@ -32,15 +34,25 @@ export function buildQuizPrompt(params: {
     );
   }
 
+  const exclusionBlock =
+    excludeFacts.length > 0
+      ? `
+Questions / faits DÉJÀ JOUÉS — interdits (ni reformulation proche, ni même réponse sur le même sujet) :
+${excludeFacts
+  .map((fact, index) => `${index + 1}. Q: ${fact.question} → R: ${fact.answer}`)
+  .join('\n')}
+`
+      : '';
+
   return `Tu es le Maître du Quiz TV. À partir UNIQUEMENT du contexte fourni, génère ${params.count} questions en français, difficulté « ${params.difficulty} ».
 
 Types autorisés (répartis de façon variée) : ${typeList}.
 
-Contexte :
+Contexte (blocs déjà mélangés — ne suis PAS l'ordre d'apparition) :
 """
 ${params.context.slice(0, 12000)}
 """
-
+${exclusionBlock}
 Réponds en JSON strict :
 {
   "questions": [
@@ -50,7 +62,7 @@ Réponds en JSON strict :
       "options": ["…"],
       "answer": "string",
       "answers": ["…"],
-      "explanation": "courte explication basée sur le contexte"
+      "explanation": "courte explication factuelle"
     }
   ]
 }
@@ -59,8 +71,11 @@ Règles par type :
 ${typeRules.join('\n')}
 
 Règles générales :
+- tutoie la personne à qui tu t'adresses
 - chaque question doit avoir un "type" parmi : ${types.join(', ')}
 - n'utilise aucun autre type
 - ne invente pas de faits absents du contexte si possible
-- questions variées, pas dans l'ordre du document`;
+- questions variées et dans un ordre ALÉATOIRE (pas l'ordre du document ni des cartes)
+- si une idée est dans la liste des faits déjà joués, choisis un autre angle / un autre fait
+- INTERDIT dans question, options et explanation : toute mention du contexte / des notes / des sources (ex. « Selon le contexte », « D'après le document », « Dans tes notes », « Selon tes cartes »). Formule les questions comme un quiz TV autonome.`;
 }
