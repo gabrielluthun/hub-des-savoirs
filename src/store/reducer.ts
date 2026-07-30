@@ -1,5 +1,5 @@
 import type { AppAction, AppState, AnkiCard } from '@/types';
-import { decksEqual, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
+import { deckIsUnder, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
 
 function registerCardDecks(state: AppState, cards: AnkiCard[]): string[] {
   return mergeDeckNames(
@@ -78,8 +78,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (!name) return state;
       return {
         ...state,
-        ankiDecks: (state.ankiDecks ?? []).filter((deck) => !decksEqual(deck, name)),
-        ankiCards: state.ankiCards.filter((card) => !decksEqual(card.deck ?? '', name)),
+        ankiDecks: (state.ankiDecks ?? []).filter((deck) => !deckIsUnder(deck, name)),
+        ankiCards: state.ankiCards.filter((card) => !deckIsUnder(card.deck ?? '', name)),
       };
     }
     case 'ADD_JETPUNK_LIST':
