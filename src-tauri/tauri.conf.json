@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Hub du Savoir",
+  "productName": "Hub des Savoirs",
   "version": "1.0.0",
-  "identifier": "com.hubdusavoir.app",
+  "identifier": "com.hubdessavoirs.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:3000",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Hub du Savoir",
+        "title": "Hub des Savoirs",
         "width": 1280,
         "height": 840,
         "minWidth": 900,
