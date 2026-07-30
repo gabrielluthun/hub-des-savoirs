@@ -1,16 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 import type { JetPunkList } from '@/types';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface ListSidebarProps {
   lists: JetPunkList[];
   activeListId: string | null;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  onDelete: (id: string) => void;
 }
 
-export function ListSidebar({ lists, activeListId, onSelect, onAdd }: ListSidebarProps) {
+export function ListSidebar({
+  lists,
+  activeListId,
+  onSelect,
+  onAdd,
+  onDelete,
+}: ListSidebarProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   const categories = useMemo(() => {
@@ -55,20 +63,20 @@ export function ListSidebar({ lists, activeListId, onSelect, onAdd }: ListSideba
       </div>
 
       {categories.length > 1 ? (
-        <div className="flex gap-1.5 overflow-x-auto px-3 pb-3">
-          <FilterChip
-            label="Toutes"
-            active={categoryFilter === 'all'}
-            onClick={() => setCategoryFilter('all')}
-          />
-          {categories.map((category) => (
-            <FilterChip
-              key={category}
-              label={category}
-              active={categoryFilter === category}
-              onClick={() => setCategoryFilter(category)}
-            />
-          ))}
+        <div className="px-3 pb-3">
+          <Select
+            aria-label="Filtrer par catégorie"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-8 text-xs"
+          >
+            <option value="all">Toutes les catégories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </Select>
         </div>
       ) : null}
 
@@ -81,49 +89,39 @@ export function ListSidebar({ lists, activeListId, onSelect, onAdd }: ListSideba
           visibleLists.map((list) => {
             const active = list.id === activeListId;
             return (
-              <button
+              <div
                 key={list.id}
-                type="button"
-                onClick={() => onSelect(list.id)}
                 className={cn(
-                  'min-w-[160px] rounded-xl px-3 py-2.5 text-left transition-colors md:min-w-0 md:w-full',
+                  'group flex min-w-[160px] items-center gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors md:min-w-0 md:w-full',
                   active ? 'bg-secondary' : 'hover:bg-secondary/50'
                 )}
               >
-                <p className="truncate text-sm font-medium">{list.title}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {list.category} • {list.items.length} items
-                </p>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onSelect(list.id)}
+                  className="min-w-0 flex-1 py-2 pr-1 text-left"
+                >
+                  <p className="truncate text-sm font-medium">{list.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {list.category} • {list.items.length} items
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete(list.id);
+                  }}
+                  className="shrink-0 rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
+                  aria-label={`Supprimer ${list.title}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             );
           })
         )}
       </div>
     </div>
-  );
-}
-
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
-        active
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-secondary text-muted-foreground hover:text-foreground'
-      )}
-    >
-      {label}
-    </button>
   );
 }

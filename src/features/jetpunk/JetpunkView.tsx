@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
@@ -80,6 +79,11 @@ export function JetPunkView() {
     );
   };
 
+  const handleDeleteList = (id: string) => {
+    dispatch(deleteJetpunkList(id));
+    toast.success('Liste supprimée.');
+  };
+
   if (!activeList) {
     return (
       <div className="flex h-full">
@@ -88,6 +92,7 @@ export function JetPunkView() {
           activeListId={null}
           onSelect={(id) => dispatch(setActiveJetpunkList(id))}
           onAdd={handleAddList}
+          onDelete={handleDeleteList}
         />
         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
           Aucune liste sélectionnée.
@@ -103,29 +108,17 @@ export function JetPunkView() {
         activeListId={activeList.id}
         onSelect={(id) => dispatch(setActiveJetpunkList(id))}
         onAdd={handleAddList}
+        onDelete={handleDeleteList}
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <input
-            value={activeList.title}
-            onChange={(e) =>
-              dispatch(updateJetpunkList(activeList.id, { title: e.target.value }))
-            }
-            className="w-full bg-transparent font-display text-2xl font-semibold outline-none"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              dispatch(deleteJetpunkList(activeList.id));
-              toast.success('Liste supprimée.');
-            }}
-            className="rounded-lg p-2 text-destructive hover:bg-destructive/10"
-            aria-label="Supprimer la liste"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
+        <input
+          value={activeList.title}
+          onChange={(e) =>
+            dispatch(updateJetpunkList(activeList.id, { title: e.target.value }))
+          }
+          className="mb-4 w-full bg-transparent font-display text-2xl font-semibold outline-none"
+        />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Input
