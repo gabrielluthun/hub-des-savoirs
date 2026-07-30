@@ -18,6 +18,7 @@ import {
   useDocSyncStatus,
   useLocalContentHash,
 } from '@/features/docs/hooks/useDocSync';
+import { confirmAction } from '@/lib/confirm';
 import { renderMarkdownToHtml } from '@/lib/markdown';
 import { createId } from '@/lib/utils';
 import { addDoc, deleteDoc, setActiveDoc, setTab, updateDoc } from '@/store/actions';
@@ -63,13 +64,12 @@ export function DocsView() {
       toast.error('Ajoutez une URL Google Docs.');
       return;
     }
-    if (
-      activeDoc.content.trim() &&
-      !window.confirm(
-        'Le document local n’est pas vide. Remplacer le contenu par l’import Google Docs ?'
-      )
-    ) {
-      return;
+    if (activeDoc.content.trim()) {
+      const confirmed = await confirmAction(
+        'Le document local n’est pas vide. Remplacer le contenu par l’import Google Docs ?',
+        { title: 'Remplacer le document', okLabel: 'Remplacer' }
+      );
+      if (!confirmed) return;
     }
     try {
       const text = await importGoogleDocText(activeDoc.googleDocsUrl);
