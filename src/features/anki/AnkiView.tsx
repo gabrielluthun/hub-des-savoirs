@@ -17,6 +17,7 @@ import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { deckExists } from '@/features/anki/lib/organization';
 import { deckIsUnder, decksEqual } from '@/features/anki/lib/decks';
+import { getDueCards } from '@/features/anki/lib/srs/schedule';
 import { ankiCardsToJetpunkList } from '@/lib/anki-jetpunk-transfer';
 import { Button, Input } from '@/components/ui/primitives';
 import {
@@ -72,15 +73,25 @@ export function AnkiView() {
   useEffect(() => {
     const tryStartFromSidebar = () => {
       if (consumeNavIntent() !== 'anki-review') return;
-      if (review.dueCount === 0) {
-        toast.message('Aucune carte due pour ce filtre.');
+      // Sidebar counts all due cards — clear filters and review that full set.
+      filters.setSelectedDeck(null);
+      filters.clearTags();
+      filters.setQuery('');
+      if (getDueCards(cards).length === 0) {
+        toast.message('Aucune carte due pour le moment.');
         return;
       }
-      review.start();
+      review.start(cards);
     };
     tryStartFromSidebar();
     return subscribeNavIntent(tryStartFromSidebar);
-  }, [review.dueCount, review.start]);
+  }, [
+    cards,
+    filters.clearTags,
+    filters.setQuery,
+    filters.setSelectedDeck,
+    review.start,
+  ]);
 
   const handleCreateDeck = (name: string) => {
     if (deckExists(filters.decks, name)) {
