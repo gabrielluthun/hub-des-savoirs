@@ -52,7 +52,10 @@ export function migrateState(state: AppState): AppState {
 
   return {
     ...state,
-    jetpunkHistory: state.jetpunkHistory ?? [],
+    jetpunkHistory: (state.jetpunkHistory ?? []).map((entry) => ({
+      ...entry,
+      foundIds: Array.isArray(entry.foundIds) ? entry.foundIds : undefined,
+    })),
     docs: (state.docs ?? []).map((doc) => ({
       ...doc,
       tags: Array.isArray(doc.tags) ? doc.tags : [],

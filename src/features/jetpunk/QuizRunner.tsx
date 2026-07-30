@@ -2,6 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useEndOnVisibilityHidden } from '@/features/jetpunk/hooks/useEndOnVisibilityHidden';
 import { useQuizClock } from '@/features/jetpunk/hooks/useQuizClock';
+import {
+  computeItemMissStats,
+  pickFocusItems,
+} from '@/features/jetpunk/lib/item-stats';
 import { Stats, type QuizResult } from '@/features/jetpunk/Stats';
 import { Button, Input } from '@/components/ui/primitives';
 import type { JetPunkHistoryEntry, JetPunkItem } from '@/types';
@@ -10,6 +14,8 @@ interface QuizRunnerProps {
   title: string;
   durationSec: number;
   items: JetPunkItem[];
+  /** Full list for miss-rate stats (defaults to items). */
+  sourceItems?: JetPunkItem[];
   previousBest: number | null;
   recentAttempts: JetPunkHistoryEntry[];
   onFinish: (result: QuizResult) => void;
@@ -35,14 +41,22 @@ export function QuizRunner({
   title,
   durationSec,
   items,
+  sourceItems,
   previousBest,
   recentAttempts,
   onFinish,
   onClose,
 }: QuizRunnerProps) {
+  const [sessionItems, setSessionItems] = useState(items);
+  const catalogItems = sourceItems ?? items;
+
+  useEffect(() => {
+    setSessionItems(items);
+  }, [items]);
+
   const playableItems = useMemo(
-    () => items.filter((item) => item.answer.trim()),
-    [items]
+    () => sessionItems.filter((item) => item.answer.trim()),
+    [sessionItems]
   );
   const [input, setInput] = useState('');
   const [foundIds, setFoundIds] = useState<Set<string>>(() => new Set());
@@ -122,16 +136,36 @@ export function QuizRunner({
     clock.reset();
   };
 
+  const handleFocusReplay = () => {
+    if (!summary) return;
+    const found = new Set(summary.result.foundIds);
+    const missedThisGame = sessionItems.filter(
+      (item) => item.answer.trim() && !found.has(item.id)
+    );
+    const nextItems =
+      missedThisGame.length > 0
+        ? missedThisGame
+        : pickFocusItems(catalogItems, computeItemMissStats(catalogItems, recentAttempts));
+    if (nextItems.length === 0) {
+      toast.message('Aucune réponse manquée à cibler.');
+      return;
+    }
+    setSessionItems(nextItems);
+    handleReplay();
+  };
+
   if (summary) {
     return (
       <Stats
         title={title}
-        items={items}
+        items={sessionItems}
         result={summary.result}
         previousBest={summary.previousBest}
         recentAttempts={recentAttempts}
         interruptedByFocus={summary.interruptedByFocus}
+        missStats={computeItemMissStats(catalogItems, recentAttempts)}
         onReplay={handleReplay}
+        onFocusReplay={handleFocusReplay}
         onClose={onClose}
       />
     );

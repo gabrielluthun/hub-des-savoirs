@@ -1,4 +1,9 @@
 import { Historique } from '@/features/jetpunk/Historique';
+import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
+import {
+  computeItemMissStats,
+  type ItemMissStat,
+} from '@/features/jetpunk/lib/item-stats';
 import { Button } from '@/components/ui/primitives';
 import type { JetPunkHistoryEntry, JetPunkItem } from '@/types';
 
@@ -17,7 +22,9 @@ interface StatsProps {
   previousBest: number | null;
   recentAttempts: JetPunkHistoryEntry[];
   interruptedByFocus?: boolean;
+  missStats?: ItemMissStat[];
   onReplay: () => void;
+  onFocusReplay?: () => void;
   onClose: () => void;
 }
 
@@ -35,7 +42,9 @@ export function Stats({
   previousBest,
   recentAttempts,
   interruptedByFocus = false,
+  missStats,
   onReplay,
+  onFocusReplay,
   onClose,
 }: StatsProps) {
   const playableItems = items.filter((item) => item.answer.trim());
@@ -48,6 +57,12 @@ export function Stats({
     ? result.score
     : (previousBest ?? result.score);
   const completed = result.score === result.total && result.total > 0;
+  const aggregateMissStats =
+    missStats ?? computeItemMissStats(items, recentAttempts);
+  const missedThisGame = playableItems.filter((item) => !foundSet.has(item.id));
+  const canFocus =
+    Boolean(onFocusReplay) &&
+    (missedThisGame.length > 0 || aggregateMissStats.length > 0);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
@@ -165,6 +180,8 @@ export function Stats({
             </table>
           </div>
 
+          <ItemMissStats stats={aggregateMissStats} />
+
           {recentAttempts.length > 0 ? (
             <Historique
               entries={recentAttempts}
@@ -180,6 +197,11 @@ export function Stats({
           <Button type="button" onClick={onReplay}>
             Rejouer
           </Button>
+          {canFocus ? (
+            <Button type="button" variant="secondary" onClick={onFocusReplay}>
+              Focus manquées
+            </Button>
+          ) : null}
           <Button type="button" variant="ghost" onClick={onClose}>
             Fermer
           </Button>
