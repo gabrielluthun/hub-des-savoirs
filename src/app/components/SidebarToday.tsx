@@ -54,7 +54,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
 
       {empty ? (
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          Rien de prévu — choisis un module pour commencer.
+          Rien de prévu, choisis un module pour commencer.
         </p>
       ) : (
         <ul className="mt-2 flex flex-col gap-1">
