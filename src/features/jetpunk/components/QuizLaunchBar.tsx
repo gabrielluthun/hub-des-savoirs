@@ -1,4 +1,4 @@
-import { Crosshair, Play, Target } from 'lucide-react';
+import { Crosshair, Infinity, Play, Target, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
@@ -57,26 +57,32 @@ export function QuizLaunchBar({
             onClick={() =>
               onDurationChange(durationSec > 0 ? durationSec : DEFAULT_TIMED_DURATION)
             }
+            title="Chronométré"
+            aria-label="Mode chronométré"
+            aria-pressed={durationSec > 0}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+              'rounded-lg p-2 transition-colors',
               durationSec > 0
                 ? 'bg-secondary text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            Chronométré
+            <Timer className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={() => onDurationChange(0)}
+            title="Sans chrono"
+            aria-label="Mode sans chrono"
+            aria-pressed={durationSec <= 0}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+              'rounded-lg p-2 transition-colors',
               durationSec <= 0
                 ? 'bg-secondary text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            Sans chrono
+            <Infinity className="h-4 w-4" />
           </button>
         </div>
         {durationSec > 0 ? (
@@ -92,9 +98,7 @@ export function QuizLaunchBar({
               </option>
             ))}
           </Select>
-        ) : (
-          <span className="text-xs text-muted-foreground">Jusqu’à tout trouver</span>
-        )}
+        ) : null}
       </div>
       <Button
         type="button"
