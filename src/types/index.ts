@@ -41,6 +41,8 @@ export interface HubDocument {
   title: string;
   googleDocsUrl: string;
   content: string;
+  /** Flat multi-tags for sidebar filter and Plateau source picking */
+  tags: string[];
   /** SHA-256 of the last successfully imported Google Docs content */
   contentHash?: string;
   lastImportedAt?: string;
