@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
 import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
@@ -15,14 +15,17 @@ import {
   computeItemMissStats,
   pickFocusItems,
 } from '@/features/jetpunk/lib/item-stats';
+import { jetpunkListToAnkiCards } from '@/lib/anki-jetpunk-transfer';
 import { Button, Input } from '@/components/ui/primitives';
 import { createId } from '@/lib/utils';
 import type { JetPunkItem } from '@/types';
 import {
+  addAnkiCards,
   addJetpunkHistory,
   addJetpunkList,
   deleteJetpunkList,
   setActiveJetpunkList,
+  setTab,
   updateJetpunkList,
 } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
@@ -95,6 +98,20 @@ export function JetPunkView() {
     toast.success('Liste supprimée.');
   };
 
+  const handleTransferToAnki = () => {
+    if (!activeList) return;
+    const cards = jetpunkListToAnkiCards(activeList);
+    if (cards.length === 0) {
+      toast.error('Aucun élément transférable (il faut au moins une réponse).');
+      return;
+    }
+    dispatch(addAnkiCards(cards));
+    dispatch(setTab('anki'));
+    toast.success(
+      `${cards.length} carte${cards.length !== 1 ? 's' : ''} Anki créée${cards.length !== 1 ? 's' : ''} (deck « ${cards[0]?.deck} »).`
+    );
+  };
+
   const sidebarProps = {
     lists,
     onSelect: (id: string) => dispatch(setActiveJetpunkList(id)),
@@ -135,17 +152,28 @@ export function JetPunkView() {
             placeholder="Nom de la liste"
             className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
           />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => exportList(activeList)}
-            title="Exporter cette liste en JSON"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Exporter cette liste</span>
-          </Button>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleTransferToAnki}
+              title="Créer des cartes Anki (deck Thème::Liste, ex. Géographie::Capitales)"
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Vers Anki</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => exportList(activeList)}
+              title="Exporter cette liste en JSON"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Exporter cette liste</span>
+            </Button>
+          </div>
         </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
