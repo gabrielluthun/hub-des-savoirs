@@ -25,6 +25,7 @@ export function createDefaultState(): AppState {
         title: 'Quizypédia',
         googleDocsUrl: '',
         content: '# Titre\n- Point 1\n- Point 2\n',
+        tags: [],
         updatedAt: now,
       },
       {
@@ -32,6 +33,7 @@ export function createDefaultState(): AppState {
         title: 'Nouveau document',
         googleDocsUrl: '',
         content: '',
+        tags: [],
         updatedAt: now,
       },
     ],
