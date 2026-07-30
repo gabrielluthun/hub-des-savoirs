@@ -15,14 +15,18 @@ export function BulkImportPanel({ value, onChange, onImport }: BulkImportPanelPr
       </p>
       <h3 className="mt-1 font-display text-lg font-semibold">Coller en masse</h3>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Format : <span className="font-mono">Question;Réponse;Mnémotechnique</span>. La
-        mnémotechnique est optionnelle. Une carte par ligne.
+        Format :{' '}
+        <span className="font-mono">Question;Réponse;Deck;Mnémotechnique;Tags</span>. Deck
+        obligatoire ; mnémotechnique et tags (séparés par des virgules) optionnels. Une carte
+        par ligne.
       </p>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="mt-4 min-h-[220px] flex-1 font-mono text-xs"
-        placeholder={'Capitale du Japon;Tokyo;To-kyo comme ticket\nRoi dit le Saint;Louis IX'}
+        placeholder={
+          'Capitale du Japon;Tokyo;Géo;To-kyo comme ticket;asie,capitales\nRoi dit le Saint;Louis IX;Histoire'
+        }
       />
       <Button type="button" className="mt-4 w-full" onClick={onImport}>
         <Upload className="h-4 w-4" />
