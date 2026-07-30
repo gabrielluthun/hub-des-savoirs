@@ -79,7 +79,9 @@ export function JetpunkHelpDialog({ open, onClose }: JetpunkHelpDialogProps) {
               </li>
               <li>
                 Tape les réponses ; elles sont acceptées dès qu’elles correspondent (sans
-                tenir compte des majuscules / accents).
+                tenir compte des majuscules / accents). Pour un nom de personne, le nom de
+                famille seul suffit (Hugo, ou de Gaulle) — pas pour les rois / reines (titres
+                ou numéros : Louis XIV…).
               </li>
             </ul>
           </section>
