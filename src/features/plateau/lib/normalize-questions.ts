@@ -12,6 +12,21 @@ function coerceType(raw: unknown, allowed: QuestionType[]): QuestionType {
   return allowed[0] ?? 'qcm';
 }
 
+/** Strip meta phrases like « Selon le contexte… » from model text. */
+export function stripContextMetaPhrases(value: string): string {
+  return value
+    .replace(
+      /^\s*(selon|d['’]après)\s+(le\s+)?(contexte|document|texte|notes?|cartes?|ressources?)\s*[,:–—-]?\s*/giu,
+      ''
+    )
+    .replace(
+      /^\s*(dans|d['’]après)\s+(tes|vos|les)\s+(notes?|cartes?|documents?|ressources?)\s*[,:–—-]?\s*/giu,
+      ''
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /** Normalize / repair model output into playable questions. */
 export function normalizeGeneratedQuestions(
   raw: unknown[],
@@ -24,14 +39,14 @@ export function normalizeGeneratedQuestions(
   for (const entry of raw) {
     if (!entry || typeof entry !== 'object') continue;
     const row = entry as Record<string, unknown>;
-    const question = String(row.question ?? '').trim();
+    const question = stripContextMetaPhrases(String(row.question ?? ''));
     if (!question) continue;
 
     const type = coerceType(row.type, allowed);
-    let options = asStringArray(row.options);
+    let options = asStringArray(row.options).map(stripContextMetaPhrases);
     let answer = String(row.answer ?? '').trim();
     let answers = asStringArray(row.answers);
-    const explanation = String(row.explanation ?? '').trim();
+    const explanation = stripContextMetaPhrases(String(row.explanation ?? ''));
 
     if (type === 'vrai_faux') {
       options = ['Vrai', 'Faux'];
