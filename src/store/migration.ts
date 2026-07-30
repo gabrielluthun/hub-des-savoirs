@@ -56,6 +56,18 @@ export function migrateState(state: AppState): AppState {
       ...entry,
       foundIds: Array.isArray(entry.foundIds) ? entry.foundIds : undefined,
     })),
+    gameHistory: (state.gameHistory ?? []).map((entry) => ({
+      ...entry,
+      questions: Array.isArray(entry.questions)
+        ? entry.questions
+            .map((fact) => ({
+              question: String(fact?.question ?? '').trim(),
+              answer: String(fact?.answer ?? '').trim(),
+              type: fact?.type,
+            }))
+            .filter((fact) => fact.question && fact.answer)
+        : undefined,
+    })),
     docs: (state.docs ?? []).map((doc) => ({
       ...doc,
       tags: Array.isArray(doc.tags) ? doc.tags : [],
