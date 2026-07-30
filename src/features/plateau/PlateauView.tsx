@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { GameHistory } from '@/features/plateau/GameHistory';
 import { GamePlay } from '@/features/plateau/GamePlay';
 import { GameSetup } from '@/features/plateau/GameSetup';
+import { collectDecks } from '@/features/anki/lib/organization';
+import {
+  selectionForKind,
+  selectionHasResources,
+} from '@/features/plateau/lib/source-selection';
 import { generateQuizQuestions } from '@/lib/gemini';
 import { buildQuizContext } from '@/lib/quiz-context';
 import { createId } from '@/lib/utils';
@@ -11,25 +16,43 @@ import { addGameHistory, setTab } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 import {
   selectAnkiCards,
+  selectAnkiDecks,
   selectDocs,
   selectGameHistory,
   selectJetpunkLists,
 } from '@/store/selectors';
-import type { Difficulty, GeneratedQuestion, QuizSource } from '@/types';
+import type { Difficulty, GeneratedQuestion, QuizSourceSelection } from '@/types';
 
 export function PlateauView() {
   const { state, dispatch } = useStore();
   const docs = selectDocs(state);
   const ankiCards = selectAnkiCards(state);
+  const ankiDecks = selectAnkiDecks(state);
   const jetpunkLists = selectJetpunkLists(state);
   const history = selectGameHistory(state);
+  const deckNames = useMemo(
+    () => collectDecks(ankiCards, ankiDecks),
+    [ankiCards, ankiDecks]
+  );
 
   const [count, setCount] = useState(5);
   const [difficulty, setDifficulty] = useState<Difficulty>('moyen');
-  const [source, setSource] = useState<QuizSource>('all');
+  const [selection, setSelection] = useState<QuizSourceSelection>(() =>
+    selectionForKind('all', { docs, deckNames: [], lists: jetpunkLists })
+  );
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<GeneratedQuestion[] | null>(null);
   const [liveScore, setLiveScore] = useState(0);
+
+  const handleSelectionChange = (next: QuizSourceSelection) => {
+    if (next.kind !== selection.kind) {
+      setSelection(
+        selectionForKind(next.kind, { docs, deckNames, lists: jetpunkLists })
+      );
+      return;
+    }
+    setSelection(next);
+  };
 
   const startGame = async () => {
     if (!state.settings.apiKey.trim()) {
@@ -38,7 +61,21 @@ export function PlateauView() {
       return;
     }
 
-    const context = buildQuizContext({ source, docs, ankiCards, jetpunkLists });
+    if (!selectionHasResources(selection, { docs, cards: ankiCards, lists: jetpunkLists })) {
+      toast.error(
+        selection.kind === 'all'
+          ? 'Aucune ressource disponible.'
+          : 'Sélectionne au moins une ressource avec du contenu.'
+      );
+      return;
+    }
+
+    const context = buildQuizContext({
+      selection,
+      docs,
+      ankiCards,
+      jetpunkLists,
+    });
     if (!context) {
       toast.error('Aucune ressource disponible pour cette source.');
       return;
@@ -117,12 +154,15 @@ export function PlateauView() {
             <GameSetup
               count={count}
               difficulty={difficulty}
-              source={source}
+              selection={selection}
+              docs={docs}
+              deckNames={deckNames}
+              lists={jetpunkLists}
               modelLabel={state.settings.model}
               loading={loading}
               onCountChange={setCount}
               onDifficultyChange={setDifficulty}
-              onSourceChange={setSource}
+              onSelectionChange={handleSelectionChange}
               onStart={startGame}
             />
             <div className="mt-8">
