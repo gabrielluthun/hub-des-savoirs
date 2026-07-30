@@ -6,10 +6,11 @@ interface GeminiGenerateParams {
   apiKey: string;
   model: GeminiModel;
   prompt: string;
+  temperature?: number;
 }
 
 export async function generateJson<T>(params: GeminiGenerateParams): Promise<T> {
-  const { apiKey, model, prompt } = params;
+  const { apiKey, model, prompt, temperature = 0.7 } = params;
   if (!apiKey.trim()) {
     throw new Error('Clé API Gemini manquante. Configurez-la dans Paramètres.');
   }
@@ -22,7 +23,7 @@ export async function generateJson<T>(params: GeminiGenerateParams): Promise<T> 
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         responseMimeType: 'application/json',
-        temperature: 0.7,
+        temperature,
       },
     }),
   });
