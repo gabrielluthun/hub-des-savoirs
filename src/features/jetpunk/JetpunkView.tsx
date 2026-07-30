@@ -7,7 +7,7 @@ import { ListSidebar } from '@/features/jetpunk/ListSidebar';
 import { QuizRunner } from '@/features/jetpunk/QuizRunner';
 import type { QuizResult } from '@/features/jetpunk/Stats';
 import { Button, Input, Select } from '@/components/ui/primitives';
-import { createId } from '@/lib/utils';
+import { createId, cn } from '@/lib/utils';
 import {
   addJetpunkHistory,
   addJetpunkList,
@@ -22,13 +22,15 @@ import {
   selectJetpunkLists,
 } from '@/store/selectors';
 
-const DURATION_OPTIONS = [
+const TIMED_DURATION_OPTIONS = [
   { label: '1 min', value: 60 },
   { label: '1 min 30', value: 90 },
   { label: '2 min', value: 120 },
   { label: '3 min', value: 180 },
   { label: '5 min', value: 300 },
 ];
+
+const DEFAULT_TIMED_DURATION = 90;
 
 export function JetPunkView() {
   const { state, dispatch } = useStore();
@@ -136,25 +138,65 @@ export function JetPunkView() {
         </div>
 
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Durée</span>
-            <Select
-              value={String(activeList.durationSec)}
-              onChange={(e) =>
-                dispatch(
-                  updateJetpunkList(activeList.id, {
-                    durationSec: Number(e.target.value),
-                  })
-                )
-              }
-              className="h-9 w-[130px]"
-            >
-              {DURATION_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">Mode</span>
+            <div className="inline-flex rounded-xl border border-border p-0.5">
+              <button
+                type="button"
+                onClick={() =>
+                  dispatch(
+                    updateJetpunkList(activeList.id, {
+                      durationSec:
+                        activeList.durationSec > 0
+                          ? activeList.durationSec
+                          : DEFAULT_TIMED_DURATION,
+                    })
+                  )
+                }
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeList.durationSec > 0
+                    ? 'bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Chronométré
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  dispatch(updateJetpunkList(activeList.id, { durationSec: 0 }))
+                }
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeList.durationSec <= 0
+                    ? 'bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Sans chrono
+              </button>
+            </div>
+            {activeList.durationSec > 0 ? (
+              <Select
+                value={String(activeList.durationSec)}
+                onChange={(e) =>
+                  dispatch(
+                    updateJetpunkList(activeList.id, {
+                      durationSec: Number(e.target.value),
+                    })
+                  )
+                }
+                className="h-9 w-[130px]"
+                aria-label="Durée du quiz"
+              >
+                {TIMED_DURATION_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            ) : null}
           </div>
           <Button
             type="button"
