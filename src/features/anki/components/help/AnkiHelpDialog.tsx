@@ -20,7 +20,7 @@ const FIELD_GUIDE = [
   {
     name: 'Deck',
     required: true,
-    description: 'Le paquet où ranger la carte (ex. Histoire, Géo).',
+    description: 'Le paquet où ranger la carte (ex. Histoire, ou Histoire::Louis XIV pour un sous-deck).',
   },
   {
     name: 'Mnémotechnique',
@@ -53,6 +53,16 @@ const EXAMPLES = [
       { label: 'Question', value: 'Roi dit le Saint' },
       { label: 'Réponse', value: 'Louis IX' },
       { label: 'Deck', value: 'Histoire' },
+    ],
+  },
+  {
+    title: 'Créer un sous-deck',
+    why: 'Utilise Parent::Enfant. Filtrer le parent inclut aussi les sous-decks.',
+    line: 'Roi dit le Saint;Louis IX;Histoire::Capétiens',
+    parts: [
+      { label: 'Question', value: 'Roi dit le Saint' },
+      { label: 'Réponse', value: 'Louis IX' },
+      { label: 'Deck', value: 'Histoire::Capétiens' },
     ],
   },
   {
@@ -129,7 +139,7 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
               </p>
             </div>
             <p className="rounded-xl bg-secondary/60 px-3 py-2.5 font-mono text-xs leading-relaxed">
-              Question;Réponse;Deck;Mnémotechnique;Tags
+              Question;Réponse;Nom du deck;Mnémotechnique;Tags
             </p>
             <div className="space-y-2.5">
               {FIELD_GUIDE.map((field) => (
@@ -183,16 +193,14 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
               </li>
               <li>
                 <span className="text-foreground">Importer .txt</span> et{' '}
-                <span className="text-foreground">Coller en masse</span> ajoutent plusieurs cartes
-                d’un coup.
+                <span className="text-foreground">Coller en masse</span> permettent l'ajout de plusieurs cartes à la fois.
               </li>
               <li>
-                <span className="text-foreground">Exporter .txt</span> enregistre les cartes que tu
-                vois à l’écran (celles du paquet et des tags sélectionnés).
+                <span className="text-foreground">Exporter .txt</span> exporte les cartes affichées à l'écran.
               </li>
               <li>
                 <span className="text-foreground">Réviser</span> lance une session sur les cartes à
-                revoir aujourd’hui, toujours dans cette sélection.
+                revoir aujourd’hui, toujours selon ta sélection actuelle.
               </li>
             </ul>
           </section>

@@ -14,7 +14,7 @@ import { useAnkiFilters } from '@/features/anki/hooks/useAnkiFilters';
 import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { deckExists } from '@/features/anki/lib/organization';
-import { decksEqual } from '@/features/anki/lib/decks';
+import { deckIsUnder, decksEqual } from '@/features/anki/lib/decks';
 import { Button, Input } from '@/components/ui/primitives';
 import { addAnkiDeck, deleteAnkiCard, removeAnkiDeck, updateAnkiCard } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
@@ -73,21 +73,22 @@ export function AnkiView() {
 
   const handleDeleteDeck = (name: string) => {
     const count = filters.deckCounts[name] ?? 0;
+    const nested = filters.decks.filter(
+      (deck) => deckIsUnder(deck, name) && !decksEqual(deck, name)
+    ).length;
     const message =
-      count === 0
+      count === 0 && nested === 0
         ? `Supprimer le deck « ${name} » ?`
-        : `Supprimer le deck « ${name} » et ses ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`;
+        : nested > 0
+          ? `Supprimer « ${name} », ses ${nested} sous-deck${nested > 1 ? 's' : ''} et ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`
+          : `Supprimer le deck « ${name} » et ses ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`;
     if (!window.confirm(message)) return;
 
     dispatch(removeAnkiDeck(name));
-    if (filters.selectedDeck && decksEqual(filters.selectedDeck, name)) {
+    if (filters.selectedDeck && deckIsUnder(filters.selectedDeck, name)) {
       filters.setSelectedDeck(null);
     }
-    toast.success(
-      count === 0
-        ? `Deck « ${name} » supprimé.`
-        : `Deck « ${name} » et ${count} carte${count > 1 ? 's' : ''} supprimé${count > 1 ? 's' : ''}.`
-    );
+    toast.success(`Deck « ${name} » supprimé.`);
   };
 
   return (

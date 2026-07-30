@@ -1,21 +1,33 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Plus } from 'lucide-react';
+import { DECK_PATH_SEP, normalizeDeckName } from '@/features/anki/lib/decks';
 import { Input } from '@/components/ui/primitives';
-import { normalizeDeckName } from '@/features/anki/lib/decks';
 
 interface DeckCreateFormProps {
   onCreate: (name: string) => boolean;
+  /** When a deck is selected, prefill Parent:: for a quick sous-deck. */
+  parentHint?: string | null;
 }
 
-export function DeckCreateForm({ onCreate }: DeckCreateFormProps) {
+export function DeckCreateForm({ onCreate, parentHint = null }: DeckCreateFormProps) {
   const [draft, setDraft] = useState('');
+
+  useEffect(() => {
+    if (!parentHint) return;
+    setDraft((current) => {
+      if (current.trim()) return current;
+      return `${parentHint}${DECK_PATH_SEP}`;
+    });
+  }, [parentHint]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const name = normalizeDeckName(draft);
     if (!name) return;
     const created = onCreate(name);
-    if (created) setDraft('');
+    if (created) {
+      setDraft(parentHint ? `${parentHint}${DECK_PATH_SEP}` : '');
+    }
   };
 
   return (
@@ -23,7 +35,7 @@ export function DeckCreateForm({ onCreate }: DeckCreateFormProps) {
       <Input
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder="Nouveau deck…"
+        placeholder={parentHint ? `${parentHint}${DECK_PATH_SEP}Enfant` : 'Nouveau deck…'}
         className="h-8 flex-1 text-xs"
         aria-label="Nom du nouveau deck"
       />
