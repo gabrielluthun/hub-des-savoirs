@@ -42,6 +42,10 @@ export function migrateState(state: AppState): AppState {
   return {
     ...state,
     jetpunkHistory: state.jetpunkHistory ?? [],
+    docs: (state.docs ?? []).map((doc) => ({
+      ...doc,
+      tags: Array.isArray(doc.tags) ? doc.tags : [],
+    })),
     settings: {
       ...state.settings,
       model: migrateGeminiModel(state.settings.model),
