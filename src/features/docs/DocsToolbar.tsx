@@ -1,7 +1,10 @@
 import { CloudDownload, ExternalLink, Sparkles } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
 import { ImportMarkdownButton } from '@/features/docs/components/toolbar/ImportMarkdownButton';
+import { SyncButton } from '@/features/docs/components/toolbar/SyncButton';
+import { SyncStatusBadge } from '@/features/docs/components/toolbar/SyncStatusBadge';
 import type { MarkdownImportResult } from '@/features/docs/lib/import-markdown';
+import type { DocSyncStatus } from '@/features/docs/lib/doc-sync';
 import { cn } from '@/lib/utils';
 
 export type DocsPane = 'editor' | 'preview' | 'gdocs';
@@ -10,8 +13,12 @@ interface DocsToolbarProps {
   url: string;
   pane: DocsPane;
   savingLabel: string;
+  syncStatus: DocSyncStatus;
+  lastImportedAt?: string;
+  syncLoading?: boolean;
   onUrlChange: (url: string) => void;
   onImport: () => void;
+  onRefresh: () => void;
   onImportMarkdown: (result: MarkdownImportResult) => void;
   onImportMarkdownError: (message: string) => void;
   onPaneChange: (pane: DocsPane) => void;
@@ -24,8 +31,12 @@ export function DocsToolbar({
   url,
   pane,
   savingLabel,
+  syncStatus,
+  lastImportedAt,
+  syncLoading = false,
   onUrlChange,
   onImport,
+  onRefresh,
   onImportMarkdown,
   onImportMarkdownError,
   onPaneChange,
@@ -46,6 +57,7 @@ export function DocsToolbar({
           <CloudDownload className="h-4 w-4" />
           Importer contenu
         </Button>
+        <SyncButton onClick={onRefresh} loading={syncLoading} disabled={!url.trim()} />
         <ImportMarkdownButton
           onImported={onImportMarkdown}
           onError={onImportMarkdownError}
@@ -91,7 +103,10 @@ export function DocsToolbar({
           Générer un quiz IA
         </Button>
 
-        <span className="ml-auto text-xs text-muted-foreground">{savingLabel}</span>
+        <div className="ml-auto flex items-center gap-2">
+          <SyncStatusBadge status={syncStatus} lastImportedAt={lastImportedAt} />
+          <span className="text-xs text-muted-foreground">{savingLabel}</span>
+        </div>
       </div>
     </div>
   );
