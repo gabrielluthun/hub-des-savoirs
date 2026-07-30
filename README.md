@@ -3,6 +3,7 @@
 SPA locale et application Desktop de révision et de culture générale. Notes (Google Docs / markdown), cartes Anki avec répétition espacée, listes JetPunk chronométrées, et **Plateau** (quiz généré par Gemini à partir de vos ressources). 
 
 Disponible en **navigateur** (Vite) et en **app desktop** (Tauri 2).
+Pas disponible sur iOS / Android.
 
 ## Stack
 
