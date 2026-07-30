@@ -129,12 +129,21 @@ export function JetPunkView() {
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Input
+            list="jetpunk-categories"
             value={activeList.category}
             onChange={(e) =>
               dispatch(updateJetpunkList(activeList.id, { category: e.target.value }))
             }
+            placeholder="Catégorie"
             className="h-8 w-auto rounded-full px-3 text-xs"
           />
+          <datalist id="jetpunk-categories">
+            {[...new Set(lists.map((list) => list.category.trim()).filter(Boolean))]
+              .sort((a, b) => a.localeCompare(b, 'fr'))
+              .map((category) => (
+                <option key={category} value={category} />
+              ))}
+          </datalist>
           <span className="text-xs text-muted-foreground">
             {activeList.items.length} élément{activeList.items.length !== 1 ? 's' : ''}
           </span>
