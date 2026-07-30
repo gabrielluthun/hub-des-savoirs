@@ -26,7 +26,16 @@ export function useAnkiAiFromDocs(params: {
     dispatch(setTab('settings'));
   };
 
-  const handleAiGenerate = async (generateParams: { docId: string; count: number }) => {
+  const handleAiGenerate = async (generateParams: {
+    docId: string;
+    count: number;
+    deck: string;
+  }) => {
+    const deck = normalizeDeckName(generateParams.deck);
+    if (!deck) {
+      toast.error('Sélectionne ou indique un deck cible avant de générer.');
+      return;
+    }
     const doc = docs.find((item) => item.id === generateParams.docId);
     if (!doc) {
       toast.error('Document introuvable.');
@@ -38,6 +47,7 @@ export function useAnkiAiFromDocs(params: {
         model,
         doc,
         count: generateParams.count,
+        deckName: deck,
       });
       toast.success(
         `${generated.length} carte${generated.length > 1 ? 's' : ''} générée${generated.length > 1 ? 's' : ''}.`
