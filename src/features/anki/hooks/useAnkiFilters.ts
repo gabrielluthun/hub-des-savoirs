@@ -8,12 +8,15 @@ import {
 import { normalizeTag } from '@/features/anki/lib/tags';
 import type { AnkiCard } from '@/types';
 
-export function useAnkiFilters(cards: AnkiCard[]) {
+export function useAnkiFilters(cards: AnkiCard[], registeredDecks: string[] = []) {
   const [query, setQuery] = useState('');
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const decks = useMemo(() => collectDecks(cards), [cards]);
+  const decks = useMemo(
+    () => collectDecks(cards, registeredDecks),
+    [cards, registeredDecks]
+  );
   const allTags = useMemo(() => collectCardTags(cards), [cards]);
   const deckCounts = useMemo(() => {
     const counts: Record<string, number> = {};
