@@ -10,6 +10,10 @@
 /build
 /dist
 
+# tauri / rust (local toolchain optional)
+/src-tauri/target
+/.toolchain
+
 # misc
 .DS_Store
 .env

@@ -2,13 +2,14 @@
 
 SPA locale et application Desktop de révision et de culture générale. Notes (Google Docs / markdown), cartes Anki avec répétition espacée, listes JetPunk chronométrées, et **Plateau** (quiz généré par Gemini à partir de vos ressources). 
 
-Tout reste dans le navigateur.
+Disponible en **navigateur** (Vite) et en **app desktop** (Tauri 2).
 
 ## Stack
 
 | Couche | Choix |
 |--------|--------|
 | UI | React 19, Vite 7, TypeScript 7 |
+| Desktop | Tauri 2 (`src-tauri/`) |
 | Styles | Tailwind CSS 3 (thème clair/sombre via `.dark`, variables HSL) |
 | Fonts | Outfit, IBM Plex Sans, JetBrains Mono |
 | Icônes / toasts | Lucide React, Sonner |
@@ -21,6 +22,7 @@ Tout reste dans le navigateur.
 
 - Node.js 18+
 - Une clé API [Google AI Studio](https://aistudio.google.com/apikey) pour Plateau et la génération de cartes Anki depuis les docs
+- Pour le desktop : [Rust](https://www.rust-lang.org/tools/install) (`rustup`) + Xcode CLT (macOS)
 
 ## Installation
 
@@ -34,6 +36,16 @@ Build / aperçu production :
 ```bash
 npm run build
 npm run preview
+```
+
+### App desktop (Tauri)
+
+```bash
+# une fois : installer Rust (rustup)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+npm run tauri:dev     # fenêtre native + hot reload Vite
+npm run tauri:build   # installateur (.dmg / .msi / …)
 ```
 
 ## Modules
@@ -60,8 +72,9 @@ hub-du-savoir/
 ├── .github/workflows/deploy.yml        # Déploiement GitHub Pages (CI)
 ├── index.html                          # Page principale
 ├── package.json                        # Dépendances
-├── vite.config.ts                      # base /hub-du-savoir/, alias @/
+├── vite.config.ts                      # base Pages ou / (Tauri), alias @/
 ├── tailwind.config.cjs                 # Configuration Tailwind
+├── src-tauri/                          # Shell desktop Tauri 2
 ├── public/                             # Ressources statiques
 │   └── favicon.svg                     # Favicon
 └── src/                                # Code source
