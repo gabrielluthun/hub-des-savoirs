@@ -48,6 +48,8 @@ export function migrateState(state: AppState): AppState {
     })),
     ankiCards: (state.ankiCards ?? []).map((card) => ({
       ...card,
+      deck: card.deck?.trim() ? card.deck : 'Défaut',
+      tags: Array.isArray(card.tags) ? card.tags : [],
       dueAt: card.dueAt ?? new Date(0).toISOString(),
       intervalDays: card.intervalDays ?? 0,
       reps: card.reps ?? 0,
