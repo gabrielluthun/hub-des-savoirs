@@ -1,28 +1,41 @@
 import { Play, Sparkles } from 'lucide-react';
+import { SourcePicker } from '@/features/plateau/components/SourcePicker';
 import { Button, Label, Select } from '@/components/ui/primitives';
-import type { Difficulty, QuizSource } from '@/types';
+import type {
+  Difficulty,
+  HubDocument,
+  JetPunkList,
+  QuizSource,
+  QuizSourceSelection,
+} from '@/types';
 
 interface GameSetupProps {
   count: number;
   difficulty: Difficulty;
-  source: QuizSource;
+  selection: QuizSourceSelection;
+  docs: HubDocument[];
+  deckNames: string[];
+  lists: JetPunkList[];
   modelLabel: string;
   loading: boolean;
   onCountChange: (value: number) => void;
   onDifficultyChange: (value: Difficulty) => void;
-  onSourceChange: (value: QuizSource) => void;
+  onSelectionChange: (value: QuizSourceSelection) => void;
   onStart: () => void;
 }
 
 export function GameSetup({
   count,
   difficulty,
-  source,
+  selection,
+  docs,
+  deckNames,
+  lists,
   modelLabel,
   loading,
   onCountChange,
   onDifficultyChange,
-  onSourceChange,
+  onSelectionChange,
   onStart,
 }: GameSetupProps) {
   return (
@@ -53,11 +66,16 @@ export function GameSetup({
             <option value="expert">Expert</option>
           </Select>
         </div>
-        <div className="space-y-1.5 sm:col-span-1">
-          <Label>Source des questions</Label>
+        <div className="space-y-1.5">
+          <Label>Type de source</Label>
           <Select
-            value={source}
-            onChange={(e) => onSourceChange(e.target.value as QuizSource)}
+            value={selection.kind}
+            onChange={(e) =>
+              onSelectionChange({
+                ...selection,
+                kind: e.target.value as QuizSource,
+              })
+            }
           >
             <option value="all">Toutes mes ressources</option>
             <option value="docs">Notes Google Docs</option>
@@ -66,6 +84,14 @@ export function GameSetup({
           </Select>
         </div>
       </div>
+
+      <SourcePicker
+        selection={selection}
+        docs={docs}
+        deckNames={deckNames}
+        lists={lists}
+        onChange={onSelectionChange}
+      />
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Button type="button" variant="accent" disabled={loading} onClick={onStart}>

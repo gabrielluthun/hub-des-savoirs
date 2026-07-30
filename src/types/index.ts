@@ -27,6 +27,17 @@ export type Difficulty = 'facile' | 'moyen' | 'difficile' | 'expert';
 
 export type QuizSource = 'all' | 'docs' | 'anki' | 'jetpunk';
 
+/** Fine-grained Plateau source picks. Fine lists apply when kind ≠ 'all'. */
+export interface QuizSourceSelection {
+  kind: QuizSource;
+  /** Document ids when kind === 'docs'. */
+  docIds: string[];
+  /** Deck names when kind === 'anki'. */
+  deckNames: string[];
+  /** JetPunk list ids when kind === 'jetpunk'. */
+  listIds: string[];
+}
+
 export interface AppSettings {
   apiKey: string;
   model: GeminiModel;
