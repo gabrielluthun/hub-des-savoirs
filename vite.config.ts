@@ -7,7 +7,7 @@ const isTauri = process.env.TAURI_ENV_PLATFORM != null;
 
 export default defineConfig({
   // GitHub Pages keeps the subpath; Tauri needs root-relative assets.
-  base: isTauri ? '/' : '/hub-du-savoir/',
+  base: isTauri ? '/' : '/hub-des-savoirs/',
   plugins: [react()],
   clearScreen: false,
   envPrefix: ['VITE_', 'TAURI_ENV_*'],

@@ -50,7 +50,7 @@ export function ListEditor({
             <Input
               value={item.prompt}
               onChange={(e) => onChangeItem(item.id, { prompt: e.target.value })}
-              placeholder="Indice (optionnel) — ex. Capitale du Japon"
+              placeholder="Indice (optionnel), ex. Capitale du Japon"
               className="min-w-0 flex-1"
             />
             <Input

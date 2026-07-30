@@ -2,14 +2,20 @@ import { createDefaultState } from '@/lib/storage';
 import { migrateState } from '@/store/migration';
 import type { AppState } from '@/types';
 
-export const HUB_BACKUP_FORMAT = 'hub-du-savoir-backup' as const;
+export const HUB_BACKUP_FORMAT = 'hub-des-savoirs-backup' as const;
+/** Ancien identifiant — encore accepté à l’import. */
+const HUB_BACKUP_FORMAT_LEGACY = 'hub-du-savoir-backup' as const;
 export const HUB_BACKUP_VERSION = 1;
 
 export interface HubBackupFile {
-  format: typeof HUB_BACKUP_FORMAT;
+  format: typeof HUB_BACKUP_FORMAT | typeof HUB_BACKUP_FORMAT_LEGACY;
   version: number;
   exportedAt: string;
   state: AppState;
+}
+
+function isHubBackupFormat(format: unknown): boolean {
+  return format === HUB_BACKUP_FORMAT || format === HUB_BACKUP_FORMAT_LEGACY;
 }
 
 export function buildHubBackup(state: AppState): HubBackupFile {
@@ -41,7 +47,7 @@ export function parseHubBackup(raw: string): AppState {
 
   // Accept wrapped backup or a raw AppState snapshot for flexibility.
   const candidate =
-    file.format === HUB_BACKUP_FORMAT && file.state && typeof file.state === 'object'
+    isHubBackupFormat(file.format) && file.state && typeof file.state === 'object'
       ? file.state
       : looksLikeAppState(parsed)
         ? (parsed as Partial<AppState>)
@@ -49,7 +55,7 @@ export function parseHubBackup(raw: string): AppState {
 
   if (!candidate) {
     throw new Error(
-      'Ce fichier n’est pas une sauvegarde Hub du Savoir.'
+      'Ce fichier n’est pas une sauvegarde Hub des Savoirs.'
     );
   }
 

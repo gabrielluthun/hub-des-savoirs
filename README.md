@@ -1,4 +1,4 @@
-# Hub du Savoir
+# Hub des Savoirs
 
 SPA locale et application Desktop de révision et de culture générale. Notes (Google Docs / markdown), cartes Anki avec répétition espacée, listes JetPunk chronométrées, et **Plateau** (quiz généré par Gemini à partir de vos ressources). 
 
@@ -15,7 +15,7 @@ Pas disponible sur iOS / Android.
 | Fonts | Outfit, IBM Plex Sans, JetBrains Mono |
 | Icônes / toasts | Lucide React, Sonner |
 | État | Context + `useReducer` (`StoreProvider`) |
-| Persistance | `localStorage` — clé `gk-hub-state-v1` |
+| Persistance | `localStorage`|
 | IA | Gemini REST (`generativelanguage.googleapis.com/v1beta`) via `fetch` |
 | Modèle par défaut | `gemini-3.5-flash-lite` |
 
@@ -73,13 +73,13 @@ Prérequis GitHub : Settings → Actions → General → Workflow permissions �
 ## Données & sauvegarde
 
 - Les données (docs, cartes, listes, historiques, réglages, clé API) restent sur **cet appareil / ce navigateur** -> un autre profil, autre machine ou mode privé = état vide.
-- **Sauvegarde Hub du Savoir** (Paramètres) : export / restauration via JSON.
+- **Sauvegarde Hub des Savoirs** (Paramètres) : export / restauration via JSON.
 - **GitHub Pages** : même modèle local ; le site hébergé ne lit ni n’écrit rien côté serveur.
 
 ## Arborescence du projet
 
 <pre>
-hub-du-savoir/
+hub-des-savoirs/
 ├── .github/workflows/deploy.yml        # Déploiement GitHub Pages (CI)
 ├── index.html                          # Page principale
 ├── package.json                        # Dépendances

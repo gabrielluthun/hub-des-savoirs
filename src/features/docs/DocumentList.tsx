@@ -14,9 +14,16 @@ interface DocumentListProps {
   activeDocId: string | null;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  onDelete: (id: string) => void;
 }
 
-export function DocumentList({ docs, activeDocId, onSelect, onAdd }: DocumentListProps) {
+export function DocumentList({
+  docs,
+  activeDocId,
+  onSelect,
+  onAdd,
+  onDelete,
+}: DocumentListProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const allTags = useMemo(() => collectAllTags(docs), [docs]);
@@ -72,6 +79,7 @@ export function DocumentList({ docs, activeDocId, onSelect, onAdd }: DocumentLis
               doc={doc}
               active={doc.id === activeDocId}
               onSelect={onSelect}
+              onDelete={onDelete}
             />
           ))
         )}

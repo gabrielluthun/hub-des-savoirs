@@ -71,7 +71,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             <BookOpen className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-sm font-semibold leading-tight">Hub du Savoir</p>
+            <p className="font-display text-sm font-semibold leading-tight">Hub des Savoirs</p>
           </div>
           <button
             type="button"

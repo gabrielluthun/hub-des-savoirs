@@ -21,7 +21,7 @@ export function BulkImportPanel({
       </p>
       <h3 className="mt-1 font-display text-lg font-semibold">Coller en masse</h3>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Une carte par ligne — ajoutées au deck sélectionné. Voir{' '}
+        Une carte par ligne : ajoutées au deck sélectionné. Voir{' '}
         <span className="font-medium text-foreground">Comment ça marche ?</span> pour le
         format.
       </p>

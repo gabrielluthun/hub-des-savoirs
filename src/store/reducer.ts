@@ -1,5 +1,11 @@
 import type { AppAction, AppState, AnkiCard } from '@/types';
-import { deckIsUnder, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
+import {
+  computeRenamedDecks,
+  deckIsUnder,
+  mergeDeckNames,
+  normalizeDeckName,
+  remapDeckPath,
+} from '@/features/anki/lib/decks';
 
 function registerCardDecks(state: AppState, cards: AnkiCard[]): string[] {
   return mergeDeckNames(
@@ -72,6 +78,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const name = normalizeDeckName(action.name);
       if (!name) return state;
       return { ...state, ankiDecks: mergeDeckNames(state.ankiDecks, [name]) };
+    }
+    case 'RENAME_ANKI_DECK': {
+      const from = normalizeDeckName(action.from);
+      const to = normalizeDeckName(action.to);
+      if (!from || !to) return state;
+      const currentDecks = mergeDeckNames(
+        state.ankiDecks,
+        state.ankiCards.map((card) => card.deck ?? '')
+      );
+      const ankiDecks = computeRenamedDecks(currentDecks, from, to);
+      if (!ankiDecks) return state;
+      return {
+        ...state,
+        ankiDecks,
+        ankiCards: state.ankiCards.map((card) => {
+          const deck = card.deck ?? '';
+          if (!deckIsUnder(deck, from)) return card;
+          return { ...card, deck: remapDeckPath(deck, from, to) };
+        }),
+      };
     }
     case 'REMOVE_ANKI_DECK': {
       const name = normalizeDeckName(action.name);

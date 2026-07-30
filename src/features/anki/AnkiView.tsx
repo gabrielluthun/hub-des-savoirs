@@ -16,7 +16,12 @@ import { useAnkiFilters } from '@/features/anki/hooks/useAnkiFilters';
 import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { deckExists } from '@/features/anki/lib/organization';
-import { deckIsUnder, decksEqual } from '@/features/anki/lib/decks';
+import {
+  computeRenamedDecks,
+  deckIsUnder,
+  decksEqual,
+  normalizeDeckName,
+} from '@/features/anki/lib/decks';
 import { getDueCards } from '@/features/anki/lib/srs/schedule';
 import { ankiCardsToJetpunkList } from '@/lib/anki-jetpunk-transfer';
 import { confirmAction } from '@/lib/confirm';
@@ -26,6 +31,7 @@ import {
   addJetpunkList,
   deleteAnkiCard,
   removeAnkiDeck,
+  renameAnkiDeck,
   setActiveJetpunkList,
   setTab,
   updateAnkiCard,
@@ -150,6 +156,35 @@ export function AnkiView() {
     })();
   };
 
+  const handleRenameDeck = (nextName: string): boolean => {
+    const from = filters.selectedDeck;
+    if (!from) return false;
+
+    const to = normalizeDeckName(nextName);
+    if (!to) {
+      toast.message('Le nom du deck ne peut pas être vide.');
+      return false;
+    }
+    if (decksEqual(from, to)) {
+      if (from !== to) {
+        dispatch(renameAnkiDeck(from, to));
+        filters.setSelectedDeck(to);
+      }
+      return true;
+    }
+
+    const renamed = computeRenamedDecks(filters.decks, from, to);
+    if (!renamed) {
+      toast.error(`Impossible de renommer : « ${to} » existe déjà.`);
+      return false;
+    }
+
+    dispatch(renameAnkiDeck(from, to));
+    filters.setSelectedDeck(to);
+    toast.success(`Deck renommé en « ${to} ».`);
+    return true;
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <DeckSidebar
@@ -168,9 +203,11 @@ export function AnkiView() {
 
       <div className="flex min-w-0 flex-1 flex-col p-5">
         <AnkiToolbar
+          selectedDeck={filters.selectedDeck}
           dueCount={review.dueCount}
           showAiPanel={aiFromDocs.showAiPanel}
           transferCount={filters.scopedCards.length}
+          onRenameDeck={handleRenameDeck}
           onStartReview={startReview}
           onToggleAiPanel={aiFromDocs.toggleAiPanel}
           onTxtFile={io.handleTxtFile}

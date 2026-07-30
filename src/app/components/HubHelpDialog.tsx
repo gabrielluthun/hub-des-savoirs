@@ -52,7 +52,7 @@ export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Hub du Savoir
+              Hub des Savoirs
             </p>
             <h2 id="hub-help-title" className="font-display text-xl font-semibold">
               Comment ça marche ?
@@ -66,7 +66,7 @@ export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
         <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
           <section className="space-y-2">
             <p className="text-muted-foreground">
-              Hub du Savoir regroupe tes notes et tes quiz{' '}
+              Hub des Savoirs regroupe tes notes et tes quiz{' '}
               <span className="text-foreground">en local</span> : rien n’est envoyé ailleurs,
               sauf les appels Gemini quand tu lances une génération IA.
             </p>

@@ -51,7 +51,7 @@ export function DeckSidebar({
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Organisation
         </p>
-        <h2 className="font-display text-lg font-semibold">Decks</h2>
+        <h2 className="font-display text-lg font-semibold">Decks Anki</h2>
         <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
           Sous-deck : Parent::Enfant
         </p>

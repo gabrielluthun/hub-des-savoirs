@@ -1,4 +1,4 @@
-# Build Hub du Savoir for macOS / Windows / Linux and attach assets to a GitHub Release.
+# Build Hub des Savoirs for macOS / Windows / Linux and attach assets to a GitHub Release.
 # Triggers: manual run, or push of a version tag (e.g. v0.1.0).
 name: Publish Tauri
 
@@ -71,12 +71,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__
-          releaseName: 'Hub du Savoir v__VERSION__'
+          releaseName: 'Hub des Savoirs v__VERSION__'
           releaseBody: |
             Builds desktop pour macOS, Windows et Linux.
-
-            Télécharge l’installateur adapté à ton système dans les **Assets** ci-dessous.
-            (Draft — publie la release quand les builds sont OK.)
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false

@@ -41,6 +41,55 @@ export function joinDeckPath(segments: string[]): string {
   return normalizeDeckName(segments.join(DECK_PATH_SEP));
 }
 
+/**
+ * Remap `deck` when it equals `from` or is nested under it.
+ * Histoire + Histoire::Louis → Géo + Géo::Louis when from=Histoire, to=Géo.
+ */
+export function remapDeckPath(deck: string, from: string, to: string): string {
+  const dSegs = deckPathSegments(deck);
+  const fSegs = deckPathSegments(from);
+  const tSegs = deckPathSegments(to);
+  if (fSegs.length === 0 || tSegs.length === 0 || dSegs.length < fSegs.length) {
+    return normalizeDeckName(deck);
+  }
+  for (let i = 0; i < fSegs.length; i++) {
+    if (fSegs[i].toLowerCase() !== dSegs[i].toLowerCase()) {
+      return normalizeDeckName(deck);
+    }
+  }
+  return joinDeckPath([...tSegs, ...dSegs.slice(fSegs.length)]);
+}
+
+/**
+ * Returns the renamed deck list, or `null` if the target collides with
+ * a deck outside the renamed subtree.
+ */
+export function computeRenamedDecks(
+  decks: string[],
+  from: string,
+  to: string
+): string[] | null {
+  const fromN = normalizeDeckName(from);
+  const toN = normalizeDeckName(to);
+  if (!fromN || !toN) return null;
+
+  const outside: string[] = [];
+  const remapped: string[] = [];
+  for (const deck of mergeDeckNames(decks)) {
+    if (deckIsUnder(deck, fromN)) {
+      remapped.push(remapDeckPath(deck, fromN, toN));
+    } else {
+      outside.push(deck);
+    }
+  }
+
+  for (const next of remapped) {
+    if (outside.some((deck) => decksEqual(deck, next))) return null;
+  }
+
+  return mergeDeckNames(outside, remapped);
+}
+
 /** Merge deck names (case-insensitive), drop empties, sort fr. */
 export function mergeDeckNames(...lists: Array<string[] | undefined>): string[] {
   const byKey = new Map<string, string>();
