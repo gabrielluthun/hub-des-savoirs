@@ -5,12 +5,18 @@ import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
 import { MarkdownEditor } from '@/features/docs/MarkdownEditor';
 import { OutlinePanel } from '@/features/docs/OutlinePanel';
-import type { MarkdownImportResult } from '@/features/docs/lib/import-markdown';
+import { hashContent } from '@/features/docs/lib/content-hash';
 import {
   buildGoogleDocsEmbedUrl,
   extractGoogleDocId,
   importGoogleDocText,
-} from '@/lib/google-docs';
+} from '@/features/docs/lib/google-docs';
+import type { MarkdownImportResult } from '@/features/docs/lib/import-markdown';
+import {
+  refreshGoogleDoc,
+  useDocSyncStatus,
+  useLocalContentHash,
+} from '@/features/docs/hooks/useDocSync';
 import { renderMarkdownToHtml } from '@/lib/markdown';
 import { createId } from '@/lib/utils';
 import { addDoc, deleteDoc, setActiveDoc, setTab, updateDoc } from '@/store/actions';
@@ -23,6 +29,10 @@ export function DocsView() {
   const activeDoc = selectActiveDoc(state);
   const [pane, setPane] = useState<DocsPane>('editor');
   const [savingLabel, setSavingLabel] = useState('Sauvegardé');
+  const [syncLoading, setSyncLoading] = useState(false);
+
+  const localHash = useLocalContentHash(activeDoc?.content ?? '');
+  const syncStatus = useDocSyncStatus(activeDoc?.contentHash, localHash);
 
   useEffect(() => {
     if (!activeDoc) return;
@@ -51,13 +61,77 @@ export function DocsView() {
       toast.error('Ajoutez une URL Google Docs.');
       return;
     }
+    if (
+      activeDoc.content.trim() &&
+      !window.confirm(
+        'Le document local n’est pas vide. Remplacer le contenu par l’import Google Docs ?'
+      )
+    ) {
+      return;
+    }
     try {
       const text = await importGoogleDocText(activeDoc.googleDocsUrl);
-      dispatch(updateDoc(activeDoc.id, { content: text }));
+      const contentHash = await hashContent(text);
+      dispatch(
+        updateDoc(activeDoc.id, {
+          content: text,
+          contentHash,
+          lastImportedAt: new Date().toISOString(),
+        })
+      );
       setPane('editor');
       toast.success('Contenu importé.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Échec de l'import.");
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (!activeDoc) return;
+    if (!activeDoc.googleDocsUrl.trim()) {
+      toast.error('Ajoutez une URL Google Docs.');
+      return;
+    }
+
+    setSyncLoading(true);
+    try {
+      const result = await refreshGoogleDoc({
+        url: activeDoc.googleDocsUrl,
+        content: activeDoc.content,
+        contentHash: activeDoc.contentHash,
+      });
+
+      if (result.outcome === 'cancelled') {
+        toast.message('Rafraîchissement annulé.');
+        return;
+      }
+
+      if (result.outcome === 'unchanged') {
+        if (result.contentHash) {
+          dispatch(
+            updateDoc(activeDoc.id, {
+              contentHash: result.contentHash,
+              lastImportedAt: result.lastImportedAt,
+            })
+          );
+        }
+        toast.success('Déjà à jour.');
+        return;
+      }
+
+      dispatch(
+        updateDoc(activeDoc.id, {
+          content: result.import.content,
+          contentHash: result.import.contentHash,
+          lastImportedAt: result.import.lastImportedAt,
+        })
+      );
+      setPane('editor');
+      toast.success('Contenu rafraîchi depuis Google Docs.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Échec du rafraîchissement.');
+    } finally {
+      setSyncLoading(false);
     }
   };
 
@@ -136,8 +210,12 @@ export function DocsView() {
           url={activeDoc.googleDocsUrl}
           pane={pane}
           savingLabel={savingLabel}
+          syncStatus={syncStatus}
+          lastImportedAt={activeDoc.lastImportedAt}
+          syncLoading={syncLoading}
           onUrlChange={(url) => dispatch(updateDoc(activeDoc.id, { googleDocsUrl: url }))}
           onImport={handleImport}
+          onRefresh={handleRefresh}
           onImportMarkdown={handleImportMarkdown}
           onImportMarkdownError={(message) => toast.error(message)}
           onPaneChange={setPane}
