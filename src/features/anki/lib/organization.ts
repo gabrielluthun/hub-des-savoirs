@@ -51,6 +51,7 @@ export function filterCards(
     (card) =>
       card.question.toLowerCase().includes(q) ||
       card.answer.toLowerCase().includes(q) ||
+      (card.mnemonic ?? '').toLowerCase().includes(q) ||
       (card.deck ?? '').toLowerCase().includes(q) ||
       (card.tags ?? []).some((tag) => tag.includes(q))
   );
