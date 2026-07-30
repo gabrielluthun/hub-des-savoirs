@@ -15,7 +15,7 @@ const MODULES = [
   {
     name: 'Anki',
     description:
-      'Cartes question / réponse avec révision espacée. Filtre par deck, importe, exporte en .txt, transfé',
+      'Cartes question / réponse avec révision espacée. Filtre par deck, import / export .txt, transfert JetPunk.',
   },
   {
     name: 'JetPunk',
