@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  hub_du_savoir_lib::run();
+    hub_du_savoir_lib::run();
 }
