@@ -1,10 +1,17 @@
 import { Button, Input, Label } from '@/components/ui/primitives';
+import { TagPicker } from '@/features/anki/components/decks/TagPicker';
 
 interface CardEditorProps {
   question: string;
   answer: string;
+  deck: string;
+  tags: string[];
+  tagSuggestions?: string[];
+  deckSuggestions?: string[];
   onQuestionChange: (value: string) => void;
   onAnswerChange: (value: string) => void;
+  onDeckChange: (value: string) => void;
+  onTagsChange: (tags: string[]) => void;
   onSave: () => void;
   onCancel: () => void;
   isEditing: boolean;
@@ -13,8 +20,14 @@ interface CardEditorProps {
 export function CardEditor({
   question,
   answer,
+  deck,
+  tags,
+  tagSuggestions = [],
+  deckSuggestions = [],
   onQuestionChange,
   onAnswerChange,
+  onDeckChange,
+  onTagsChange,
   onSave,
   onCancel,
   isEditing,
@@ -36,6 +49,24 @@ export function CardEditor({
           onChange={(e) => onAnswerChange(e.target.value)}
           placeholder="Tokyo"
         />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Deck</Label>
+        <Input
+          value={deck}
+          onChange={(e) => onDeckChange(e.target.value)}
+          placeholder="Défaut"
+          list="anki-deck-suggestions"
+        />
+        <datalist id="anki-deck-suggestions">
+          {deckSuggestions.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Tags</Label>
+        <TagPicker tags={tags} onChange={onTagsChange} suggestions={tagSuggestions} />
       </div>
       <div className="flex gap-2">
         <Button type="button" onClick={onSave}>
