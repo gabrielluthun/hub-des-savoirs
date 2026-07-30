@@ -5,6 +5,7 @@ import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
 import { MarkdownEditor } from '@/features/docs/MarkdownEditor';
 import { OutlinePanel } from '@/features/docs/OutlinePanel';
+import type { MarkdownImportResult } from '@/features/docs/lib/import-markdown';
 import {
   buildGoogleDocsEmbedUrl,
   extractGoogleDocId,
@@ -58,6 +59,20 @@ export function DocsView() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Échec de l'import.");
     }
+  };
+
+  const handleImportMarkdown = (result: MarkdownImportResult) => {
+    if (!activeDoc) return;
+    const shouldReplaceTitle =
+      !activeDoc.title.trim() || activeDoc.title === 'Nouveau document';
+    dispatch(
+      updateDoc(activeDoc.id, {
+        content: result.content,
+        ...(shouldReplaceTitle ? { title: result.suggestedTitle } : {}),
+      })
+    );
+    setPane('editor');
+    toast.success('Fichier Markdown importé.');
   };
 
   const handleGenerateQuiz = () => {
@@ -123,6 +138,8 @@ export function DocsView() {
           savingLabel={savingLabel}
           onUrlChange={(url) => dispatch(updateDoc(activeDoc.id, { googleDocsUrl: url }))}
           onImport={handleImport}
+          onImportMarkdown={handleImportMarkdown}
+          onImportMarkdownError={(message) => toast.error(message)}
           onPaneChange={setPane}
           onGenerateQuiz={handleGenerateQuiz}
           canOpenExternal={Boolean(docId)}
