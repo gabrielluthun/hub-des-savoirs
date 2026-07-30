@@ -23,9 +23,10 @@ export type ImportableAnkiCard = {
 export function useAnkiImportExport(params: {
   cards: AnkiCard[];
   scopedCards: AnkiCard[];
+  selectedDeck: string | null;
   dispatch: Dispatch;
 }) {
-  const { cards, scopedCards, dispatch } = params;
+  const { cards, scopedCards, selectedDeck, dispatch } = params;
   const [bulk, setBulk] = useState('');
   const [deduplicationReport, setDeduplicationReport] = useState<{
     added: number;
@@ -81,7 +82,11 @@ export function useAnkiImportExport(params: {
   };
 
   const handleBulkImport = () => {
-    const parsed = parseBulkAnkiInput(bulk);
+    if (!selectedDeck) {
+      toast.error('Sélectionne ou crée un deck avant d’importer.');
+      return;
+    }
+    const parsed = parseBulkAnkiInput(bulk, { defaultDeck: selectedDeck });
     importParsedCards(parsed);
     if (parsed.length > 0) setBulk('');
   };

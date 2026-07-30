@@ -12,7 +12,7 @@ interface GenerateFromDocPanelProps {
   drafts: GeneratedAnkiDraft[];
   defaultDeck: string;
   deckSuggestions: string[];
-  onGenerate: (params: { docId: string; count: number }) => void;
+  onGenerate: (params: { docId: string; count: number; deck: string }) => void;
   onClear: () => void;
   onSave: (params: {
     drafts: GeneratedAnkiDraft[];
@@ -61,7 +61,7 @@ export function GenerateFromDocPanel({
       return;
     }
     if (!docId) return;
-    onGenerate({ docId, count });
+    onGenerate({ docId, count, deck });
   };
 
   const handleSave = () => {
@@ -80,7 +80,8 @@ export function GenerateFromDocPanel({
         </p>
         <h3 className="font-display text-lg font-semibold">Depuis un document</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Gemini crée des cartes Q/R (+ mnémotechnique) à partir d’une note Docs.
+          Gemini crée des cartes Q/R (+ mnémotechnique) à partir d’une note Docs, en
+          ciblant le thème du deck.
         </p>
       </div>
 
