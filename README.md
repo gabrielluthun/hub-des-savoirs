@@ -1,22 +1,26 @@
 # Hub du Savoir
 
-SPA locale de révision / culture générale : notes Google Docs, cartes Anki, listes JetPunk, module Quizypedia, et **Plateau** (quiz IA à partir de vos ressources).
+SPA locale et application Desktop de révision et de culture générale. Notes (Google Docs / markdown), cartes Anki avec répétition espacée, listes JetPunk chronométrées, et **Plateau** (quiz généré par Gemini à partir de vos ressources). 
+
+Tout reste dans le navigateur.
 
 ## Stack
 
-- React 19 + Vite + TypeScript 7
-- Tailwind CSS 3 (dark via classe `.dark`, variables HSL)
-- Fonts : Outfit, IBM Plex Sans, JetBrains Mono
-- Lucide React + Sonner
-- État : Context + `useReducer` (`StoreProvider`)
-- Persistance : `localStorage` clé `gk-hub-state-v1`
-- Gemini REST (`generativelanguage.googleapis.com/v1beta`) via `fetch` (pas d’Axios)
-- Modèle par défaut : `gemini-3.5-flash-lite`
+| Couche | Choix |
+|--------|--------|
+| UI | React 19, Vite 7, TypeScript 7 |
+| Styles | Tailwind CSS 3 (thème clair/sombre via `.dark`, variables HSL) |
+| Fonts | Outfit, IBM Plex Sans, JetBrains Mono |
+| Icônes / toasts | Lucide React, Sonner |
+| État | Context + `useReducer` (`StoreProvider`) |
+| Persistance | `localStorage` — clé `gk-hub-state-v1` |
+| IA | Gemini REST (`generativelanguage.googleapis.com/v1beta`) via `fetch` |
+| Modèle par défaut | `gemini-3.5-flash-lite` |
 
 ## Prérequis
 
 - Node.js 18+
-- Une clé API [Google AI Studio](https://aistudio.google.com/apikey) pour Plateau
+- Une clé API [Google AI Studio](https://aistudio.google.com/apikey) pour Plateau et la génération de cartes Anki depuis les docs
 
 ## Installation
 
@@ -25,7 +29,7 @@ npm install
 npm run dev
 ```
 
-Build production :
+Build / aperçu production :
 
 ```bash
 npm run build
@@ -36,18 +40,67 @@ npm run preview
 
 | Onglet | Rôle |
 |--------|------|
-| Google Docs | Notes markdown, import Docs (`/export?format=txt`), aperçu, iframe |
-| Anki | Cartes, import masse, export `.txt` TSV |
-| JetPunk | Listes catégorisées + quiz chronométré |
-| Quizypedia | Placeholder ; activation dans Paramètres → Modules |
-| Plateau | Quiz IA à partir de vos ressources |
-| Paramètres | Clé API, modèle, thème, modules, sons |
+| **Google Docs** | Notes markdown locales, import Google Docs, sync de contenu, aperçu, plan |
+| **Anki** | Decks, tags, révision SRS, import/export TSV `.txt`, génération IA depuis un document, déduplication, envoi vers onglet JetPunk |
+| **JetPunk** | Listes catégorisées, alias de réponses, quiz chronométré, stats d’oublis, historique, import/export JSON, envoi vers onglet Anki |
+| **Quizypedia** | Placeholder (activable dans Paramètres → Modules) |
+| **Plateau** | Quiz IA (QCM, libre, vrai/faux, liste) à partir de docs, decks Anki et/ou listes JetPunk ; difficulté, anti-répétition, historique, sons optionnels |
+| **Paramètres** | Clé API + vérification modèle Gemini, thème, modules, sons, **sauvegarde complète** |
 
-## Données
+## Données & sauvegarde
 
-- **Stockage :** les données restent sur **ce navigateur / cet appareil**. 
-Un autre appareil, un autre profil, ou le mode privé = état vide (ou distinct).
-- **GitHub Pages :** même modèle : chaque visiteur gère ses propres données locales ; le site hébergé ne lit ni n’enregistre rien côté serveur.
+- Les données (docs, cartes, listes, historiques, réglages, clé API) restent sur **cet appareil / ce navigateur** -> un autre profil, autre machine ou mode privé = état vide.
+- **Sauvegarde Hub du Savoir** (Paramètres) : export / restauration via JSON.
+- **GitHub Pages** : même modèle local ; le site hébergé ne lit ni n’écrit rien côté serveur.
+
+## Arborescence du projet
+
+<pre>
+hub-du-savoir/
+├── .github/workflows/deploy.yml        # Déploiement GitHub Pages (CI)
+├── index.html                          # Page principale
+├── package.json                        # Dépendances
+├── vite.config.ts                      # base /hub-du-savoir/, alias @/
+├── tailwind.config.cjs                 # Configuration Tailwind
+├── public/                             # Ressources statiques
+│   └── favicon.svg                     # Favicon
+└── src/                                # Code source
+    ├── main.tsx                       # Entrée principale React
+    ├── App.tsx                        # Wrapper d’application principal
+    ├── index.css
+    ├── app/                           # Shell, sidebar, aide, navigation, layout
+    │   ├── AppShell.tsx
+    │   ├── Sidebar.tsx
+    │   ├── nav-intent.ts
+    │   ├── components/
+    │   └── lib/
+    ├── components/ui/                 # Primitives UI, boutons, inputs…
+    ├── features/
+    │   ├── docs/                      # Notes, Google Docs, imports texte
+    │   │   ├── components/
+    │   │   ├── hooks/
+    │   │   └── lib/
+    │   ├── anki/                      # Decks, SRS, import/export, IA
+    │   │   ├── components/
+    │   │   ├── hooks/
+    │   │   └── lib/
+    │   ├── jetpunk/                   # Listes JetPunk, quiz, stats
+    │   │   ├── components/
+    │   │   ├── hooks/
+    │   │   └── lib/
+    │   ├── plateau/                   # Quiz IA Gemini (QCM, vrai/faux, etc.)
+    │   │   ├── components/
+    │   │   └── lib/
+    │   ├── quizypedia/                # (placeholder, désactivable)
+    │   └── settings/                  # Clé API, thèmes, sauvegarde, modules
+    ├── lib/                           # utilitaires (stockage, gemini, backup…)
+    ├── store/                         # State global (context, actions, reducer)
+    └── types/                         # Types partagés (TypeScript)
+
+</pre>
+
+
+</details>
 
 ## Licence
 
