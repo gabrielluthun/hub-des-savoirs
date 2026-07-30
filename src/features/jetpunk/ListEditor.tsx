@@ -33,7 +33,7 @@ export function ListEditor({
             <Input
               value={item.prompt}
               onChange={(e) => onChangeItem(item.id, { prompt: e.target.value })}
-              placeholder="Indice / pays"
+              placeholder="Indice"
               className="flex-1"
             />
             <Input
