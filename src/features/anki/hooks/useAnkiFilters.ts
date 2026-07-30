@@ -19,9 +19,16 @@ export function useAnkiFilters(cards: AnkiCard[], registeredDecks: string[] = []
   );
   const allTags = useMemo(() => collectCardTags(cards), [cards]);
   const deckCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
+    const paths = new Set<string>(decks);
     for (const deck of decks) {
-      counts[deck] = countCardsInDeck(cards, deck);
+      const parts = deck.split('::');
+      for (let i = 1; i < parts.length; i++) {
+        paths.add(parts.slice(0, i).join('::'));
+      }
+    }
+    const counts: Record<string, number> = {};
+    for (const path of paths) {
+      counts[path] = countCardsInDeck(cards, path);
     }
     return counts;
   }, [cards, decks]);
