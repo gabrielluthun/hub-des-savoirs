@@ -72,9 +72,6 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-display text-sm font-semibold leading-tight">Hub du Savoir</p>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-              Version locale
-            </p>
           </div>
           <button
             type="button"
