@@ -50,6 +50,16 @@ export const deleteAnkiCard = (id: string) => ({
   id,
 });
 
+export const addAnkiDeck = (name: string) => ({
+  type: 'ADD_ANKI_DECK' as const,
+  name,
+});
+
+export const removeAnkiDeck = (name: string) => ({
+  type: 'REMOVE_ANKI_DECK' as const,
+  name,
+});
+
 export const addJetpunkList = (list: JetPunkList) => ({
   type: 'ADD_JETPUNK_LIST' as const,
   list,
