@@ -15,10 +15,9 @@ export function BulkImportPanel({ value, onChange, onImport }: BulkImportPanelPr
       </p>
       <h3 className="mt-1 font-display text-lg font-semibold">Coller en masse</h3>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Format :{' '}
-        <span className="font-mono">Question;Réponse;Deck;Mnémotechnique;Tags</span>. Deck
-        obligatoire ; mnémotechnique et tags (séparés par des virgules) optionnels. Les
-        doublons (question normalisée) sont ignorés. Une carte par ligne.
+        Une carte par ligne — voir{' '}
+        <span className="font-medium text-foreground">Comment ça marche ?</span> pour le
+        format complet.
       </p>
       <Textarea
         value={value}
