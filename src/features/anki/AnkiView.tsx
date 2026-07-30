@@ -4,9 +4,18 @@ import { toast } from 'sonner';
 import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
+import { DeckSidebar } from '@/features/anki/components/decks/DeckSidebar';
 import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
+import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
+import {
+  collectCardTags,
+  collectDecks,
+  countCardsInDeck,
+  filterCards,
+} from '@/features/anki/lib/organization';
 import { createAnkiCard } from '@/features/anki/lib/srs/card-factory';
+import { normalizeTag } from '@/features/anki/lib/tags';
 import { Button, Input } from '@/components/ui/primitives';
 import { parseBulkAnkiInput, serializeAnkiCards } from '@/lib/anki-format';
 import { downloadTextFile } from '@/lib/export';
@@ -25,28 +34,45 @@ export function AnkiView() {
   const cards = selectAnkiCards(state);
   const [query, setQuery] = useState('');
   const [bulk, setBulk] = useState('');
+  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftQuestion, setDraftQuestion] = useState('');
   const [draftAnswer, setDraftAnswer] = useState('');
+  const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
+  const [draftTags, setDraftTags] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
 
-  const review = useReviewQueue(cards, (cardId, patch) => {
+  const decks = useMemo(() => collectDecks(cards), [cards]);
+  const allTags = useMemo(() => collectCardTags(cards), [cards]);
+  const deckCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const deck of decks) {
+      counts[deck] = countCardsInDeck(cards, deck);
+    }
+    return counts;
+  }, [cards, decks]);
+
+  const scopedCards = useMemo(
+    () => filterCards(cards, { deck: selectedDeck, tags: selectedTags, query }),
+    [cards, selectedDeck, selectedTags, query]
+  );
+
+  const reviewScope = useMemo(
+    () => filterCards(cards, { deck: selectedDeck, tags: selectedTags }),
+    [cards, selectedDeck, selectedTags]
+  );
+
+  const review = useReviewQueue(reviewScope, (cardId, patch) => {
     dispatch(updateAnkiCard(cardId, patch));
   });
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return cards;
-    return cards.filter(
-      (card) =>
-        card.question.toLowerCase().includes(q) || card.answer.toLowerCase().includes(q)
-    );
-  }, [cards, query]);
 
   const openNew = () => {
     setEditingId(null);
     setDraftQuestion('');
     setDraftAnswer('');
+    setDraftDeck(selectedDeck ?? DEFAULT_ANKI_DECK);
+    setDraftTags([...selectedTags]);
     setShowEditor(true);
   };
 
@@ -54,6 +80,8 @@ export function AnkiView() {
     setEditingId(card.id);
     setDraftQuestion(card.question);
     setDraftAnswer(card.answer);
+    setDraftDeck(card.deck || DEFAULT_ANKI_DECK);
+    setDraftTags([...(card.tags ?? [])]);
     setShowEditor(true);
   };
 
@@ -62,11 +90,14 @@ export function AnkiView() {
       toast.error('Question et réponse sont obligatoires.');
       return;
     }
+    const deck = normalizeDeckName(draftDeck);
     if (editingId) {
       dispatch(
         updateAnkiCard(editingId, {
           question: draftQuestion.trim(),
           answer: draftAnswer.trim(),
+          deck,
+          tags: draftTags,
         })
       );
       toast.success('Carte mise à jour.');
@@ -76,6 +107,8 @@ export function AnkiView() {
           createAnkiCard({
             question: draftQuestion.trim(),
             answer: draftAnswer.trim(),
+            deck,
+            tags: draftTags,
           })
         )
       );
@@ -90,12 +123,15 @@ export function AnkiView() {
       toast.error('Aucune carte valide à importer.');
       return;
     }
+    const deck = selectedDeck ?? DEFAULT_ANKI_DECK;
     dispatch(
       addAnkiCards(
         parsed.map((card) =>
           createAnkiCard({
             question: card.question,
             answer: card.answer,
+            deck,
+            tags: selectedTags,
           })
         )
       )
@@ -105,24 +141,45 @@ export function AnkiView() {
   };
 
   const handleExport = () => {
-    if (cards.length === 0) {
+    if (scopedCards.length === 0) {
       toast.error('Aucune carte à exporter.');
       return;
     }
-    downloadTextFile('anki-cards.txt', serializeAnkiCards(cards));
+    downloadTextFile('anki-cards.txt', serializeAnkiCards(scopedCards));
     toast.success('Export .txt téléchargé.');
   };
 
   const startReview = () => {
     if (review.dueCount === 0) {
-      toast.message('Aucune carte due pour le moment.');
+      toast.message('Aucune carte due pour ce filtre.');
       return;
     }
     review.start();
   };
 
+  const toggleTag = (tag: string) => {
+    const normalized = normalizeTag(tag);
+    setSelectedTags((current) =>
+      current.includes(normalized)
+        ? current.filter((t) => t !== normalized)
+        : [...current, normalized]
+    );
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
+      <DeckSidebar
+        decks={decks}
+        deckCounts={deckCounts}
+        selectedDeck={selectedDeck}
+        onSelectDeck={setSelectedDeck}
+        allTags={allTags}
+        selectedTags={selectedTags}
+        onToggleTag={toggleTag}
+        onClearTags={() => setSelectedTags([])}
+        totalCount={cards.length}
+      />
+
       <div className="flex min-w-0 flex-1 flex-col p-5">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -131,7 +188,7 @@ export function AnkiView() {
             </p>
             <h1 className="font-display text-2xl font-semibold">Anki — Éditeur & Export</h1>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Format d&apos;export natif : texte brut, une carte par ligne (Question → Réponse).
+              Decks et tags pour organiser le paquet (et cibler Plateau plus tard).
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -161,7 +218,7 @@ export function AnkiView() {
             Nouvelle carte
           </Button>
           <span className="text-xs text-muted-foreground">
-            {filtered.length} carte{filtered.length !== 1 ? 's' : ''}
+            {scopedCards.length} carte{scopedCards.length !== 1 ? 's' : ''}
           </span>
         </div>
 
@@ -170,8 +227,14 @@ export function AnkiView() {
             <CardEditor
               question={draftQuestion}
               answer={draftAnswer}
+              deck={draftDeck}
+              tags={draftTags}
+              tagSuggestions={allTags}
+              deckSuggestions={decks}
               onQuestionChange={setDraftQuestion}
               onAnswerChange={setDraftAnswer}
+              onDeckChange={setDraftDeck}
+              onTagsChange={setDraftTags}
               onSave={saveCard}
               onCancel={() => setShowEditor(false)}
               isEditing={Boolean(editingId)}
@@ -180,7 +243,7 @@ export function AnkiView() {
         ) : null}
 
         <CardList
-          cards={filtered}
+          cards={scopedCards}
           onEdit={openEdit}
           onDelete={(id) => {
             dispatch(deleteAnkiCard(id));
