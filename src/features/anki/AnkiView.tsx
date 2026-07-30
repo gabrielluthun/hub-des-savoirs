@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react';
-import { Download, Plus, Search, Sparkles } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
@@ -7,265 +6,46 @@ import { CardList } from '@/features/anki/CardList';
 import { DeckSidebar } from '@/features/anki/components/decks/DeckSidebar';
 import { GenerateFromDocPanel } from '@/features/anki/components/generate/GenerateFromDocPanel';
 import { DeduplicationReport } from '@/features/anki/components/import/DeduplicationReport';
-import { TxtImportButton } from '@/features/anki/components/import/TxtImportButton';
+import { AnkiToolbar } from '@/features/anki/components/layout/AnkiToolbar';
 import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
-import { useGenerateCards } from '@/features/anki/hooks/useGenerateCards';
+import { useAnkiAiFromDocs } from '@/features/anki/hooks/useAnkiAiFromDocs';
+import { useAnkiCardEditor } from '@/features/anki/hooks/useAnkiCardEditor';
+import { useAnkiFilters } from '@/features/anki/hooks/useAnkiFilters';
+import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
-import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
-import {
-  buildExistingQuestionKeys,
-  partitionByQuestionDeduplication,
-} from '@/features/anki/lib/import/deduplication';
-import {
-  collectCardTags,
-  collectDecks,
-  countCardsInDeck,
-  filterCards,
-} from '@/features/anki/lib/organization';
-import { createAnkiCard } from '@/features/anki/lib/srs/card-factory';
-import { normalizeTag } from '@/features/anki/lib/tags';
+import { DEFAULT_ANKI_DECK } from '@/features/anki/lib/decks';
 import { Button, Input } from '@/components/ui/primitives';
-import { parseBulkAnkiInput, serializeAnkiCards } from '@/lib/anki-format';
-import { downloadTextFile } from '@/lib/export';
-import {
-  addAnkiCard,
-  addAnkiCards,
-  deleteAnkiCard,
-  setTab,
-  updateAnkiCard,
-} from '@/store/actions';
+import { deleteAnkiCard, updateAnkiCard } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 import { selectAnkiCards, selectDocs } from '@/store/selectors';
-import type { AnkiCard } from '@/types';
 
 export function AnkiView() {
   const { state, dispatch } = useStore();
   const cards = selectAnkiCards(state);
   const docs = selectDocs(state);
-  const [query, setQuery] = useState('');
-  const [bulk, setBulk] = useState('');
-  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftQuestion, setDraftQuestion] = useState('');
-  const [draftAnswer, setDraftAnswer] = useState('');
-  const [draftMnemonic, setDraftMnemonic] = useState('');
-  const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
-  const [draftTags, setDraftTags] = useState<string[]>([]);
-  const [showEditor, setShowEditor] = useState(false);
-  const [showAiPanel, setShowAiPanel] = useState(false);
-  const [deduplicationReport, setDeduplicationReport] = useState<{
-    added: number;
-    skipped: number;
-    skippedQuestions: string[];
-  } | null>(null);
-  const ai = useGenerateCards();
 
-  const decks = useMemo(() => collectDecks(cards), [cards]);
-  const allTags = useMemo(() => collectCardTags(cards), [cards]);
-  const deckCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const deck of decks) {
-      counts[deck] = countCardsInDeck(cards, deck);
-    }
-    return counts;
-  }, [cards, decks]);
-
-  const scopedCards = useMemo(
-    () => filterCards(cards, { deck: selectedDeck, tags: selectedTags, query }),
-    [cards, selectedDeck, selectedTags, query]
-  );
-
-  const reviewScope = useMemo(
-    () => filterCards(cards, { deck: selectedDeck, tags: selectedTags }),
-    [cards, selectedDeck, selectedTags]
-  );
-
-  const review = useReviewQueue(reviewScope, (cardId, patch) => {
-    dispatch(updateAnkiCard(cardId, patch));
+  const filters = useAnkiFilters(cards);
+  const editor = useAnkiCardEditor({
+    dispatch,
+    selectedDeck: filters.selectedDeck,
+    selectedTags: filters.selectedTags,
+  });
+  const io = useAnkiImportExport({
+    cards,
+    scopedCards: filters.scopedCards,
+    dispatch,
+  });
+  const aiFromDocs = useAnkiAiFromDocs({
+    docs,
+    apiKey: state.settings.apiKey,
+    model: state.settings.model,
+    dispatch,
+    importParsedCards: io.importParsedCards,
   });
 
-  const importParsedCards = (
-    parsed: {
-      question: string;
-      answer: string;
-      deck: string;
-      mnemonic: string;
-      tags: string[];
-    }[]
-  ) => {
-    if (parsed.length === 0) {
-      toast.error('Aucune carte valide à importer.');
-      return;
-    }
-
-    const { unique, duplicates } = partitionByQuestionDeduplication(
-      parsed,
-      buildExistingQuestionKeys(cards)
-    );
-
-    if (unique.length > 0) {
-      dispatch(
-        addAnkiCards(
-          unique.map((card) =>
-            createAnkiCard({
-              question: card.question,
-              answer: card.answer,
-              mnemonic: card.mnemonic,
-              deck: card.deck,
-              tags: card.tags,
-            })
-          )
-        )
-      );
-    }
-
-    setDeduplicationReport({
-      added: unique.length,
-      skipped: duplicates.length,
-      skippedQuestions: duplicates.map((card) => card.question),
-    });
-
-    if (unique.length === 0) {
-      toast.message('Tous les doublons ont été ignorés.');
-      return;
-    }
-
-    toast.success(
-      `${unique.length} carte${unique.length > 1 ? 's' : ''} ajoutée${unique.length > 1 ? 's' : ''}${
-        duplicates.length > 0
-          ? ` (${duplicates.length} doublon${duplicates.length > 1 ? 's' : ''} ignoré${duplicates.length > 1 ? 's' : ''})`
-          : ''
-      }.`
-    );
-  };
-
-  const openNew = () => {
-    setEditingId(null);
-    setDraftQuestion('');
-    setDraftAnswer('');
-    setDraftMnemonic('');
-    setDraftDeck(selectedDeck ?? DEFAULT_ANKI_DECK);
-    setDraftTags([...selectedTags]);
-    setShowEditor(true);
-  };
-
-  const openEdit = (card: AnkiCard) => {
-    setEditingId(card.id);
-    setDraftQuestion(card.question);
-    setDraftAnswer(card.answer);
-    setDraftMnemonic(card.mnemonic ?? '');
-    setDraftDeck(card.deck || DEFAULT_ANKI_DECK);
-    setDraftTags([...(card.tags ?? [])]);
-    setShowEditor(true);
-  };
-
-  const saveCard = () => {
-    if (!draftQuestion.trim() || !draftAnswer.trim()) {
-      toast.error('Question et réponse sont obligatoires.');
-      return;
-    }
-    if (!draftDeck.trim()) {
-      toast.error('Le deck est obligatoire.');
-      return;
-    }
-    const deck = normalizeDeckName(draftDeck);
-    const mnemonic = draftMnemonic.trim();
-    if (editingId) {
-      dispatch(
-        updateAnkiCard(editingId, {
-          question: draftQuestion.trim(),
-          answer: draftAnswer.trim(),
-          mnemonic,
-          deck,
-          tags: draftTags,
-        })
-      );
-      toast.success('Carte mise à jour.');
-    } else {
-      dispatch(
-        addAnkiCard(
-          createAnkiCard({
-            question: draftQuestion.trim(),
-            answer: draftAnswer.trim(),
-            mnemonic,
-            deck,
-            tags: draftTags,
-          })
-        )
-      );
-      toast.success('Carte ajoutée.');
-    }
-    setShowEditor(false);
-  };
-
-  const handleBulkImport = () => {
-    const parsed = parseBulkAnkiInput(bulk);
-    importParsedCards(parsed);
-    if (parsed.length > 0) setBulk('');
-  };
-
-  const handleTxtFile = async (file: File) => {
-    try {
-      const text = await file.text();
-      importParsedCards(parseBulkAnkiInput(text));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Échec de l'import .txt.");
-    }
-  };
-
-  const handleAiGenerate = async (params: { docId: string; count: number }) => {
-    const doc = docs.find((item) => item.id === params.docId);
-    if (!doc) {
-      toast.error('Document introuvable.');
-      return;
-    }
-    try {
-      const generated = await ai.generate({
-        apiKey: state.settings.apiKey,
-        model: state.settings.model,
-        doc,
-        count: params.count,
-      });
-      toast.success(
-        `${generated.length} carte${generated.length > 1 ? 's' : ''} générée${generated.length > 1 ? 's' : ''}.`
-      );
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Échec de la génération.');
-    }
-  };
-
-  const handleAiSave = (params: {
-    drafts: { question: string; answer: string; mnemonic: string }[];
-    deck: string;
-    indices: number[];
-  }) => {
-    const deck = normalizeDeckName(params.deck);
-    const selectedDrafts = params.indices
-      .map((index) => params.drafts[index])
-      .filter((draft): draft is { question: string; answer: string; mnemonic: string } =>
-        Boolean(draft)
-      )
-      .map((draft) => ({
-        question: draft.question,
-        answer: draft.answer,
-        deck,
-        mnemonic: draft.mnemonic,
-        tags: [] as string[],
-      }));
-
-    importParsedCards(selectedDrafts);
-    ai.clear();
-  };
-
-  const handleExport = () => {
-    if (scopedCards.length === 0) {
-      toast.error('Aucune carte à exporter.');
-      return;
-    }
-    downloadTextFile('anki-cards.txt', serializeAnkiCards(scopedCards));
-    toast.success('Export .txt téléchargé.');
-  };
+  const review = useReviewQueue(filters.reviewScope, (cardId, patch) => {
+    dispatch(updateAnkiCard(cardId, patch));
+  });
 
   const startReview = () => {
     if (review.dueCount === 0) {
@@ -275,132 +55,98 @@ export function AnkiView() {
     review.start();
   };
 
-  const toggleTag = (tag: string) => {
-    const normalized = normalizeTag(tag);
-    setSelectedTags((current) =>
-      current.includes(normalized)
-        ? current.filter((t) => t !== normalized)
-        : [...current, normalized]
-    );
-  };
-
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <DeckSidebar
-        decks={decks}
-        deckCounts={deckCounts}
-        selectedDeck={selectedDeck}
-        onSelectDeck={setSelectedDeck}
-        allTags={allTags}
-        selectedTags={selectedTags}
-        onToggleTag={toggleTag}
-        onClearTags={() => setSelectedTags([])}
+        decks={filters.decks}
+        deckCounts={filters.deckCounts}
+        selectedDeck={filters.selectedDeck}
+        onSelectDeck={filters.setSelectedDeck}
+        allTags={filters.allTags}
+        selectedTags={filters.selectedTags}
+        onToggleTag={filters.toggleTag}
+        onClearTags={filters.clearTags}
         totalCount={cards.length}
       />
 
       <div className="flex min-w-0 flex-1 flex-col p-5">
-        <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Cartes de révision
-            </p>
-            <h1 className="font-display text-2xl font-semibold">Anki — Éditeur & Export</h1>
-            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Format .txt : Question;Réponse;Deck (;Mnémotechnique;Tags optionnels).
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="accent" onClick={startReview}>
-              <Sparkles className="h-4 w-4" />
-              Réviser ({review.dueCount})
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setShowAiPanel((value) => !value)}
-            >
-              <Sparkles className="h-4 w-4" />
-              {showAiPanel ? 'Masquer IA' : 'IA depuis Docs'}
-            </Button>
-            <TxtImportButton onFile={handleTxtFile} />
-            <Button type="button" variant="outline" onClick={handleExport}>
-              <Download className="h-4 w-4" />
-              Exporter .txt
-            </Button>
-          </div>
-        </div>
+        <AnkiToolbar
+          dueCount={review.dueCount}
+          showAiPanel={aiFromDocs.showAiPanel}
+          onStartReview={startReview}
+          onToggleAiPanel={aiFromDocs.toggleAiPanel}
+          onTxtFile={io.handleTxtFile}
+          onExport={io.handleExport}
+        />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <div className="relative min-w-[200px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={filters.query}
+              onChange={(e) => filters.setQuery(e.target.value)}
               placeholder="Rechercher…"
               className="pl-9"
             />
           </div>
-          <Button type="button" variant="secondary" onClick={openNew}>
+          <Button type="button" variant="secondary" onClick={editor.openNew}>
             <Plus className="h-4 w-4" />
             Nouvelle carte
           </Button>
           <span className="text-xs text-muted-foreground">
-            {scopedCards.length} carte{scopedCards.length !== 1 ? 's' : ''}
+            {filters.scopedCards.length} carte{filters.scopedCards.length !== 1 ? 's' : ''}
           </span>
         </div>
 
-        {showAiPanel ? (
+        {aiFromDocs.showAiPanel ? (
           <GenerateFromDocPanel
             docs={docs}
-            loading={ai.loading}
-            drafts={ai.drafts}
-            defaultDeck={selectedDeck ?? DEFAULT_ANKI_DECK}
-            deckSuggestions={decks}
+            loading={aiFromDocs.ai.loading}
+            drafts={aiFromDocs.ai.drafts}
+            defaultDeck={filters.selectedDeck ?? DEFAULT_ANKI_DECK}
+            deckSuggestions={filters.decks}
             hasApiKey={Boolean(state.settings.apiKey.trim())}
-            onNeedApiKey={() => {
-              toast.error('Ajoutez votre clé API Gemini dans Paramètres.');
-              dispatch(setTab('settings'));
-            }}
-            onGenerate={handleAiGenerate}
-            onClear={ai.clear}
-            onSave={handleAiSave}
+            onNeedApiKey={aiFromDocs.handleNeedApiKey}
+            onGenerate={aiFromDocs.handleAiGenerate}
+            onClear={aiFromDocs.ai.clear}
+            onSave={aiFromDocs.handleAiSave}
           />
         ) : null}
 
-        {deduplicationReport ? (
+        {io.deduplicationReport ? (
           <DeduplicationReport
-            added={deduplicationReport.added}
-            skipped={deduplicationReport.skipped}
-            skippedQuestions={deduplicationReport.skippedQuestions}
-            onDismiss={() => setDeduplicationReport(null)}
+            added={io.deduplicationReport.added}
+            skipped={io.deduplicationReport.skipped}
+            skippedQuestions={io.deduplicationReport.skippedQuestions}
+            onDismiss={io.dismissDeduplicationReport}
           />
         ) : null}
 
-        {showEditor ? (
+        {editor.showEditor ? (
           <div className="mb-4">
             <CardEditor
-              question={draftQuestion}
-              answer={draftAnswer}
-              mnemonic={draftMnemonic}
-              deck={draftDeck}
-              tags={draftTags}
-              tagSuggestions={allTags}
-              deckSuggestions={decks}
-              onQuestionChange={setDraftQuestion}
-              onAnswerChange={setDraftAnswer}
-              onMnemonicChange={setDraftMnemonic}
-              onDeckChange={setDraftDeck}
-              onTagsChange={setDraftTags}
-              onSave={saveCard}
-              onCancel={() => setShowEditor(false)}
-              isEditing={Boolean(editingId)}
+              question={editor.draftQuestion}
+              answer={editor.draftAnswer}
+              mnemonic={editor.draftMnemonic}
+              deck={editor.draftDeck}
+              tags={editor.draftTags}
+              tagSuggestions={filters.allTags}
+              deckSuggestions={filters.decks}
+              onQuestionChange={editor.setDraftQuestion}
+              onAnswerChange={editor.setDraftAnswer}
+              onMnemonicChange={editor.setDraftMnemonic}
+              onDeckChange={editor.setDraftDeck}
+              onTagsChange={editor.setDraftTags}
+              onSave={editor.saveCard}
+              onCancel={editor.closeEditor}
+              isEditing={Boolean(editor.editingId)}
             />
           </div>
         ) : null}
 
         <CardList
-          cards={scopedCards}
-          onEdit={openEdit}
+          cards={filters.scopedCards}
+          onEdit={editor.openEdit}
           onDelete={(id) => {
             dispatch(deleteAnkiCard(id));
             toast.success('Carte supprimée.');
@@ -408,7 +154,11 @@ export function AnkiView() {
         />
       </div>
 
-      <BulkImportPanel value={bulk} onChange={setBulk} onImport={handleBulkImport} />
+      <BulkImportPanel
+        value={io.bulk}
+        onChange={io.setBulk}
+        onImport={io.handleBulkImport}
+      />
 
       {review.active ? (
         <ReviewSession
