@@ -1,10 +1,12 @@
 import { Play, Sparkles } from 'lucide-react';
+import { QuestionTypePicker } from '@/features/plateau/components/QuestionTypePicker';
 import { SourcePicker } from '@/features/plateau/components/SourcePicker';
 import { Button, Label, Select } from '@/components/ui/primitives';
 import type {
   Difficulty,
   HubDocument,
   JetPunkList,
+  QuestionType,
   QuizSource,
   QuizSourceSelection,
 } from '@/types';
@@ -13,6 +15,7 @@ interface GameSetupProps {
   count: number;
   difficulty: Difficulty;
   selection: QuizSourceSelection;
+  questionTypes: QuestionType[];
   docs: HubDocument[];
   deckNames: string[];
   lists: JetPunkList[];
@@ -21,6 +24,7 @@ interface GameSetupProps {
   onCountChange: (value: number) => void;
   onDifficultyChange: (value: Difficulty) => void;
   onSelectionChange: (value: QuizSourceSelection) => void;
+  onQuestionTypesChange: (types: QuestionType[]) => void;
   onStart: () => void;
 }
 
@@ -28,6 +32,7 @@ export function GameSetup({
   count,
   difficulty,
   selection,
+  questionTypes,
   docs,
   deckNames,
   lists,
@@ -36,6 +41,7 @@ export function GameSetup({
   onCountChange,
   onDifficultyChange,
   onSelectionChange,
+  onQuestionTypesChange,
   onStart,
 }: GameSetupProps) {
   return (
@@ -92,6 +98,8 @@ export function GameSetup({
         lists={lists}
         onChange={onSelectionChange}
       />
+
+      <QuestionTypePicker selected={questionTypes} onChange={onQuestionTypesChange} />
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Button type="button" variant="accent" disabled={loading} onClick={onStart}>
