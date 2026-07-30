@@ -1,4 +1,5 @@
 import { Layers, ListChecks, MonitorPlay } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   countDueAnkiCards,
   findLastJetpunkPlay,
@@ -28,15 +29,18 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
   };
 
   const startAnkiReview = () => {
-    requestNavIntent('anki-review');
+    requestNavIntent({ type: 'anki-review' });
     go('anki');
   };
 
   const resumeJetpunk = () => {
     if (!lastJetpunk) return;
-    if (lastJetpunk.list) {
-      dispatch(setActiveJetpunkList(lastJetpunk.list.id));
+    if (!lastJetpunk.list) {
+      toast.message('Cette liste JetPunk n’existe plus.');
+      return;
     }
+    dispatch(setActiveJetpunkList(lastJetpunk.list.id));
+    requestNavIntent({ type: 'jetpunk-quiz', listId: lastJetpunk.list.id });
     go('jetpunk');
   };
 
