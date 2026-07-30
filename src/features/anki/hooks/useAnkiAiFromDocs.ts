@@ -53,6 +53,10 @@ export function useAnkiAiFromDocs(params: {
     indices: number[];
   }) => {
     const deck = normalizeDeckName(saveParams.deck);
+    if (!deck) {
+      toast.error('Indique un deck avant d’ajouter les cartes.');
+      return;
+    }
     const selectedDrafts = saveParams.indices
       .map((index) => saveParams.drafts[index])
       .filter((draft): draft is { question: string; answer: string; mnemonic: string } =>
