@@ -53,6 +53,12 @@ export interface AnkiCard {
   id: string;
   question: string;
   answer: string;
+  /** ISO datetime — card is due when dueAt <= now */
+  dueAt: string;
+  /** Current SRS interval in days (0 = learning / just failed) */
+  intervalDays: number;
+  /** Successful review count */
+  reps: number;
 }
 
 export interface JetPunkItem {
