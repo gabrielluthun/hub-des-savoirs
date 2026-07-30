@@ -23,6 +23,7 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
       {cards.map((card) => {
         const tags = card.tags ?? [];
         const deck = card.deck || DEFAULT_ANKI_DECK;
+        const mnemonic = card.mnemonic?.trim() ?? '';
         return (
           <div
             key={card.id}
@@ -31,6 +32,9 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{card.question}</p>
               <p className="mt-1 text-xs text-muted-foreground">{card.answer}</p>
+              {mnemonic ? (
+                <p className="mt-1 text-xs italic text-muted-foreground/80">{mnemonic}</p>
+              ) : null}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
                   {deck}

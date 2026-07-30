@@ -1,15 +1,17 @@
-import { Button, Input, Label } from '@/components/ui/primitives';
+import { Button, Input, Label, Textarea } from '@/components/ui/primitives';
 import { TagPicker } from '@/features/anki/components/decks/TagPicker';
 
 interface CardEditorProps {
   question: string;
   answer: string;
+  mnemonic: string;
   deck: string;
   tags: string[];
   tagSuggestions?: string[];
   deckSuggestions?: string[];
   onQuestionChange: (value: string) => void;
   onAnswerChange: (value: string) => void;
+  onMnemonicChange: (value: string) => void;
   onDeckChange: (value: string) => void;
   onTagsChange: (tags: string[]) => void;
   onSave: () => void;
@@ -20,12 +22,14 @@ interface CardEditorProps {
 export function CardEditor({
   question,
   answer,
+  mnemonic,
   deck,
   tags,
   tagSuggestions = [],
   deckSuggestions = [],
   onQuestionChange,
   onAnswerChange,
+  onMnemonicChange,
   onDeckChange,
   onTagsChange,
   onSave,
@@ -48,6 +52,15 @@ export function CardEditor({
           value={answer}
           onChange={(e) => onAnswerChange(e.target.value)}
           placeholder="Tokyo"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Mnémotechnique (optionnel)</Label>
+        <Textarea
+          value={mnemonic}
+          onChange={(e) => onMnemonicChange(e.target.value)}
+          placeholder="Astuce pour mémoriser…"
+          className="min-h-[72px]"
         />
       </div>
       <div className="space-y-1.5">

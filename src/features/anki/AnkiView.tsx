@@ -5,6 +5,7 @@ import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
 import { DeckSidebar } from '@/features/anki/components/decks/DeckSidebar';
+import { TxtImportButton } from '@/features/anki/components/import/TxtImportButton';
 import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
@@ -39,6 +40,7 @@ export function AnkiView() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftQuestion, setDraftQuestion] = useState('');
   const [draftAnswer, setDraftAnswer] = useState('');
+  const [draftMnemonic, setDraftMnemonic] = useState('');
   const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
@@ -67,10 +69,37 @@ export function AnkiView() {
     dispatch(updateAnkiCard(cardId, patch));
   });
 
+  const importParsedCards = (
+    parsed: { question: string; answer: string; mnemonic: string }[]
+  ) => {
+    if (parsed.length === 0) {
+      toast.error('Aucune carte valide à importer.');
+      return;
+    }
+    const deck = selectedDeck ?? DEFAULT_ANKI_DECK;
+    dispatch(
+      addAnkiCards(
+        parsed.map((card) =>
+          createAnkiCard({
+            question: card.question,
+            answer: card.answer,
+            mnemonic: card.mnemonic,
+            deck,
+            tags: selectedTags,
+          })
+        )
+      )
+    );
+    toast.success(
+      `${parsed.length} carte${parsed.length > 1 ? 's' : ''} ajoutée${parsed.length > 1 ? 's' : ''}.`
+    );
+  };
+
   const openNew = () => {
     setEditingId(null);
     setDraftQuestion('');
     setDraftAnswer('');
+    setDraftMnemonic('');
     setDraftDeck(selectedDeck ?? DEFAULT_ANKI_DECK);
     setDraftTags([...selectedTags]);
     setShowEditor(true);
@@ -80,6 +109,7 @@ export function AnkiView() {
     setEditingId(card.id);
     setDraftQuestion(card.question);
     setDraftAnswer(card.answer);
+    setDraftMnemonic(card.mnemonic ?? '');
     setDraftDeck(card.deck || DEFAULT_ANKI_DECK);
     setDraftTags([...(card.tags ?? [])]);
     setShowEditor(true);
@@ -91,11 +121,13 @@ export function AnkiView() {
       return;
     }
     const deck = normalizeDeckName(draftDeck);
+    const mnemonic = draftMnemonic.trim();
     if (editingId) {
       dispatch(
         updateAnkiCard(editingId, {
           question: draftQuestion.trim(),
           answer: draftAnswer.trim(),
+          mnemonic,
           deck,
           tags: draftTags,
         })
@@ -107,6 +139,7 @@ export function AnkiView() {
           createAnkiCard({
             question: draftQuestion.trim(),
             answer: draftAnswer.trim(),
+            mnemonic,
             deck,
             tags: draftTags,
           })
@@ -119,25 +152,17 @@ export function AnkiView() {
 
   const handleBulkImport = () => {
     const parsed = parseBulkAnkiInput(bulk);
-    if (parsed.length === 0) {
-      toast.error('Aucune carte valide à importer.');
-      return;
+    importParsedCards(parsed);
+    if (parsed.length > 0) setBulk('');
+  };
+
+  const handleTxtFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      importParsedCards(parseBulkAnkiInput(text));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Échec de l'import .txt.");
     }
-    const deck = selectedDeck ?? DEFAULT_ANKI_DECK;
-    dispatch(
-      addAnkiCards(
-        parsed.map((card) =>
-          createAnkiCard({
-            question: card.question,
-            answer: card.answer,
-            deck,
-            tags: selectedTags,
-          })
-        )
-      )
-    );
-    setBulk('');
-    toast.success(`${parsed.length} carte${parsed.length > 1 ? 's' : ''} ajoutée${parsed.length > 1 ? 's' : ''}.`);
   };
 
   const handleExport = () => {
@@ -188,7 +213,7 @@ export function AnkiView() {
             </p>
             <h1 className="font-display text-2xl font-semibold">Anki — Éditeur & Export</h1>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Decks et tags pour organiser le paquet (et cibler Plateau plus tard).
+              Format .txt : Question;Réponse;Mnémotechnique (optionnelle).
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -196,9 +221,10 @@ export function AnkiView() {
               <Sparkles className="h-4 w-4" />
               Réviser ({review.dueCount})
             </Button>
+            <TxtImportButton onFile={handleTxtFile} />
             <Button type="button" variant="outline" onClick={handleExport}>
               <Download className="h-4 w-4" />
-              Exporter (.txt)
+              Exporter .txt
             </Button>
           </div>
         </div>
@@ -227,12 +253,14 @@ export function AnkiView() {
             <CardEditor
               question={draftQuestion}
               answer={draftAnswer}
+              mnemonic={draftMnemonic}
               deck={draftDeck}
               tags={draftTags}
               tagSuggestions={allTags}
               deckSuggestions={decks}
               onQuestionChange={setDraftQuestion}
               onAnswerChange={setDraftAnswer}
+              onMnemonicChange={setDraftMnemonic}
               onDeckChange={setDraftDeck}
               onTagsChange={setDraftTags}
               onSave={saveCard}
