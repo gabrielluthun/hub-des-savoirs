@@ -1,0 +1,35 @@
+export interface ConfirmOptions {
+  title?: string;
+  okLabel?: string;
+  cancelLabel?: string;
+}
+
+function isTauriRuntime(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    ('__TAURI_INTERNALS__' in window ||
+      '__TAURI__' in window ||
+      Boolean(import.meta.env.TAURI_ENV_PLATFORM))
+  );
+}
+
+/**
+ * Confirm dialog that works in the browser (`window.confirm`)
+ * and in the Tauri desktop shell (native dialog plugin).
+ */
+export async function confirmAction(
+  message: string,
+  options: ConfirmOptions = {}
+): Promise<boolean> {
+  if (isTauriRuntime()) {
+    const { confirm } = await import('@tauri-apps/plugin-dialog');
+    return confirm(message, {
+      title: options.title ?? 'Hub du Savoir',
+      kind: 'warning',
+      okLabel: options.okLabel ?? 'OK',
+      cancelLabel: options.cancelLabel ?? 'Annuler',
+    });
+  }
+
+  return window.confirm(message);
+}

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { confirmAction } from '@/lib/confirm';
 import { downloadJsonFile } from '@/lib/export';
 import { verifyGeminiApiKey } from '@/lib/gemini';
 import { parseHubBackup, serializeHubBackup } from '@/lib/hub-backup';
@@ -44,8 +45,9 @@ export function SettingsView() {
     try {
       const raw = await file.text();
       const next = parseHubBackup(raw);
-      const confirmed = window.confirm(
-        'Remplacer tout le Hub (docs, Anki, JetPunk, historiques, paramètres) par cette sauvegarde ? Cette action est immédiate.'
+      const confirmed = await confirmAction(
+        'Remplacer tout le Hub (docs, Anki, JetPunk, historiques, paramètres) par cette sauvegarde ? Cette action est immédiate.',
+        { title: 'Restaurer la sauvegarde', okLabel: 'Restaurer' }
       );
       if (!confirmed) return;
       dispatch(hydrate(next));

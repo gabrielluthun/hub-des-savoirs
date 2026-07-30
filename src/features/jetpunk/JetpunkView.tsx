@@ -21,6 +21,7 @@ import {
   pickFocusItems,
 } from '@/features/jetpunk/lib/item-stats';
 import { jetpunkListToAnkiCards } from '@/lib/anki-jetpunk-transfer';
+import { confirmAction } from '@/lib/confirm';
 import { Button, Input } from '@/components/ui/primitives';
 import { createId } from '@/lib/utils';
 import type { JetPunkItem } from '@/types';
@@ -117,13 +118,17 @@ export function JetPunkView() {
   };
 
   const handleDeleteList = (id: string) => {
-    const list = lists.find((entry) => entry.id === id);
-    const label = list?.title?.trim() || 'cette liste';
-    if (!window.confirm(`Supprimer « ${label} » ? Cette action est définitive.`)) {
-      return;
-    }
-    dispatch(deleteJetpunkList(id));
-    toast.success('Liste supprimée.');
+    void (async () => {
+      const list = lists.find((entry) => entry.id === id);
+      const label = list?.title?.trim() || 'cette liste';
+      const confirmed = await confirmAction(
+        `Supprimer « ${label} » ? Cette action est définitive.`,
+        { title: 'Supprimer la liste', okLabel: 'Supprimer' }
+      );
+      if (!confirmed) return;
+      dispatch(deleteJetpunkList(id));
+      toast.success('Liste supprimée.');
+    })();
   };
 
   const handleTransferToAnki = () => {
