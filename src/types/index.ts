@@ -53,6 +53,8 @@ export interface AnkiCard {
   id: string;
   question: string;
   answer: string;
+  /** Optional mnemonic / memory aid */
+  mnemonic: string;
   /** Deck name for grouping / Plateau targeting */
   deck: string;
   /** Flat multi-tags for filtering and Plateau targeting */
