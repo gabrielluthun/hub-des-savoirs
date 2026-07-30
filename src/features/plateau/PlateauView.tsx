@@ -5,6 +5,7 @@ import { GameHistory } from '@/features/plateau/GameHistory';
 import { GamePlay } from '@/features/plateau/GamePlay';
 import { GameSetup } from '@/features/plateau/GameSetup';
 import { collectDecks } from '@/features/anki/lib/organization';
+import { ALL_QUESTION_TYPES } from '@/features/plateau/lib/question-types';
 import {
   selectionForKind,
   selectionHasResources,
@@ -21,7 +22,12 @@ import {
   selectGameHistory,
   selectJetpunkLists,
 } from '@/store/selectors';
-import type { Difficulty, GeneratedQuestion, QuizSourceSelection } from '@/types';
+import type {
+  Difficulty,
+  GeneratedQuestion,
+  QuestionType,
+  QuizSourceSelection,
+} from '@/types';
 
 export function PlateauView() {
   const { state, dispatch } = useStore();
@@ -40,6 +46,8 @@ export function PlateauView() {
   const [selection, setSelection] = useState<QuizSourceSelection>(() =>
     selectionForKind('all', { docs, deckNames: [], lists: jetpunkLists })
   );
+  const [questionTypes, setQuestionTypes] =
+    useState<QuestionType[]>(ALL_QUESTION_TYPES);
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<GeneratedQuestion[] | null>(null);
   const [liveScore, setLiveScore] = useState(0);
@@ -89,6 +97,7 @@ export function PlateauView() {
         context,
         count,
         difficulty,
+        questionTypes,
       });
       setQuestions(generated);
       setLiveScore(0);
@@ -155,6 +164,7 @@ export function PlateauView() {
               count={count}
               difficulty={difficulty}
               selection={selection}
+              questionTypes={questionTypes}
               docs={docs}
               deckNames={deckNames}
               lists={jetpunkLists}
@@ -163,6 +173,7 @@ export function PlateauView() {
               onCountChange={setCount}
               onDifficultyChange={setDifficulty}
               onSelectionChange={handleSelectionChange}
+              onQuestionTypesChange={setQuestionTypes}
               onStart={startGame}
             />
             <div className="mt-8">
