@@ -48,6 +48,16 @@ npm run tauri:dev     # fenêtre native + hot reload Vite
 npm run tauri:build   # installateur (.dmg / .msi / …)
 ```
 
+### Release desktop (CI GitHub)
+
+Le workflow [`.github/workflows/publish-tauri.yml`](.github/workflows/publish-tauri.yml) build **macOS** (Apple Silicon + Intel), **Windows** et **Linux**, puis crée une **draft Release** avec les installateurs en assets.
+
+Déclencheurs :
+- Actions → **Publish Tauri** → Run workflow
+- ou tag : `git tag v0.1.0 && git push origin v0.1.0`
+
+Prérequis GitHub : Settings → Actions → General → Workflow permissions → **Read and write**.
+
 ## Modules
 
 | Onglet | Rôle |
