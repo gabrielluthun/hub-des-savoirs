@@ -113,10 +113,17 @@ export interface JetPunkHistoryEntry {
   foundIds?: string[];
 }
 
+export type QuestionType = 'qcm' | 'libre' | 'vrai_faux' | 'liste';
+
 export interface GeneratedQuestion {
+  type: QuestionType;
   question: string;
+  /** QCM / vrai-faux choices. */
   options?: string[];
+  /** Canonical answer (also used for libre / vrai-faux). */
   answer: string;
+  /** For type liste: items the player must find. */
+  answers?: string[];
   explanation: string;
 }
 

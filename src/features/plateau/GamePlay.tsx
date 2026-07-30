@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react';
+import { ListAnswerPanel } from '@/features/plateau/components/ListAnswerPanel';
+import {
+  answersMatch,
+  findMatchingListItem,
+  QUESTION_TYPE_LABELS,
+} from '@/features/plateau/lib/question-types';
 import { Button, Input } from '@/components/ui/primitives';
 import type { GeneratedQuestion } from '@/types';
 
@@ -9,35 +15,56 @@ interface GamePlayProps {
   onAbort: () => void;
 }
 
+function questionDuration(question: GeneratedQuestion): number {
+  return question.type === 'liste' ? 45 : 30;
+}
+
 export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePlayProps) {
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [typed, setTyped] = useState('');
+  const [foundItems, setFoundItems] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(false);
   const [remaining, setRemaining] = useState(30);
 
   const current = questions[index];
-  const useOptions = Boolean(current?.options && current.options.length >= 2);
+  const listItems = current?.answers ?? [];
+  const isList = current?.type === 'liste';
+  const useOptions = Boolean(
+    current &&
+      (current.type === 'qcm' || current.type === 'vrai_faux') &&
+      current.options &&
+      current.options.length >= 2
+  );
 
   useEffect(() => {
-    if (revealed) return;
-    setRemaining(30);
+    if (!current || revealed) return;
+    setRemaining(questionDuration(current));
     const timer = window.setInterval(() => {
       setRemaining((value) => value - 1);
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [index, revealed]);
+  }, [index, revealed, current]);
 
   useEffect(() => {
-    if (remaining <= 0 && !revealed) {
+    if (remaining > 0 || revealed || !current) return;
+    if (isList) {
+      const ok = foundItems.length === listItems.length && listItems.length > 0;
       setRevealed(true);
-      setWasCorrect(false);
-      setStreak(0);
+      setWasCorrect(ok);
+      if (ok) {
+        setScore((s) => s + 1);
+        setStreak((s) => s + 1);
+      } else setStreak(0);
+      return;
     }
-  }, [remaining, revealed]);
+    setRevealed(true);
+    setWasCorrect(false);
+    setStreak(0);
+  }, [remaining, revealed, current, isList, foundItems.length, listItems.length]);
 
   const playTone = (ok: boolean) => {
     if (!soundEnabled) return;
@@ -52,14 +79,12 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       osc.start();
       osc.stop(ctx.currentTime + 0.15);
     } catch {
-      // ignore audio errors
+      // ignore
     }
   };
 
-  const checkAnswer = (value: string) => {
-    if (revealed || !current) return;
-    const ok = value.trim().toLowerCase() === current.answer.trim().toLowerCase();
-    setSelected(value);
+  const settle = (ok: boolean, value?: string) => {
+    if (value !== undefined) setSelected(value);
     setRevealed(true);
     setWasCorrect(ok);
     if (ok) {
@@ -72,6 +97,38 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     }
   };
 
+  const checkAnswer = (value: string) => {
+    if (revealed || !current || isList) return;
+    settle(answersMatch(value, current.answer), value);
+  };
+
+  const submitListGuess = () => {
+    if (revealed || !current || !isList || !typed.trim()) return;
+    const match = findMatchingListItem(typed, listItems, new Set(foundItems));
+    setTyped('');
+    if (!match) {
+      playTone(false);
+      return;
+    }
+    const next = [...foundItems, match];
+    setFoundItems(next);
+    playTone(true);
+    if (next.length >= listItems.length) settle(true);
+  };
+
+  const goNext = () => {
+    if (index + 1 >= questions.length) {
+      onFinish(score);
+      return;
+    }
+    setIndex((i) => i + 1);
+    setSelected(null);
+    setTyped('');
+    setFoundItems([]);
+    setRevealed(false);
+    setWasCorrect(false);
+  };
+
   if (!current) return null;
 
   return (
@@ -79,6 +136,7 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
         <span>
           Question {index + 1} / {questions.length}
+          <span className="ml-2 text-xs">· {QUESTION_TYPE_LABELS[current.type]}</span>
         </span>
         <span>
           Score {score} · Série {streak} · {Math.max(remaining, 0)}s
@@ -90,7 +148,7 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       {useOptions ? (
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           {current.options!.map((option) => {
-            const isCorrect = option === current.answer;
+            const isCorrect = answersMatch(option, current.answer);
             const isSelected = selected === option;
             let className =
               'rounded-xl border border-border px-4 py-3 text-left text-sm transition-colors';
@@ -111,7 +169,9 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
             );
           })}
         </div>
-      ) : (
+      ) : null}
+
+      {current.type === 'libre' ? (
         <form
           className="mt-5 flex gap-2"
           onSubmit={(e) => {
@@ -129,29 +189,31 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
             Valider
           </Button>
         </form>
-      )}
+      ) : null}
+
+      {isList ? (
+        <ListAnswerPanel
+          items={listItems}
+          foundItems={foundItems}
+          revealed={revealed}
+          typed={typed}
+          onTypedChange={setTyped}
+          onSubmit={submitListGuess}
+        />
+      ) : null}
 
       {revealed ? (
         <div className="mt-5 rounded-xl bg-secondary/60 p-4 text-sm">
           <p className="font-medium">
-            {wasCorrect ? 'Bonne réponse !' : `Réponse : ${current.answer}`}
+            {wasCorrect
+              ? 'Bonne réponse !'
+              : isList
+                ? `Éléments : ${listItems.join(', ')}`
+                : `Réponse : ${current.answer}`}
           </p>
           <p className="mt-1 text-muted-foreground">{current.explanation}</p>
           <div className="mt-4 flex gap-2">
-            <Button
-              type="button"
-              onClick={() => {
-                if (index + 1 >= questions.length) {
-                  onFinish(score);
-                } else {
-                  setIndex((i) => i + 1);
-                  setSelected(null);
-                  setTyped('');
-                  setRevealed(false);
-                  setWasCorrect(false);
-                }
-              }}
-            >
+            <Button type="button" onClick={goNext}>
               {index + 1 >= questions.length ? 'Voir le score' : 'Question suivante'}
             </Button>
             <Button type="button" variant="ghost" onClick={onAbort}>
