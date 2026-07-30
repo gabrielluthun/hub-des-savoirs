@@ -89,7 +89,7 @@ export function SettingsView() {
             <div>
               <p className="text-sm font-medium">Activer l&apos;intégration Quizypedia</p>
               <p className="text-xs text-muted-foreground">
-                Affiche le module dès qu&apos;il est approuvé / prêt.
+                Affiche ou masque le module dans la navigation.
               </p>
             </div>
             <input
