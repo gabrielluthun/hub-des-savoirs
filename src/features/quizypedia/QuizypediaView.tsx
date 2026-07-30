@@ -39,11 +39,11 @@ export function QuizypediaView() {
     <div className="flex h-full flex-col p-6">
       <div className="mb-6">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Module actif
+          Module en attente
         </p>
         <h1 className="font-display text-2xl font-semibold">Quizypedia</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          L&apos;intégration est activée. Branchez l&apos;API dès qu&apos;elle sera disponible.
+         Bientôt disponible...
         </p>
       </div>
 
@@ -52,10 +52,9 @@ export function QuizypediaView() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
             <CircleHelp className="h-5 w-5 text-muted-foreground" />
           </div>
-          <h2 className="font-display text-lg font-semibold">Prêt pour l&apos;API</h2>
+          <h2 className="font-display text-lg font-semibold">Bientôt disponible</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Aucune source Quizypedia configurée pour le moment. Ce module attend l&apos;accès
-            développeur / l&apos;approbation API.
+            Le module Quizypédia sera disponible dès qu'il sera approuvé par les modérateurs.
           </p>
         </div>
       </div>
