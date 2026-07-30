@@ -15,14 +15,14 @@ export function BulkImportPanel({ value, onChange, onImport }: BulkImportPanelPr
       </p>
       <h3 className="mt-1 font-display text-lg font-semibold">Coller en masse</h3>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Une carte par ligne, séparateur tabulation, point-virgule, ou &apos;|&apos;. Exemple :
-        Capitale du Japon;Tokyo
+        Format : <span className="font-mono">Question;Réponse;Mnémotechnique</span>. La
+        mnémotechnique est optionnelle. Une carte par ligne.
       </p>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="mt-4 min-h-[220px] flex-1 font-mono text-xs"
-        placeholder={'Question\tRéponse\nCapitale du Japon\tTokyo'}
+        placeholder={'Capitale du Japon;Tokyo;To-kyo comme ticket\nRoi dit le Saint;Louis IX'}
       />
       <Button type="button" className="mt-4 w-full" onClick={onImport}>
         <Upload className="h-4 w-4" />
