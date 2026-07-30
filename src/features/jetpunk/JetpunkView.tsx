@@ -1,13 +1,20 @@
 import { useMemo, useState } from 'react';
-import { Play, Target, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
+import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
+import { QuizLaunchBar } from '@/features/jetpunk/components/QuizLaunchBar';
 import { ListEditor } from '@/features/jetpunk/ListEditor';
 import { ListSidebar } from '@/features/jetpunk/ListSidebar';
 import { QuizRunner } from '@/features/jetpunk/QuizRunner';
 import type { QuizResult } from '@/features/jetpunk/Stats';
-import { Button, Input, Select } from '@/components/ui/primitives';
-import { createId, cn } from '@/lib/utils';
+import {
+  computeItemMissStats,
+  pickFocusItems,
+} from '@/features/jetpunk/lib/item-stats';
+import { Input } from '@/components/ui/primitives';
+import { createId } from '@/lib/utils';
+import type { JetPunkItem } from '@/types';
 import {
   addJetpunkHistory,
   addJetpunkList,
@@ -22,27 +29,22 @@ import {
   selectJetpunkLists,
 } from '@/store/selectors';
 
-const TIMED_DURATION_OPTIONS = [
-  { label: '1 min', value: 60 },
-  { label: '1 min 30', value: 90 },
-  { label: '2 min', value: 120 },
-  { label: '3 min', value: 180 },
-  { label: '5 min', value: 300 },
-];
-
-const DEFAULT_TIMED_DURATION = 90;
-
 export function JetPunkView() {
   const { state, dispatch } = useStore();
   const lists = selectJetpunkLists(state);
   const activeList = selectActiveJetpunkList(state);
   const history = selectJetpunkHistory(state) ?? [];
   const [quizOpen, setQuizOpen] = useState(false);
+  const [quizItems, setQuizItems] = useState<JetPunkItem[] | null>(null);
 
   const listHistory = useMemo(() => {
     if (!activeList) return [];
     return history.filter((entry) => entry.listId === activeList.id);
   }, [activeList, history]);
+  const missStats = useMemo(
+    () => (activeList ? computeItemMissStats(activeList.items, listHistory) : []),
+    [activeList, listHistory]
+  );
   const previousBest =
     listHistory.length > 0
       ? Math.max(...listHistory.map((entry) => entry.score))
@@ -61,6 +63,7 @@ export function JetPunkView() {
         durationSec: result.durationSec,
         elapsedSec: result.elapsedSec,
         playedAt: new Date().toISOString(),
+        foundIds: result.foundIds,
       })
     );
   };
@@ -137,93 +140,25 @@ export function JetPunkView() {
           </span>
         </div>
 
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted-foreground">Mode</span>
-            <div className="inline-flex rounded-xl border border-border p-0.5">
-              <button
-                type="button"
-                onClick={() =>
-                  dispatch(
-                    updateJetpunkList(activeList.id, {
-                      durationSec:
-                        activeList.durationSec > 0
-                          ? activeList.durationSec
-                          : DEFAULT_TIMED_DURATION,
-                    })
-                  )
-                }
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
-                  activeList.durationSec > 0
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                Chronométré
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  dispatch(updateJetpunkList(activeList.id, { durationSec: 0 }))
-                }
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
-                  activeList.durationSec <= 0
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                Sans chrono
-              </button>
-            </div>
-            {activeList.durationSec > 0 ? (
-              <Select
-                value={String(activeList.durationSec)}
-                onChange={(e) =>
-                  dispatch(
-                    updateJetpunkList(activeList.id, {
-                      durationSec: Number(e.target.value),
-                    })
-                  )
-                }
-                className="h-9 w-[130px]"
-                aria-label="Durée du quiz"
-              >
-                {TIMED_DURATION_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            ) : null}
-          </div>
-          <Button
-            type="button"
-            onClick={() => {
-              if (activeList.items.filter((item) => item.answer.trim()).length === 0) {
-                toast.error('Ajoutez au moins une réponse.');
-                return;
-              }
-              setQuizOpen(true);
-            }}
-          >
-            <Play className="h-4 w-4" />
-            Démarrer le quiz
-          </Button>
-          <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
-            {previousBest !== null ? (
-              <span className="tabular-nums">
-                Record {previousBest}/
-                {listHistory[0]?.total ?? activeList.items.length}
-              </span>
-            ) : null}
-            <span className="inline-flex items-center gap-2 tabular-nums">
-              <Target className="h-4 w-4" />
-              {lastScore} / {activeList.items.filter((item) => item.answer.trim()).length}
-            </span>
-          </div>
-        </div>
+        <QuizLaunchBar
+          durationSec={activeList.durationSec}
+          items={activeList.items}
+          focusCount={missStats.length}
+          previousBest={previousBest}
+          lastScore={lastScore}
+          historyTotalFallback={listHistory[0]?.total ?? activeList.items.length}
+          onDurationChange={(durationSec) =>
+            dispatch(updateJetpunkList(activeList.id, { durationSec }))
+          }
+          onStartFull={() => {
+            setQuizItems(null);
+            setQuizOpen(true);
+          }}
+          onStartFocus={() => {
+            setQuizItems(pickFocusItems(activeList.items, missStats));
+            setQuizOpen(true);
+          }}
+        />
 
         <ListEditor
           items={activeList.items}
@@ -255,7 +190,8 @@ export function JetPunkView() {
           }
         />
 
-        <div className="mt-8">
+        <div className="mt-8 space-y-6">
+          <ItemMissStats stats={missStats} />
           <Historique
             entries={listHistory}
             title="Historique de cette liste"
@@ -266,13 +202,17 @@ export function JetPunkView() {
 
       {quizOpen ? (
         <QuizRunner
-          title={activeList.title}
+          title={quizItems ? `${activeList.title} — Focus` : activeList.title}
           durationSec={activeList.durationSec}
-          items={activeList.items}
+          items={quizItems ?? activeList.items}
+          sourceItems={activeList.items}
           previousBest={previousBest}
           recentAttempts={listHistory}
           onFinish={handleQuizFinish}
-          onClose={() => setQuizOpen(false)}
+          onClose={() => {
+            setQuizOpen(false);
+            setQuizItems(null);
+          }}
         />
       ) : null}
     </div>
