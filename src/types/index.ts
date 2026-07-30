@@ -53,6 +53,10 @@ export interface AnkiCard {
   id: string;
   question: string;
   answer: string;
+  /** Deck name for grouping / Plateau targeting */
+  deck: string;
+  /** Flat multi-tags for filtering and Plateau targeting */
+  tags: string[];
   /** ISO datetime — card is due when dueAt <= now */
   dueAt: string;
   /** Current SRS interval in days (0 = learning / just failed) */
