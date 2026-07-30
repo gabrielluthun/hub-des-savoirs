@@ -59,6 +59,12 @@ export const addAnkiDeck = (name: string) => ({
   name,
 });
 
+export const renameAnkiDeck = (from: string, to: string) => ({
+  type: 'RENAME_ANKI_DECK' as const,
+  from,
+  to,
+});
+
 export const removeAnkiDeck = (name: string) => ({
   type: 'REMOVE_ANKI_DECK' as const,
   name,
