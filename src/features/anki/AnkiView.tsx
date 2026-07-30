@@ -35,6 +35,7 @@ export function AnkiView() {
   const io = useAnkiImportExport({
     cards,
     scopedCards: filters.scopedCards,
+    selectedDeck: filters.selectedDeck,
     dispatch,
   });
   const aiFromDocs = useAnkiAiFromDocs({
@@ -194,6 +195,7 @@ export function AnkiView() {
 
       <BulkImportPanel
         value={io.bulk}
+        targetDeck={filters.selectedDeck}
         onChange={io.setBulk}
         onImport={io.handleBulkImport}
       />
