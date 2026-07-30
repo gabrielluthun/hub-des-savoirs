@@ -1,4 +1,9 @@
-import { decksEqual, mergeDeckNames, normalizeDeckName } from '@/features/anki/lib/decks';
+import {
+  deckIsUnder,
+  decksEqual,
+  mergeDeckNames,
+  normalizeDeckName,
+} from '@/features/anki/lib/decks';
 import { dedupeTags, normalizeTag } from '@/features/anki/lib/tags';
 import type { AnkiCard } from '@/types';
 
@@ -18,7 +23,7 @@ export function filterCardsByDeck(
   deck: string | null
 ): AnkiCard[] {
   if (!deck) return cards;
-  return cards.filter((card) => decksEqual(card.deck ?? '', deck));
+  return cards.filter((card) => deckIsUnder(card.deck ?? '', deck));
 }
 
 /** OR filter: empty selection = all cards. */
@@ -51,6 +56,7 @@ export function filterCards(
   );
 }
 
+/** Inclusive: parent deck counts its own cards + nested sous-decks. */
 export function countCardsInDeck(cards: AnkiCard[], deck: string): number {
   return filterCardsByDeck(cards, deck).length;
 }
@@ -58,4 +64,9 @@ export function countCardsInDeck(cards: AnkiCard[], deck: string): number {
 export function deckExists(decks: string[], name: string): boolean {
   const normalized = normalizeDeckName(name);
   return decks.some((deck) => decksEqual(deck, normalized));
+}
+
+/** Flat names that belong to a deck path (exact + nested). */
+export function decksInSubtree(decks: string[], root: string): string[] {
+  return decks.filter((deck) => deckIsUnder(deck, root));
 }
