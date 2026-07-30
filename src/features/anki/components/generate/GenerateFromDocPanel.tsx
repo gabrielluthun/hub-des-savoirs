@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { DeckField } from '@/features/anki/components/decks/DeckField';
 import { GeneratePreviewList } from '@/features/anki/components/generate/GeneratePreviewList';
 import type { GeneratedAnkiDraft } from '@/features/anki/lib/generate/generate-cards-from-doc';
-import { DEFAULT_ANKI_DECK } from '@/features/anki/lib/decks';
 import { Button, Input, Label, Select } from '@/components/ui/primitives';
 import type { HubDocument } from '@/types';
 
@@ -38,7 +38,7 @@ export function GenerateFromDocPanel({
   const docsWithContent = docs.filter((doc) => doc.content.trim());
   const [docId, setDocId] = useState(docsWithContent[0]?.id ?? '');
   const [count, setCount] = useState(8);
-  const [deck, setDeck] = useState(defaultDeck || DEFAULT_ANKI_DECK);
+  const [deck, setDeck] = useState(defaultDeck);
   const [selected, setSelected] = useState<Set<number>>(() => new Set());
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export function GenerateFromDocPanel({
   }, [drafts]);
 
   useEffect(() => {
-    setDeck(defaultDeck || DEFAULT_ANKI_DECK);
+    setDeck(defaultDeck);
   }, [defaultDeck]);
 
   const handleGenerate = () => {
@@ -114,19 +114,9 @@ export function GenerateFromDocPanel({
             disabled={loading}
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 sm:col-span-2">
           <Label>Deck cible</Label>
-          <Input
-            value={deck}
-            onChange={(e) => setDeck(e.target.value)}
-            list="anki-ai-deck-suggestions"
-            disabled={loading}
-          />
-          <datalist id="anki-ai-deck-suggestions">
-            {deckSuggestions.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
+          <DeckField value={deck} onChange={setDeck} suggestions={deckSuggestions} />
         </div>
       </div>
 
