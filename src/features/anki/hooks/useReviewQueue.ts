@@ -28,12 +28,15 @@ export function useReviewQueue(
   const current = queue[0] ?? null;
   const remaining = queue.length;
 
-  const start = useCallback(() => {
-    const due = getShuffledDueCards(cards);
-    setQueueIds(due.map((card) => card.id));
-    setRevealed(false);
-    setReviewedCount(0);
-  }, [cards]);
+  const start = useCallback(
+    (sourceCards?: AnkiCard[]) => {
+      const due = getShuffledDueCards(sourceCards ?? cards);
+      setQueueIds(due.map((card) => card.id));
+      setRevealed(false);
+      setReviewedCount(0);
+    },
+    [cards]
+  );
 
   const stop = useCallback(() => {
     setQueueIds(null);
