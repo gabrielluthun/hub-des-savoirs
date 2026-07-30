@@ -1,14 +1,16 @@
 export interface ParsedAnkiLine {
   question: string;
   answer: string;
+  deck: string;
   mnemonic: string;
+  tags: string[];
 }
 
 /**
- * Format: Question;Réponse;Mnémotechnique
- * - Question and Réponse are required
- * - Mnémotechnique is optional
- * Also accepts tab or | as separators (legacy 2-field lines).
+ * Format: Question;Réponse;Deck;Mnémotechnique;Tags
+ * - Question, Réponse, Deck are required
+ * - Mnémotechnique and Tags are optional
+ * - Tags are comma-separated in the 5th field
  */
 export function parseBulkAnkiInput(raw: string): ParsedAnkiLine[] {
   return raw
@@ -19,40 +21,52 @@ export function parseBulkAnkiInput(raw: string): ParsedAnkiLine[] {
     .filter((card): card is ParsedAnkiLine => Boolean(card));
 }
 
-export function parseAnkiLine(line: string): ParsedAnkiLine | null {
-  let parts: string[];
-  if (line.includes(';')) {
-    parts = line.split(';');
-  } else if (line.includes('\t')) {
-    parts = line.split('\t');
-  } else if (line.includes('|')) {
-    parts = line.split('|');
-  } else {
-    return null;
+function parseTagsField(raw: string): string[] {
+  const seen = new Set<string>();
+  const tags: string[] = [];
+  for (const part of raw.split(',')) {
+    const tag = part.trim().toLowerCase();
+    if (!tag || seen.has(tag)) continue;
+    seen.add(tag);
+    tags.push(tag);
   }
+  return tags;
+}
 
-  const question = parts[0]?.trim() ?? '';
-  const answer = parts[1]?.trim() ?? '';
-  const mnemonic = parts
-    .slice(2)
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .join('; ');
+export function parseAnkiLine(line: string): ParsedAnkiLine | null {
+  if (!line.includes(';')) return null;
 
-  if (!question || !answer) return null;
-  return { question, answer, mnemonic };
+  const parts = line.split(';').map((part) => part.trim());
+  const question = parts[0] ?? '';
+  const answer = parts[1] ?? '';
+  const deck = parts[2] ?? '';
+  const mnemonic = parts[3] ?? '';
+  const tags = parts[4] ? parseTagsField(parts[4]) : [];
+
+  if (!question || !answer || !deck) return null;
+
+  return { question, answer, deck, mnemonic, tags };
 }
 
 export function serializeAnkiCards(
-  cards: { question: string; answer: string; mnemonic?: string }[]
+  cards: {
+    question: string;
+    answer: string;
+    deck: string;
+    mnemonic?: string;
+    tags?: string[];
+  }[]
 ): string {
   return cards
     .map((card) => {
       const mnemonic = card.mnemonic?.trim() ?? '';
-      if (mnemonic) {
-        return `${card.question};${card.answer};${mnemonic}`;
-      }
-      return `${card.question};${card.answer}`;
+      const tags = (card.tags ?? []).map((tag) => tag.trim()).filter(Boolean);
+      const base = `${card.question};${card.answer};${card.deck}`;
+
+      if (!mnemonic && tags.length === 0) return base;
+      if (mnemonic && tags.length === 0) return `${base};${mnemonic}`;
+      if (!mnemonic && tags.length > 0) return `${base};;${tags.join(',')}`;
+      return `${base};${mnemonic};${tags.join(',')}`;
     })
     .join('\n');
 }
