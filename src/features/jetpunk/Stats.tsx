@@ -16,6 +16,7 @@ interface StatsProps {
   result: QuizResult;
   previousBest: number | null;
   recentAttempts: JetPunkHistoryEntry[];
+  interruptedByFocus?: boolean;
   onReplay: () => void;
   onClose: () => void;
 }
@@ -33,6 +34,7 @@ export function Stats({
   result,
   previousBest,
   recentAttempts,
+  interruptedByFocus = false,
   onReplay,
   onClose,
 }: StatsProps) {
@@ -60,6 +62,12 @@ export function Stats({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+          {interruptedByFocus ? (
+            <p className="rounded-xl border border-border bg-secondary/50 px-4 py-3 text-sm text-muted-foreground">
+              Partie interrompue parce que l’onglet a été quitté. Le score actuel a été
+              enregistré.
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl border border-border bg-card px-4 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -85,7 +93,9 @@ export function Stats({
                 {formatDuration(result.elapsedSec)}
               </p>
               <p className="text-xs text-muted-foreground">
-                sur {formatDuration(result.durationSec)}
+                {result.durationSec > 0
+                  ? `sur ${formatDuration(result.durationSec)}`
+                  : 'mode sans chrono'}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card px-4 py-3">
