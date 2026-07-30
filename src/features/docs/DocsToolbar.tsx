@@ -1,5 +1,7 @@
 import { CloudDownload, ExternalLink, Sparkles } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
+import { ImportMarkdownButton } from '@/features/docs/components/toolbar/ImportMarkdownButton';
+import type { MarkdownImportResult } from '@/features/docs/lib/import-markdown';
 import { cn } from '@/lib/utils';
 
 export type DocsPane = 'editor' | 'preview' | 'gdocs';
@@ -10,6 +12,8 @@ interface DocsToolbarProps {
   savingLabel: string;
   onUrlChange: (url: string) => void;
   onImport: () => void;
+  onImportMarkdown: (result: MarkdownImportResult) => void;
+  onImportMarkdownError: (message: string) => void;
   onPaneChange: (pane: DocsPane) => void;
   onGenerateQuiz: () => void;
   canOpenExternal: boolean;
@@ -22,6 +26,8 @@ export function DocsToolbar({
   savingLabel,
   onUrlChange,
   onImport,
+  onImportMarkdown,
+  onImportMarkdownError,
   onPaneChange,
   onGenerateQuiz,
   canOpenExternal,
@@ -40,6 +46,10 @@ export function DocsToolbar({
           <CloudDownload className="h-4 w-4" />
           Importer contenu
         </Button>
+        <ImportMarkdownButton
+          onImported={onImportMarkdown}
+          onError={onImportMarkdownError}
+        />
         {canOpenExternal && externalUrl ? (
           <a
             href={externalUrl}
