@@ -41,6 +41,9 @@ export interface HubDocument {
   title: string;
   googleDocsUrl: string;
   content: string;
+  /** SHA-256 of the last successfully imported Google Docs content */
+  contentHash?: string;
+  lastImportedAt?: string;
   updatedAt: string;
 }
 
