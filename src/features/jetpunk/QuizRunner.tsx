@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { useEndOnVisibilityHidden } from '@/features/jetpunk/hooks/useEndOnVisibilityHidden';
+import { useQuizClock } from '@/features/jetpunk/hooks/useQuizClock';
 import { Stats, type QuizResult } from '@/features/jetpunk/Stats';
 import { Button, Input } from '@/components/ui/primitives';
 import type { JetPunkHistoryEntry, JetPunkItem } from '@/types';
@@ -21,6 +24,13 @@ function normalize(value: string): string {
     .toLowerCase();
 }
 
+function formatClock(totalSec: number): string {
+  const safe = Math.max(0, totalSec);
+  const minutes = Math.floor(safe / 60);
+  const seconds = safe % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 export function QuizRunner({
   title,
   durationSec,
@@ -34,41 +44,50 @@ export function QuizRunner({
     () => items.filter((item) => item.answer.trim()),
     [items]
   );
-  const [remaining, setRemaining] = useState(durationSec);
   const [input, setInput] = useState('');
   const [foundIds, setFoundIds] = useState<Set<string>>(() => new Set());
   const [summary, setSummary] = useState<{
     result: QuizResult;
     previousBest: number | null;
+    interruptedByFocus: boolean;
   } | null>(null);
   const endedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const foundIdsRef = useRef(foundIds);
-  const remainingRef = useRef(remaining);
-
+  const endQuizRef = useRef<(interruptedByFocus?: boolean) => void>(() => {});
   foundIdsRef.current = foundIds;
-  remainingRef.current = remaining;
 
   const score = foundIds.size;
   const total = playableItems.length;
   const allFound = score >= total && total > 0;
   const playing = summary === null;
 
-  const endQuiz = () => {
+  const clock = useQuizClock({
+    durationSec,
+    playing,
+    allFound,
+    onTimedOut: () => endQuizRef.current(false),
+  });
+
+  const endQuiz = (interruptedByFocus = false) => {
     if (endedRef.current) return;
     endedRef.current = true;
-    const timeLeft = remainingRef.current;
-    const elapsedSec = timeLeft <= 0 ? durationSec : Math.max(0, durationSec - timeLeft);
     const next: QuizResult = {
       score: foundIdsRef.current.size,
       total,
-      durationSec,
-      elapsedSec,
+      durationSec: clock.untimed ? 0 : durationSec,
+      elapsedSec: clock.elapsedSec,
       foundIds: [...foundIdsRef.current],
     };
-    setSummary({ result: next, previousBest });
+    if (interruptedByFocus) {
+      toast.message('Quiz interrompu : tu as quitté l’onglet.');
+    }
+    setSummary({ result: next, previousBest, interruptedByFocus });
     onFinish(next);
   };
+  endQuizRef.current = endQuiz;
+
+  useEndOnVisibilityHidden(playing, () => endQuiz(true));
 
   useEffect(() => {
     if (!playing) return;
@@ -76,20 +95,10 @@ export function QuizRunner({
   }, [playing]);
 
   useEffect(() => {
-    if (!playing || remaining <= 0 || allFound) return;
-    const timer = window.setInterval(() => {
-      setRemaining((value) => value - 1);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [playing, remaining, allFound]);
-
-  useEffect(() => {
     if (!playing) return;
-    if (remaining <= 0 || allFound) {
-      endQuiz();
-    }
+    if (allFound) endQuiz(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, remaining, allFound]);
+  }, [playing, allFound]);
 
   const tryMatch = (raw: string) => {
     const guess = normalize(raw);
@@ -108,9 +117,9 @@ export function QuizRunner({
   const handleReplay = () => {
     endedRef.current = false;
     setSummary(null);
-    setRemaining(durationSec);
     setInput('');
     setFoundIds(new Set());
+    clock.reset();
   };
 
   if (summary) {
@@ -121,14 +130,12 @@ export function QuizRunner({
         result={summary.result}
         previousBest={summary.previousBest}
         recentAttempts={recentAttempts}
+        interruptedByFocus={summary.interruptedByFocus}
         onReplay={handleReplay}
         onClose={onClose}
       />
     );
   }
-
-  const minutes = Math.floor(Math.max(remaining, 0) / 60);
-  const seconds = Math.max(remaining, 0) % 60;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
@@ -136,7 +143,7 @@ export function QuizRunner({
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Quiz chronométré
+              {clock.untimed ? 'Quiz sans chrono' : 'Quiz chronométré'}
             </p>
             <h2 className="truncate font-display text-lg font-semibold sm:text-xl">
               {title}
@@ -147,7 +154,9 @@ export function QuizRunner({
               {score} / {total}
             </p>
             <p className="font-mono text-xl tabular-nums">
-              {minutes}:{seconds.toString().padStart(2, '0')}
+              {clock.untimed
+                ? formatClock(clock.elapsedSec)
+                : formatClock(clock.remaining)}
             </p>
           </div>
         </div>
@@ -215,7 +224,7 @@ export function QuizRunner({
 
       <footer className="shrink-0 border-t border-border px-4 py-3 sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl justify-center">
-          <Button type="button" variant="ghost" onClick={endQuiz}>
+          <Button type="button" variant="ghost" onClick={() => endQuiz(false)}>
             Terminer
           </Button>
         </div>
