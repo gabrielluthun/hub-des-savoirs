@@ -3,8 +3,19 @@ import { Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { GameHistory } from '@/features/plateau/GameHistory';
 import { GamePlay } from '@/features/plateau/GamePlay';
+import { GameResults } from '@/features/plateau/GameResults';
 import { GameSetup } from '@/features/plateau/GameSetup';
 import { collectDecks } from '@/features/anki/lib/organization';
+import {
+  collectRecentFacts,
+  toPlayedFact,
+} from '@/features/plateau/lib/anti-repeat';
+import {
+  pickBestScoreMark,
+  type PlateauGameResult,
+  type PlateauScoreMark,
+} from '@/features/plateau/lib/game-result';
+import type { PlateauSourceLink } from '@/features/plateau/lib/resolve-source';
 import { ALL_QUESTION_TYPES } from '@/features/plateau/lib/question-types';
 import {
   selectionForKind,
@@ -13,7 +24,12 @@ import {
 import { generateQuizQuestions } from '@/lib/gemini';
 import { buildQuizContext } from '@/lib/quiz-context';
 import { createId } from '@/lib/utils';
-import { addGameHistory, setTab } from '@/store/actions';
+import {
+  addGameHistory,
+  setActiveDoc,
+  setActiveJetpunkList,
+  setTab,
+} from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 import {
   selectAnkiCards,
@@ -40,7 +56,6 @@ export function PlateauView() {
     () => collectDecks(ankiCards, ankiDecks),
     [ankiCards, ankiDecks]
   );
-
   const [count, setCount] = useState(5);
   const [difficulty, setDifficulty] = useState<Difficulty>('moyen');
   const [selection, setSelection] = useState<QuizSourceSelection>(() =>
@@ -51,6 +66,9 @@ export function PlateauView() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<GeneratedQuestion[] | null>(null);
   const [liveScore, setLiveScore] = useState(0);
+  const [lastResult, setLastResult] = useState<PlateauGameResult | null>(null);
+  const [resultPreviousBest, setResultPreviousBest] =
+    useState<PlateauScoreMark | null>(null);
 
   const handleSelectionChange = (next: QuizSourceSelection) => {
     if (next.kind !== selection.kind) {
@@ -89,7 +107,10 @@ export function PlateauView() {
       return;
     }
 
+    const excludeFacts = collectRecentFacts(history);
+
     setLoading(true);
+    setLastResult(null);
     try {
       const generated = await generateQuizQuestions({
         apiKey: state.settings.apiKey,
@@ -98,6 +119,7 @@ export function PlateauView() {
         count,
         difficulty,
         questionTypes,
+        excludeFacts,
       });
       setQuestions(generated);
       setLiveScore(0);
@@ -108,21 +130,62 @@ export function PlateauView() {
     }
   };
 
-  const finishGame = (score: number) => {
-    const total = questions?.length ?? count;
+  const finishGame = (result: PlateauGameResult) => {
+    const bestBefore = pickBestScoreMark(
+      history.map((entry) => ({ score: entry.score, total: entry.total }))
+    );
     dispatch(
       addGameHistory({
         id: createId(),
-        score,
-        total,
+        score: result.score,
+        total: result.total,
         difficulty,
         playedAt: new Date().toISOString(),
+        questions: result.answers.map((entry) => toPlayedFact(entry.question)),
       })
     );
-    setLiveScore(score);
+    setLiveScore(result.score);
     setQuestions(null);
-    toast.success(`Partie terminée : ${score}/${total}`);
+    setResultPreviousBest(bestBefore);
+    setLastResult(result);
   };
+
+  const openSource = (link: PlateauSourceLink) => {
+    if (link.kind === 'doc') {
+      dispatch(setActiveDoc(link.id));
+      dispatch(setTab('docs'));
+      return;
+    }
+    if (link.kind === 'anki') {
+      dispatch(setTab('anki'));
+      return;
+    }
+    dispatch(setActiveJetpunkList(link.listId));
+    dispatch(setTab('jetpunk'));
+  };
+
+  if (lastResult) {
+    return (
+      <GameResults
+        result={lastResult}
+        difficulty={difficulty}
+        previousBest={resultPreviousBest}
+        docs={docs}
+        cards={ankiCards}
+        lists={jetpunkLists}
+        onReplay={() => {
+          setLastResult(null);
+          setResultPreviousBest(null);
+          void startGame();
+        }}
+        onClose={() => {
+          setLastResult(null);
+          setResultPreviousBest(null);
+        }}
+        onOpenSource={openSource}
+      />
+    );
+  }
 
   return (
     <div className="h-full overflow-y-auto p-6">

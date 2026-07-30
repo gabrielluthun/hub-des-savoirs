@@ -92,12 +92,23 @@ export interface JetPunkList {
   items: JetPunkItem[];
 }
 
+export type QuestionType = 'qcm' | 'libre' | 'vrai_faux' | 'liste';
+
+/** Compact record of a posed Plateau question — used for anti-repeat. */
+export interface PlayedQuizFact {
+  question: string;
+  answer: string;
+  type?: QuestionType;
+}
+
 export interface GameHistoryEntry {
   id: string;
   score: number;
   total: number;
   difficulty: Difficulty;
   playedAt: string;
+  /** Questions asked in this game — absent on legacy entries. */
+  questions?: PlayedQuizFact[];
 }
 
 export interface JetPunkHistoryEntry {
@@ -112,8 +123,6 @@ export interface JetPunkHistoryEntry {
   /** Item ids found during the attempt — absent on legacy entries. */
   foundIds?: string[];
 }
-
-export type QuestionType = 'qcm' | 'libre' | 'vrai_faux' | 'liste';
 
 export interface GeneratedQuestion {
   type: QuestionType;

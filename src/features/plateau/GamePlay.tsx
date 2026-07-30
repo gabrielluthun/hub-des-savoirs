@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ListAnswerPanel } from '@/features/plateau/components/ListAnswerPanel';
+import type {
+  PlateauAnswerRecord,
+  PlateauGameResult,
+} from '@/features/plateau/lib/game-result';
+import { scoreFromAnswers } from '@/features/plateau/lib/game-result';
 import {
   answersMatch,
   findMatchingListItem,
@@ -11,7 +16,7 @@ import type { GeneratedQuestion } from '@/types';
 interface GamePlayProps {
   questions: GeneratedQuestion[];
   soundEnabled: boolean;
-  onFinish: (score: number) => void;
+  onFinish: (result: PlateauGameResult) => void;
   onAbort: () => void;
 }
 
@@ -29,6 +34,9 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
   const [revealed, setRevealed] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(false);
   const [remaining, setRemaining] = useState(30);
+  const recordsRef = useRef<PlateauAnswerRecord[]>([]);
+  const startedAtRef = useRef(Date.now());
+  const recordedIndexRef = useRef<number | null>(null);
 
   const current = questions[index];
   const listItems = current?.answers ?? [];
@@ -49,23 +57,6 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     return () => window.clearInterval(timer);
   }, [index, revealed, current]);
 
-  useEffect(() => {
-    if (remaining > 0 || revealed || !current) return;
-    if (isList) {
-      const ok = foundItems.length === listItems.length && listItems.length > 0;
-      setRevealed(true);
-      setWasCorrect(ok);
-      if (ok) {
-        setScore((s) => s + 1);
-        setStreak((s) => s + 1);
-      } else setStreak(0);
-      return;
-    }
-    setRevealed(true);
-    setWasCorrect(false);
-    setStreak(0);
-  }, [remaining, revealed, current, isList, foundItems.length, listItems.length]);
-
   const playTone = (ok: boolean) => {
     if (!soundEnabled) return;
     try {
@@ -83,8 +74,16 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     }
   };
 
-  const settle = (ok: boolean, value?: string) => {
-    if (value !== undefined) setSelected(value);
+  const appendRecord = (record: PlateauAnswerRecord) => {
+    if (recordedIndexRef.current === index) return;
+    recordedIndexRef.current = index;
+    recordsRef.current = [...recordsRef.current, record];
+  };
+
+  const settle = (ok: boolean, userAnswer: string) => {
+    if (!current || revealed) return;
+    appendRecord({ question: current, correct: ok, userAnswer });
+    setSelected(userAnswer);
     setRevealed(true);
     setWasCorrect(ok);
     if (ok) {
@@ -96,6 +95,18 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       playTone(false);
     }
   };
+
+  useEffect(() => {
+    if (remaining > 0 || revealed || !current) return;
+    if (isList) {
+      const ok = foundItems.length === listItems.length && listItems.length > 0;
+      settle(ok, foundItems.join(', ') || '—');
+      return;
+    }
+    settle(false, selected ?? (typed.trim() || '—'));
+    // settle intentionally closes over latest answer fields
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remaining, revealed, current, isList, foundItems.length, listItems.length]);
 
   const checkAnswer = (value: string) => {
     if (revealed || !current || isList) return;
@@ -113,12 +124,24 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     const next = [...foundItems, match];
     setFoundItems(next);
     playTone(true);
-    if (next.length >= listItems.length) settle(true);
+    if (next.length >= listItems.length) {
+      settle(true, next.join(', '));
+    }
+  };
+
+  const finish = () => {
+    const answers = recordsRef.current;
+    onFinish({
+      score: scoreFromAnswers(answers),
+      total: questions.length,
+      elapsedSec: Math.max(0, Math.round((Date.now() - startedAtRef.current) / 1000)),
+      answers,
+    });
   };
 
   const goNext = () => {
     if (index + 1 >= questions.length) {
-      onFinish(score);
+      finish();
       return;
     }
     setIndex((i) => i + 1);
@@ -127,6 +150,7 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     setFoundItems([]);
     setRevealed(false);
     setWasCorrect(false);
+    recordedIndexRef.current = null;
   };
 
   if (!current) return null;
@@ -214,7 +238,7 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
           <p className="mt-1 text-muted-foreground">{current.explanation}</p>
           <div className="mt-4 flex gap-2">
             <Button type="button" onClick={goNext}>
-              {index + 1 >= questions.length ? 'Voir le score' : 'Question suivante'}
+              {index + 1 >= questions.length ? 'Voir les résultats' : 'Question suivante'}
             </Button>
             <Button type="button" variant="ghost" onClick={onAbort}>
               Abandonner

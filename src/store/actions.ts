@@ -4,6 +4,7 @@ import type {
   Difficulty,
   HubDocument,
   JetPunkList,
+  PlayedQuizFact,
   TabId,
 } from '@/types';
 
@@ -99,4 +100,5 @@ export const addGameHistory = (entry: {
   total: number;
   difficulty: Difficulty;
   playedAt: string;
+  questions?: PlayedQuizFact[];
 }) => ({ type: 'ADD_GAME_HISTORY' as const, entry });

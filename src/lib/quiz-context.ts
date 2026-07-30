@@ -1,4 +1,5 @@
 import type { AnkiCard, HubDocument, JetPunkList, QuizSourceSelection } from '@/types';
+import { shuffleCopy } from '@/features/plateau/lib/anti-repeat';
 import {
   filterCardsForSelection,
   filterDocsForSelection,
@@ -12,9 +13,13 @@ export function buildQuizContext(params: {
   jetpunkLists: JetPunkList[];
 }): string {
   const parts: string[] = [];
-  const docs = filterDocsForSelection(params.docs, params.selection);
-  const cards = filterCardsForSelection(params.ankiCards, params.selection);
-  const lists = filterListsForSelection(params.jetpunkLists, params.selection);
+  const docs = shuffleCopy(filterDocsForSelection(params.docs, params.selection));
+  const cards = shuffleCopy(
+    filterCardsForSelection(params.ankiCards, params.selection)
+  );
+  const lists = shuffleCopy(
+    filterListsForSelection(params.jetpunkLists, params.selection)
+  );
 
   if (params.selection.kind === 'all' || params.selection.kind === 'docs') {
     for (const doc of docs) {
@@ -34,13 +39,13 @@ export function buildQuizContext(params: {
 
   if (params.selection.kind === 'all' || params.selection.kind === 'jetpunk') {
     for (const list of lists) {
-      const lines = list.items
-        .filter((item) => item.prompt.trim() || item.answer.trim())
-        .map((item) => `- ${item.prompt} → ${item.answer}`);
+      const lines = shuffleCopy(
+        list.items.filter((item) => item.prompt.trim() || item.answer.trim())
+      ).map((item) => `- ${item.prompt} → ${item.answer}`);
       if (lines.length === 0) continue;
       parts.push(`# Liste JetPunk : ${list.title} (${list.category})\n${lines.join('\n')}`);
     }
   }
 
-  return parts.join('\n\n').trim();
+  return shuffleCopy(parts).join('\n\n').trim();
 }
