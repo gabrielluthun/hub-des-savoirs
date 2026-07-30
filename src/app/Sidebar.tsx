@@ -34,6 +34,9 @@ interface SidebarProps {
 export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const { state, dispatch } = useStore();
   const activeTab = state.settings.activeTab;
+  const navItems = NAV_ITEMS.filter(
+    (item) => item.id !== 'quizypedia' || state.settings.quizypediaEnabled
+  );
 
   const go = (tab: TabId) => {
     dispatch(setTab(tab));
@@ -83,7 +86,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             Navigation
           </p>
           <nav className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               const active = activeTab === item.id;
               return (
