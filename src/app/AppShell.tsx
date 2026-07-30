@@ -35,7 +35,7 @@ export function AppShell() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <p className="font-display text-sm font-semibold">Hub du Savoir</p>
+          <p className="font-display text-sm font-semibold">Hub des Savoirs</p>
         </header>
         <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
           {tab === 'docs' && <DocsView />}
