@@ -15,6 +15,7 @@ export function useGenerateCards() {
       model: GeminiModel;
       doc: HubDocument;
       count: number;
+      deckName: string;
     }) => {
       setLoading(true);
       try {
@@ -24,6 +25,7 @@ export function useGenerateCards() {
           docTitle: params.doc.title,
           content: params.doc.content,
           count: params.count,
+          deckName: params.deckName,
         });
         setDrafts(cards);
         return cards;
