@@ -5,6 +5,7 @@ import { GameHistory } from '@/features/plateau/GameHistory';
 import { GamePlay } from '@/features/plateau/GamePlay';
 import { GameResults } from '@/features/plateau/GameResults';
 import { GameSetup } from '@/features/plateau/GameSetup';
+import { PlateauHelp } from '@/features/plateau/components/help/PlateauHelpDialog';
 import { collectDecks } from '@/features/anki/lib/organization';
 import {
   collectRecentFacts,
@@ -191,11 +192,14 @@ export function PlateauView() {
     <div className="h-full overflow-y-auto p-6">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-quiz-accent">
-              Émission spéciale
+              Rubrique spéciale
             </p>
-            <h1 className="font-display text-3xl font-semibold">Le Maître du Quiz TV</h1>
+            <div className="mt-0.5 flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-3xl font-semibold">Le Maître du Quiz TV</h1>
+              <PlateauHelp />
+            </div>
             <p className="mt-1 text-sm text-muted-foreground">
               Questions générées par IA à partir de vos notes, listes et cartes.
             </p>
