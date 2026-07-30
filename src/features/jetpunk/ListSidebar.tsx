@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 import type { JetPunkList } from '@/types';
-import { Download, Plus, Trash2 } from 'lucide-react';
+import { Download, Plus, Trash2, Upload } from 'lucide-react';
 
 interface ListSidebarProps {
   lists: JetPunkList[];
@@ -11,6 +11,7 @@ interface ListSidebarProps {
   onAdd: () => void;
   onDelete: (id: string) => void;
   onExportAll: () => void;
+  onToggleImport: () => void;
 }
 
 export function ListSidebar({
@@ -20,6 +21,7 @@ export function ListSidebar({
   onAdd,
   onDelete,
   onExportAll,
+  onToggleImport,
 }: ListSidebarProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -55,6 +57,15 @@ export function ListSidebar({
           <h2 className="font-display text-lg font-semibold">JetPunk</h2>
         </div>
         <div className="mt-1 flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={onToggleImport}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            aria-label="Importer des listes"
+            title="Importer des listes"
+          >
+            <Upload className="h-4 w-4" />
+          </button>
           <button
             type="button"
             onClick={onExportAll}
