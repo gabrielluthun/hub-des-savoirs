@@ -1,4 +1,5 @@
 import { buildAnkiCardsPrompt } from '@/features/anki/lib/generate/build-cards-prompt';
+import { DECK_PATH_SEP } from '@/features/anki/lib/decks';
 import { generateJson } from '@/lib/gemini';
 import type { GeminiModel } from '@/types';
 
@@ -23,6 +24,10 @@ export async function generateAnkiCardsFromDoc(params: {
     throw new Error('Indique un deck cible avant de générer.');
   }
 
+  const leaf =
+    params.deckName.split(DECK_PATH_SEP).filter(Boolean).at(-1)?.trim() ||
+    params.deckName;
+
   const prompt = buildAnkiCardsPrompt({
     docTitle: params.docTitle,
     content: params.content,
@@ -34,13 +39,16 @@ export async function generateAnkiCardsFromDoc(params: {
     apiKey: params.apiKey,
     model: params.model,
     prompt,
+    temperature: 0.4,
   });
 
   if (!Array.isArray(result.cards) || result.cards.length === 0) {
-    throw new Error('Aucune carte générée.');
+    throw new Error(
+      `Aucune carte liée à « ${leaf} » dans ce document. Choisis un autre doc, ou un deck plus large.`
+    );
   }
 
-  return result.cards
+  const cards = result.cards
     .map((card) => ({
       question: String(card.question ?? '').trim(),
       answer: String(card.answer ?? '').trim(),
@@ -48,4 +56,12 @@ export async function generateAnkiCardsFromDoc(params: {
     }))
     .filter((card) => card.question && card.answer)
     .slice(0, params.count);
+
+  if (cards.length === 0) {
+    throw new Error(
+      `Aucune carte liée à « ${leaf} » dans ce document. Choisis un autre doc, ou un deck plus large.`
+    );
+  }
+
+  return cards;
 }
