@@ -1,7 +1,7 @@
 import { Play, Sparkles } from 'lucide-react';
 import { QuestionTypePicker } from '@/features/plateau/components/QuestionTypePicker';
 import { SourcePicker } from '@/features/plateau/components/SourcePicker';
-import { Button, Label, Select } from '@/components/ui/primitives';
+import { Button, Input, Label, Select } from '@/components/ui/primitives';
 import type {
   Difficulty,
   HubDocument,
@@ -10,6 +10,14 @@ import type {
   QuizSource,
   QuizSourceSelection,
 } from '@/types';
+
+const MIN_QUESTION_COUNT = 1;
+const MAX_QUESTION_COUNT = 100;
+
+function clampQuestionCount(value: number): number {
+  if (!Number.isFinite(value)) return 5;
+  return Math.min(MAX_QUESTION_COUNT, Math.max(MIN_QUESTION_COUNT, Math.round(value)));
+}
 
 interface GameSetupProps {
   count: number;
@@ -49,16 +57,24 @@ export function GameSetup({
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label>Nombre de questions</Label>
-          <Select
-            value={String(count)}
-            onChange={(e) => onCountChange(Number(e.target.value))}
-          >
-            {[3, 5, 8, 10].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </Select>
+          <Input
+            type="number"
+            aria-label="Nombre de questions"
+            inputMode="numeric"
+            min={MIN_QUESTION_COUNT}
+            max={MAX_QUESTION_COUNT}
+            step={1}
+            value={count}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === '') return;
+              onCountChange(clampQuestionCount(Number(raw)));
+            }}
+            onBlur={() => onCountChange(clampQuestionCount(count))}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Entre {MIN_QUESTION_COUNT} et {MAX_QUESTION_COUNT}
+          </p>
         </div>
         <div className="space-y-1.5">
           <Label>Difficulté</Label>
