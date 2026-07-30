@@ -1,5 +1,6 @@
 import type { AppState, GeminiModel, TabId } from '@/types';
 import { DEFAULT_GEMINI_MODEL, GEMINI_MODELS } from '@/types';
+import { mergeDeckNames } from '@/features/anki/lib/decks';
 
 const LEGACY_TAB_MAP: Record<string, TabId> = {
   jeutv: 'plateau',
@@ -39,6 +40,16 @@ export function migrateActiveTab(tab: string): TabId {
 }
 
 export function migrateState(state: AppState): AppState {
+  const ankiCards = (state.ankiCards ?? []).map((card) => ({
+    ...card,
+    mnemonic: card.mnemonic ?? '',
+    deck: card.deck?.trim() ? card.deck : '',
+    tags: Array.isArray(card.tags) ? card.tags : [],
+    dueAt: card.dueAt ?? new Date(0).toISOString(),
+    intervalDays: card.intervalDays ?? 0,
+    reps: card.reps ?? 0,
+  }));
+
   return {
     ...state,
     jetpunkHistory: state.jetpunkHistory ?? [],
@@ -46,15 +57,11 @@ export function migrateState(state: AppState): AppState {
       ...doc,
       tags: Array.isArray(doc.tags) ? doc.tags : [],
     })),
-    ankiCards: (state.ankiCards ?? []).map((card) => ({
-      ...card,
-      mnemonic: card.mnemonic ?? '',
-      deck: card.deck?.trim() ? card.deck : 'Défaut',
-      tags: Array.isArray(card.tags) ? card.tags : [],
-      dueAt: card.dueAt ?? new Date(0).toISOString(),
-      intervalDays: card.intervalDays ?? 0,
-      reps: card.reps ?? 0,
-    })),
+    ankiCards,
+    ankiDecks: mergeDeckNames(
+      state.ankiDecks,
+      ankiCards.map((card) => card.deck)
+    ),
     settings: {
       ...state.settings,
       model: migrateGeminiModel(state.settings.model),
