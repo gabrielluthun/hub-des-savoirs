@@ -56,36 +56,34 @@ export function ListSidebar({
           </p>
           <h2 className="font-display text-lg font-semibold">JetPunk</h2>
         </div>
-        <div className="mt-1 flex shrink-0 items-center gap-0.5">
-          <button
-            type="button"
-            onClick={onToggleImport}
-            className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
-            aria-label="Importer des listes"
-            title="Importer des listes JSON"
-          >
-            <Upload className="h-4 w-4" />
-            <span className="hidden sm:inline md:hidden lg:inline">Import</span>
-          </button>
-          <button
-            type="button"
-            onClick={onExportAll}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
-            aria-label="Exporter toutes les listes"
-            title="Exporter toutes les listes"
-          >
-            <Download className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onAdd}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
-            aria-label="Nouvelle liste"
-            title="Nouvelle liste"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-1 shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          aria-label="Nouvelle liste"
+          title="Nouvelle liste"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+        <button
+          type="button"
+          onClick={onToggleImport}
+          className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border px-2 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Upload className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">Importer une liste</span>
+        </button>
+        <button
+          type="button"
+          onClick={onExportAll}
+          className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border px-2 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Download className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">Tout exporter</span>
+        </button>
       </div>
 
       {categories.length > 1 ? (
