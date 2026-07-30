@@ -110,11 +110,43 @@ export function personLastNameForms(answer: string): string[] {
   return [last];
 }
 
-export function answerMatchesGuess(answer: string, guessRaw: string): boolean {
+export type AnswerMatchKind = 'exact' | 'last-name';
+
+export function matchKindForGuess(
+  answer: string,
+  guessRaw: string
+): AnswerMatchKind | null {
   const guess = normalizeJetpunkAnswer(guessRaw);
-  if (!guess) return false;
+  if (!guess) return null;
   const expected = normalizeJetpunkAnswer(answer);
-  if (!expected) return false;
-  if (guess === expected) return true;
-  return personLastNameForms(answer).includes(guess);
+  if (!expected) return null;
+  if (guess === expected) return 'exact';
+  if (personLastNameForms(answer).includes(guess)) return 'last-name';
+  return null;
+}
+
+export function answerMatchesGuess(answer: string, guessRaw: string): boolean {
+  return matchKindForGuess(answer, guessRaw) !== null;
+}
+
+/**
+ * All still-open items that match the guess.
+ * Exact full-name hits win as a group; otherwise all last-name hits
+ * (e.g. « Dupont » validates Pierre Dupont + Marie Dupont together).
+ */
+export function findMatchingAnswers<T extends { id: string; answer: string }>(
+  items: T[],
+  guessRaw: string,
+  excludeIds: ReadonlySet<string>
+): T[] {
+  const candidates = items
+    .filter((item) => !excludeIds.has(item.id))
+    .map((item) => ({ item, kind: matchKindForGuess(item.answer, guessRaw) }))
+    .filter((entry): entry is { item: T; kind: AnswerMatchKind } => entry.kind !== null);
+
+  if (candidates.length === 0) return [];
+
+  const exact = candidates.filter((entry) => entry.kind === 'exact');
+  if (exact.length > 0) return exact.map((entry) => entry.item);
+  return candidates.map((entry) => entry.item);
 }
