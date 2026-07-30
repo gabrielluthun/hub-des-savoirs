@@ -72,7 +72,7 @@ export function AnkiView() {
 
   useEffect(() => {
     const tryStartFromSidebar = () => {
-      if (consumeNavIntent() !== 'anki-review') return;
+      if (!consumeNavIntent('anki-review')) return;
       // Sidebar counts all due cards — clear filters and review that full set.
       filters.setSelectedDeck(null);
       filters.clearTags();

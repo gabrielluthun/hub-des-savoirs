@@ -129,6 +129,10 @@ export function JetpunkHelpDialog({ open, onClose }: JetpunkHelpDialogProps) {
                 Géographie::Capitales).
               </li>
               <li>C’est une copie : ta liste JetPunk reste en place.</li>
+              <li>
+                Les questions déjà présentes dans Anki sont ignorées
+                pour éviter les doublons.
+              </li>
             </ul>
           </section>
 

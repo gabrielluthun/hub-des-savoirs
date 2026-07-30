@@ -30,7 +30,7 @@ export function buildQuizPrompt(params: {
   }
   if (types.includes('liste')) {
     typeRules.push(
-      `- liste : question = thème à compléter ; answers = 3 à 5 éléments à retrouver ; answer = le premier élément ; pas d'options`
+      `- liste : le joueur tape de mémoire les éléments (AUCUNE liste de choix n'est affichée). question = consigne claire du type « Cite les N … » / « Quels sont les N … ? » ; answers = exactement les N éléments attendus (3 à 5) ; answer = answers[0] ; options = [] ou absent. INTERDIT dans question : « parmi les suivants », « parmi ceux-ci », « coche », « choisis dans la liste », ou toute tournure qui implique des propositions visibles.`
     );
   }
 

@@ -1,17 +1,4 @@
-import {
-  filterRepeatedQuestions,
-  shuffleCopy,
-  shuffleQuestionOptions,
-} from '@/features/plateau/lib/anti-repeat';
-import { buildQuizPrompt } from '@/features/plateau/lib/build-quiz-prompt';
-import { normalizeGeneratedQuestions } from '@/features/plateau/lib/normalize-questions';
-import { ALL_QUESTION_TYPES } from '@/features/plateau/lib/question-types';
-import type {
-  GeminiModel,
-  GeneratedQuestion,
-  PlayedQuizFact,
-  QuestionType,
-} from '@/types';
+import type { GeminiModel } from '@/types';
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
@@ -59,55 +46,24 @@ export async function generateJson<T>(params: GeminiGenerateParams): Promise<T> 
   return JSON.parse(text) as T;
 }
 
-export async function generateQuizQuestions(params: {
+/** Lightweight check: GET model metadata with the provided key. */
+export async function verifyGeminiApiKey(params: {
   apiKey: string;
   model: GeminiModel;
-  context: string;
-  count: number;
-  difficulty: string;
-  questionTypes?: QuestionType[];
-  excludeFacts?: PlayedQuizFact[];
-}): Promise<GeneratedQuestion[]> {
-  const questionTypes =
-    params.questionTypes && params.questionTypes.length > 0
-      ? params.questionTypes
-      : ALL_QUESTION_TYPES;
-  const excludeFacts = params.excludeFacts ?? [];
-  const requestCount = Math.min(params.count + 2, params.count * 2);
-
-  const prompt = buildQuizPrompt({
-    context: params.context,
-    count: requestCount,
-    difficulty: params.difficulty,
-    questionTypes,
-    excludeFacts,
-  });
-
-  const result = await generateJson<{ questions: unknown[] }>({
-    apiKey: params.apiKey,
-    model: params.model,
-    prompt,
-    temperature: 0.85,
-  });
-
-  if (!Array.isArray(result.questions) || result.questions.length === 0) {
-    throw new Error('Aucune question générée.');
+}): Promise<void> {
+  const apiKey = params.apiKey.trim();
+  if (!apiKey) {
+    throw new Error('Clé API Gemini manquante.');
   }
 
-  const normalized = normalizeGeneratedQuestions(
-    result.questions,
-    questionTypes,
-    requestCount
-  );
-  const fresh = filterRepeatedQuestions(normalized, excludeFacts);
-  const pool = fresh.length > 0 ? fresh : normalized;
-  const questions = shuffleCopy(pool)
-    .map(shuffleQuestionOptions)
-    .slice(0, params.count);
+  const url = `${GEMINI_BASE}/models/${params.model}?key=${encodeURIComponent(apiKey)}`;
+  const response = await fetch(url);
 
-  if (questions.length === 0) {
-    throw new Error('Aucune question exploitable générée.');
+  if (response.ok) return;
+
+  const errorText = await response.text();
+  if (response.status === 400 || response.status === 403 || response.status === 401) {
+    throw new Error('Clé API refusée ou modèle inaccessible.');
   }
-
-  return questions;
+  throw new Error(`Erreur Gemini (${response.status}) : ${errorText.slice(0, 160)}`);
 }

@@ -1,12 +1,15 @@
 import type {
   AnkiCard,
   AppSettings,
+  AppState,
   Difficulty,
   HubDocument,
   JetPunkList,
   PlayedQuizFact,
   TabId,
 } from '@/types';
+
+export const hydrate = (state: AppState) => ({ type: 'HYDRATE' as const, state });
 
 export const setTab = (tab: TabId) => ({ type: 'SET_TAB' as const, tab });
 

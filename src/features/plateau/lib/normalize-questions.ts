@@ -27,6 +27,19 @@ export function stripContextMetaPhrases(value: string): string {
     .trim();
 }
 
+/** List questions are free recall — remove wording that implies visible choices. */
+export function stripFakeChoicePhrases(value: string): string {
+  return value
+    .replace(
+      /\s*[,:]?\s*parmi\s+(les\s+suivants?|ceux-ci|celles-ci|les\s+propositions?\s+suivantes?)\s*:?\s*/giu,
+      ' '
+    )
+    .replace(/\s*[,:]?\s*coche[rz]?\s+(les\s+)?(bonnes\s+)?réponses?\s*:?\s*/giu, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([?!.])/g, '$1')
+    .trim();
+}
+
 /** Normalize / repair model output into playable questions. */
 export function normalizeGeneratedQuestions(
   raw: unknown[],
@@ -69,8 +82,11 @@ export function normalizeGeneratedQuestions(
       if (!answer) continue;
     }
 
+    let questionText = question;
     if (type === 'liste') {
       options = [];
+      questionText = stripFakeChoicePhrases(question);
+      if (!questionText) continue;
       if (answers.length === 0 && answer) answers = [answer];
       answers = [...new Set(answers)].slice(0, 6);
       if (answers.length < 2) continue;
@@ -79,7 +95,7 @@ export function normalizeGeneratedQuestions(
 
     questions.push({
       type,
-      question,
+      question: questionText,
       options: options.length > 0 ? options : undefined,
       answer,
       answers: type === 'liste' ? answers : undefined,
