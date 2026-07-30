@@ -21,7 +21,7 @@ import {
   selectionForKind,
   selectionHasResources,
 } from '@/features/plateau/lib/source-selection';
-import { generateQuizQuestions } from '@/lib/gemini';
+import { generateQuizQuestions } from '@/features/plateau/lib/generate-quiz';
 import { buildQuizContext } from '@/lib/quiz-context';
 import { createId } from '@/lib/utils';
 import {
