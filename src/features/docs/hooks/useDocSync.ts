@@ -6,6 +6,7 @@ import {
   getDocSyncStatus,
   type DocSyncStatus,
 } from '@/features/docs/lib/doc-sync';
+import { confirmAction } from '@/lib/confirm';
 
 export function useLocalContentHash(content: string): string | null {
   const [hash, setHash] = useState<string | null>(null);
@@ -61,7 +62,10 @@ export async function refreshGoogleDoc(params: {
     };
   }
 
-  const confirmed = window.confirm(buildRemoteReplaceConfirmMessage(check.localEdited));
+  const confirmed = await confirmAction(
+    buildRemoteReplaceConfirmMessage(check.localEdited),
+    { title: 'Mettre à jour le document', okLabel: 'Remplacer' }
+  );
   if (!confirmed) {
     return { outcome: 'cancelled' };
   }
