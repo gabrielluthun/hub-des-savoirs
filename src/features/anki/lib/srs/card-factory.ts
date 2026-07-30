@@ -7,6 +7,7 @@ import { createId } from '@/lib/utils';
 export function createAnkiCard(input: {
   question: string;
   answer: string;
+  mnemonic?: string;
   deck?: string;
   tags?: string[];
   id?: string;
@@ -15,6 +16,7 @@ export function createAnkiCard(input: {
     id: input.id ?? createId(),
     question: input.question,
     answer: input.answer,
+    mnemonic: input.mnemonic?.trim() ?? '',
     deck: normalizeDeckName(input.deck ?? DEFAULT_ANKI_DECK),
     tags: dedupeTags(input.tags ?? []),
     ...createDefaultSrsFields(),
@@ -25,6 +27,7 @@ export function withDefaultSrs(card: AnkiCard): AnkiCard {
   const defaults = createDefaultSrsFields();
   return {
     ...card,
+    mnemonic: card.mnemonic ?? '',
     deck: normalizeDeckName(card.deck ?? DEFAULT_ANKI_DECK),
     tags: Array.isArray(card.tags) ? dedupeTags(card.tags) : [],
     dueAt: card.dueAt ?? defaults.dueAt,
