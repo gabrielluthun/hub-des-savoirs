@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
+import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
 import { ImportPanel } from '@/features/jetpunk/components/import/ImportPanel';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
 import { QuizLaunchBar } from '@/features/jetpunk/components/QuizLaunchBar';
@@ -126,6 +127,7 @@ export function JetPunkView() {
             <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
           </div>
         </div>
+        <JetpunkHelp />
       </div>
     );
   }
@@ -258,6 +260,8 @@ export function JetPunkView() {
           }}
         />
       ) : null}
+
+      {!quizOpen ? <JetpunkHelp /> : null}
     </div>
   );
 }
