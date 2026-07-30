@@ -1,6 +1,8 @@
 /** One-shot intents when switching tabs from the sidebar. */
 
-export type NavIntent = 'anki-review';
+export type NavIntent =
+  | { type: 'anki-review' }
+  | { type: 'jetpunk-quiz'; listId: string };
 
 const EVENT = 'hub:nav-intent';
 
@@ -13,8 +15,12 @@ export function requestNavIntent(intent: NavIntent): void {
   }
 }
 
-export function consumeNavIntent(): NavIntent | null {
-  const intent = pending;
+/** Consume only if the pending intent matches `expected` (other listeners keep it). */
+export function consumeNavIntent<T extends NavIntent['type']>(
+  expected: T
+): Extract<NavIntent, { type: T }> | null {
+  if (!pending || pending.type !== expected) return null;
+  const intent = pending as Extract<NavIntent, { type: T }>;
   pending = null;
   return intent;
 }
