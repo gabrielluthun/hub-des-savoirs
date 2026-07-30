@@ -98,6 +98,8 @@ export interface JetPunkHistoryEntry {
   durationSec: number;
   elapsedSec: number;
   playedAt: string;
+  /** Item ids found during the attempt — absent on legacy entries. */
+  foundIds?: string[];
 }
 
 export interface GeneratedQuestion {
