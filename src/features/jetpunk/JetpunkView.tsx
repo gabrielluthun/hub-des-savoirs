@@ -3,7 +3,6 @@ import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
 import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
-import { ImportPanel } from '@/features/jetpunk/components/import/ImportPanel';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
 import { QuizLaunchBar } from '@/features/jetpunk/components/QuizLaunchBar';
 import { useJetpunkExport } from '@/features/jetpunk/hooks/useJetpunkExport';
@@ -39,8 +38,7 @@ export function JetPunkView() {
   const activeList = selectActiveJetpunkList(state);
   const history = selectJetpunkHistory(state) ?? [];
   const { exportList, exportAll } = useJetpunkExport();
-  const importer = useJetpunkImport(dispatch);
-  const [importOpen, setImportOpen] = useState(false);
+  const { importFile } = useJetpunkImport(dispatch);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizItems, setQuizItems] = useState<JetPunkItem[] | null>(null);
 
@@ -103,25 +101,16 @@ export function JetPunkView() {
     onAdd: handleAddList,
     onDelete: handleDeleteList,
     onExportAll: () => exportAll(lists),
-    onToggleImport: () => setImportOpen((open) => !open),
+    onImportFile: (file: File) => {
+      void importFile(file);
+    },
   };
-
-  const importPanel = importOpen ? (
-    <ImportPanel
-      paste={importer.paste}
-      onPasteChange={importer.setPaste}
-      onImportPaste={importer.importPaste}
-      onImportFile={importer.importFile}
-      onClose={() => setImportOpen(false)}
-    />
-  ) : null;
 
   if (!activeList) {
     return (
       <div className="flex h-full min-h-0 flex-col md:flex-row">
         <ListSidebar {...sidebarProps} activeListId={null} />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
-          {importPanel}
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
             <p>Aucune liste sélectionnée.</p>
             <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
@@ -137,8 +126,6 @@ export function JetPunkView() {
       <ListSidebar {...sidebarProps} activeListId={activeList.id} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
-        {importPanel}
-
         <div className="mb-3 flex items-start gap-2">
           <input
             value={activeList.title}

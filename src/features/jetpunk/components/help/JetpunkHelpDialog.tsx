@@ -102,17 +102,15 @@ export function JetpunkHelpDialog({ open, onClose }: JetpunkHelpDialogProps) {
             <h3 className="font-medium">Import / export</h3>
             <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
               <li>
-                <span className="text-foreground">Import</span> (sidebar) : fichier{' '}
-                <code className="text-foreground">.json</code> ou collage au format ci-dessous.
+                <span className="text-foreground">Importer une liste</span> : choisis un
+                fichier <code className="text-foreground">.json</code> au format export Hub.
               </li>
               <li>
-                <span className="text-foreground">Exporter</span> : la liste courante (bouton
-                à côté du titre) ou toutes les listes (icône téléchargement en sidebar).
+                <span className="text-foreground">Tout exporter</span> /{' '}
+                <span className="text-foreground">Exporter cette liste</span> : sauvegarde en
+                JSON pour réimport plus tard.
               </li>
             </ul>
-            <p className="rounded-xl bg-secondary/60 px-3 py-2.5 font-mono text-xs leading-relaxed">
-              {`{ "version": 1, "lists": [ … ] }`}
-            </p>
           </section>
 
           <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">

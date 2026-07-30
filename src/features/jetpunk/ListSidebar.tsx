@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { JsonImportButton } from '@/features/jetpunk/components/import/JsonImportButton';
 import { Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 import type { JetPunkList } from '@/types';
-import { Download, Plus, Trash2, Upload } from 'lucide-react';
+import { Download, Plus, Trash2 } from 'lucide-react';
 
 interface ListSidebarProps {
   lists: JetPunkList[];
@@ -11,7 +12,7 @@ interface ListSidebarProps {
   onAdd: () => void;
   onDelete: (id: string) => void;
   onExportAll: () => void;
-  onToggleImport: () => void;
+  onImportFile: (file: File) => void;
 }
 
 export function ListSidebar({
@@ -21,7 +22,7 @@ export function ListSidebar({
   onAdd,
   onDelete,
   onExportAll,
-  onToggleImport,
+  onImportFile,
 }: ListSidebarProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -68,14 +69,11 @@ export function ListSidebar({
       </div>
 
       <div className="grid grid-cols-2 gap-2 px-3 pb-3">
-        <button
-          type="button"
-          onClick={onToggleImport}
+        <JsonImportButton
+          onFile={onImportFile}
+          label="Importer une liste"
           className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border px-2 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          <Upload className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">Importer une liste</span>
-        </button>
+        />
         <button
           type="button"
           onClick={onExportAll}
