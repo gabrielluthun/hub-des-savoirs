@@ -5,9 +5,11 @@ import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
 import { DeckSidebar } from '@/features/anki/components/decks/DeckSidebar';
+import { GenerateFromDocPanel } from '@/features/anki/components/generate/GenerateFromDocPanel';
 import { DeduplicationReport } from '@/features/anki/components/import/DeduplicationReport';
 import { TxtImportButton } from '@/features/anki/components/import/TxtImportButton';
 import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
+import { useGenerateCards } from '@/features/anki/hooks/useGenerateCards';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { DEFAULT_ANKI_DECK, normalizeDeckName } from '@/features/anki/lib/decks';
 import {
@@ -29,15 +31,17 @@ import {
   addAnkiCard,
   addAnkiCards,
   deleteAnkiCard,
+  setTab,
   updateAnkiCard,
 } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
-import { selectAnkiCards } from '@/store/selectors';
+import { selectAnkiCards, selectDocs } from '@/store/selectors';
 import type { AnkiCard } from '@/types';
 
 export function AnkiView() {
   const { state, dispatch } = useStore();
   const cards = selectAnkiCards(state);
+  const docs = selectDocs(state);
   const [query, setQuery] = useState('');
   const [bulk, setBulk] = useState('');
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
@@ -49,11 +53,13 @@ export function AnkiView() {
   const [draftDeck, setDraftDeck] = useState(DEFAULT_ANKI_DECK);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
+  const [showAiPanel, setShowAiPanel] = useState(false);
   const [deduplicationReport, setDeduplicationReport] = useState<{
     added: number;
     skipped: number;
     skippedQuestions: string[];
   } | null>(null);
+  const ai = useGenerateCards();
 
   const decks = useMemo(() => collectDecks(cards), [cards]);
   const allTags = useMemo(() => collectCardTags(cards), [cards]);
@@ -208,6 +214,50 @@ export function AnkiView() {
     }
   };
 
+  const handleAiGenerate = async (params: { docId: string; count: number }) => {
+    const doc = docs.find((item) => item.id === params.docId);
+    if (!doc) {
+      toast.error('Document introuvable.');
+      return;
+    }
+    try {
+      const generated = await ai.generate({
+        apiKey: state.settings.apiKey,
+        model: state.settings.model,
+        doc,
+        count: params.count,
+      });
+      toast.success(
+        `${generated.length} carte${generated.length > 1 ? 's' : ''} générée${generated.length > 1 ? 's' : ''}.`
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Échec de la génération.');
+    }
+  };
+
+  const handleAiSave = (params: {
+    drafts: { question: string; answer: string; mnemonic: string }[];
+    deck: string;
+    indices: number[];
+  }) => {
+    const deck = normalizeDeckName(params.deck);
+    const selectedDrafts = params.indices
+      .map((index) => params.drafts[index])
+      .filter((draft): draft is { question: string; answer: string; mnemonic: string } =>
+        Boolean(draft)
+      )
+      .map((draft) => ({
+        question: draft.question,
+        answer: draft.answer,
+        deck,
+        mnemonic: draft.mnemonic,
+        tags: [] as string[],
+      }));
+
+    importParsedCards(selectedDrafts);
+    ai.clear();
+  };
+
   const handleExport = () => {
     if (scopedCards.length === 0) {
       toast.error('Aucune carte à exporter.');
@@ -264,6 +314,14 @@ export function AnkiView() {
               <Sparkles className="h-4 w-4" />
               Réviser ({review.dueCount})
             </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowAiPanel((value) => !value)}
+            >
+              <Sparkles className="h-4 w-4" />
+              {showAiPanel ? 'Masquer IA' : 'IA depuis Docs'}
+            </Button>
             <TxtImportButton onFile={handleTxtFile} />
             <Button type="button" variant="outline" onClick={handleExport}>
               <Download className="h-4 w-4" />
@@ -290,6 +348,24 @@ export function AnkiView() {
             {scopedCards.length} carte{scopedCards.length !== 1 ? 's' : ''}
           </span>
         </div>
+
+        {showAiPanel ? (
+          <GenerateFromDocPanel
+            docs={docs}
+            loading={ai.loading}
+            drafts={ai.drafts}
+            defaultDeck={selectedDeck ?? DEFAULT_ANKI_DECK}
+            deckSuggestions={decks}
+            hasApiKey={Boolean(state.settings.apiKey.trim())}
+            onNeedApiKey={() => {
+              toast.error('Ajoutez votre clé API Gemini dans Paramètres.');
+              dispatch(setTab('settings'));
+            }}
+            onGenerate={handleAiGenerate}
+            onClear={ai.clear}
+            onSave={handleAiSave}
+          />
+        ) : null}
 
         {deduplicationReport ? (
           <DeduplicationReport
