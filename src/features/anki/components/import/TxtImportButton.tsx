@@ -22,8 +22,13 @@ export function TxtImportButton({ onFile }: TxtImportButtonProps) {
           if (file) onFile(file);
         }}
       />
-      <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
-        <FileText className="h-4 w-4" />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => inputRef.current?.click()}
+      >
+        <FileText className="h-3.5 w-3.5" />
         Importer .txt
       </Button>
     </>

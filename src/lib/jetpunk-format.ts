@@ -55,10 +55,11 @@ function asExportList(value: unknown): JetpunkExportList | null {
   for (const entry of raw.items) {
     if (!entry || typeof entry !== 'object') continue;
     const item = entry as Record<string, unknown>;
+    // Hub JSON: prompt/answer — also accept Anki-style question for round-trips
     const answer = String(item.answer ?? '').trim();
     if (!answer) continue;
     items.push({
-      prompt: String(item.prompt ?? ''),
+      prompt: String(item.prompt ?? item.question ?? ''),
       answer,
     });
   }

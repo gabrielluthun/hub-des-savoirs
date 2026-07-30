@@ -15,8 +15,17 @@ import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
 import { deckExists } from '@/features/anki/lib/organization';
 import { deckIsUnder, decksEqual } from '@/features/anki/lib/decks';
+import { ankiCardsToJetpunkList } from '@/lib/anki-jetpunk-transfer';
 import { Button, Input } from '@/components/ui/primitives';
-import { addAnkiDeck, deleteAnkiCard, removeAnkiDeck, updateAnkiCard } from '@/store/actions';
+import {
+  addAnkiDeck,
+  addJetpunkList,
+  deleteAnkiCard,
+  removeAnkiDeck,
+  setActiveJetpunkList,
+  setTab,
+  updateAnkiCard,
+} from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 import { selectAnkiCards, selectAnkiDecks, selectDocs } from '@/store/selectors';
 
@@ -72,6 +81,22 @@ export function AnkiView() {
     return true;
   };
 
+  const handleTransferToJetpunk = () => {
+    const list = ankiCardsToJetpunkList(filters.scopedCards, {
+      deck: filters.selectedDeck ?? undefined,
+    });
+    if (!list) {
+      toast.error('Aucune carte transférable (il faut au moins une réponse).');
+      return;
+    }
+    dispatch(addJetpunkList(list));
+    dispatch(setActiveJetpunkList(list.id));
+    dispatch(setTab('jetpunk'));
+    toast.success(
+      `Liste JetPunk « ${list.title} » (${list.category}) créée — ${list.items.length} élément${list.items.length !== 1 ? 's' : ''}.`
+    );
+  };
+
   const handleDeleteDeck = (name: string) => {
     const count = filters.deckCounts[name] ?? 0;
     const nested = filters.decks.filter(
@@ -112,10 +137,12 @@ export function AnkiView() {
         <AnkiToolbar
           dueCount={review.dueCount}
           showAiPanel={aiFromDocs.showAiPanel}
+          transferCount={filters.scopedCards.length}
           onStartReview={startReview}
           onToggleAiPanel={aiFromDocs.toggleAiPanel}
           onTxtFile={io.handleTxtFile}
           onExport={io.handleExport}
+          onTransferToJetpunk={handleTransferToJetpunk}
         />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">

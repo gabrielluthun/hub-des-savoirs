@@ -205,6 +205,21 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
             </ul>
           </section>
 
+          <section className="space-y-2">
+            <h3 className="font-medium">Vers JetPunk</h3>
+            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+              <li>
+                Le bouton <span className="text-foreground">Vers JetPunk</span> transforme les
+                cartes affichées en une liste de quiz (question → indice, réponse → réponse).
+              </li>
+              <li>
+                Un deck <span className="text-foreground">Thème::Liste</span> devient la
+                catégorie et le titre de la liste (ex. Géographie::Capitales).
+              </li>
+              <li>C’est une copie : tes cartes Anki restent en place.</li>
+            </ul>
+          </section>
+
           <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
             <p className="font-medium text-foreground">Astuce</p>
             <p className="mt-1">
