@@ -113,6 +113,22 @@ export function JetpunkHelpDialog({ open, onClose }: JetpunkHelpDialogProps) {
             </ul>
           </section>
 
+          <section className="space-y-2">
+            <h3 className="font-medium">Vers Anki</h3>
+            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+              <li>
+                Le bouton <span className="text-foreground">Vers Anki</span> copie la liste
+                active en cartes de révision (indice → question, réponse → réponse).
+              </li>
+              <li>
+                La catégorie et le nom de la liste deviennent le deck Anki{' '}
+                <span className="text-foreground">Catégorie::Liste</span> (ex.
+                Géographie::Capitales).
+              </li>
+              <li>C’est une copie : ta liste JetPunk reste en place.</li>
+            </ul>
+          </section>
+
           <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
             <p className="font-medium text-foreground">Astuce</p>
             <p className="mt-1">
