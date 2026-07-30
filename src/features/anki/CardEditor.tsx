@@ -1,4 +1,5 @@
 import { Button, Input, Label, Textarea } from '@/components/ui/primitives';
+import { DeckField } from '@/features/anki/components/decks/DeckField';
 import { TagPicker } from '@/features/anki/components/decks/TagPicker';
 
 interface CardEditorProps {
@@ -56,17 +57,7 @@ export function CardEditor({
       </div>
       <div className="space-y-1.5">
         <Label>Deck</Label>
-        <Input
-          value={deck}
-          onChange={(e) => onDeckChange(e.target.value)}
-          placeholder="Défaut"
-          list="anki-deck-suggestions"
-        />
-        <datalist id="anki-deck-suggestions">
-          {deckSuggestions.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
+        <DeckField value={deck} onChange={onDeckChange} suggestions={deckSuggestions} />
       </div>
       <div className="space-y-1.5">
         <Label>Mnémotechnique (optionnel)</Label>
