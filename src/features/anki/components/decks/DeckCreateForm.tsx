@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { DECK_PATH_SEP, normalizeDeckName } from '@/features/anki/lib/decks';
 import { Input } from '@/components/ui/primitives';
 
@@ -23,7 +24,10 @@ export function DeckCreateForm({ onCreate, parentHint = null }: DeckCreateFormPr
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const name = normalizeDeckName(draft);
-    if (!name) return;
+    if (!name) {
+      toast.error('Le nom du deck ne peut pas être vide.');
+      return;
+    }
     const created = onCreate(name);
     if (created) {
       setDraft(parentHint ? `${parentHint}${DECK_PATH_SEP}` : '');
