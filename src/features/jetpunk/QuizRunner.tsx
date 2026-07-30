@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useEndOnVisibilityHidden } from '@/features/jetpunk/hooks/useEndOnVisibilityHidden';
 import { useQuizClock } from '@/features/jetpunk/hooks/useQuizClock';
-import { answerMatchesGuess } from '@/features/jetpunk/lib/answer-match';
+import { findMatchingAnswers } from '@/features/jetpunk/lib/answer-match';
 import {
   computeItemMissStats,
   pickFocusItems,
@@ -108,12 +108,14 @@ export function QuizRunner({
   }, [playing, allFound]);
 
   const tryMatch = (raw: string) => {
-    const match = playableItems.find(
-      (item) => !foundIds.has(item.id) && answerMatchesGuess(item.answer, raw)
-    );
-    if (!match) return false;
+    const hits = findMatchingAnswers(playableItems, raw, foundIds);
+    if (hits.length === 0) return false;
 
-    setFoundIds((prev) => new Set(prev).add(match.id));
+    setFoundIds((prev) => {
+      const next = new Set(prev);
+      for (const item of hits) next.add(item.id);
+      return next;
+    });
     setInput('');
     return true;
   };
