@@ -14,15 +14,20 @@ export async function generateAnkiCardsFromDoc(params: {
   docTitle: string;
   content: string;
   count: number;
+  deckName: string;
 }): Promise<GeneratedAnkiDraft[]> {
   if (!params.content.trim()) {
     throw new Error('Le document sélectionné est vide.');
+  }
+  if (!params.deckName.trim()) {
+    throw new Error('Indique un deck cible avant de générer.');
   }
 
   const prompt = buildAnkiCardsPrompt({
     docTitle: params.docTitle,
     content: params.content,
     count: params.count,
+    deckName: params.deckName,
   });
 
   const result = await generateJson<{ cards: GeneratedAnkiDraft[] }>({
