@@ -46,6 +46,12 @@ export function migrateState(state: AppState): AppState {
       ...doc,
       tags: Array.isArray(doc.tags) ? doc.tags : [],
     })),
+    ankiCards: (state.ankiCards ?? []).map((card) => ({
+      ...card,
+      dueAt: card.dueAt ?? new Date(0).toISOString(),
+      intervalDays: card.intervalDays ?? 0,
+      reps: card.reps ?? 0,
+    })),
     settings: {
       ...state.settings,
       model: migrateGeminiModel(state.settings.model),

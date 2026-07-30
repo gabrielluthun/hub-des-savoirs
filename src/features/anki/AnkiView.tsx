@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Download, Plus, Search } from 'lucide-react';
+import { Download, Plus, Search, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
+import { ReviewSession } from '@/features/anki/components/review/ReviewSession';
+import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
+import { createAnkiCard } from '@/features/anki/lib/srs/card-factory';
 import { Button, Input } from '@/components/ui/primitives';
 import { parseBulkAnkiInput, serializeAnkiCards } from '@/lib/anki-format';
 import { downloadTextFile } from '@/lib/export';
-import { createId } from '@/lib/utils';
 import {
   addAnkiCard,
   addAnkiCards,
@@ -27,6 +29,10 @@ export function AnkiView() {
   const [draftQuestion, setDraftQuestion] = useState('');
   const [draftAnswer, setDraftAnswer] = useState('');
   const [showEditor, setShowEditor] = useState(false);
+
+  const review = useReviewQueue(cards, (cardId, patch) => {
+    dispatch(updateAnkiCard(cardId, patch));
+  });
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -66,11 +72,12 @@ export function AnkiView() {
       toast.success('Carte mise à jour.');
     } else {
       dispatch(
-        addAnkiCard({
-          id: createId(),
-          question: draftQuestion.trim(),
-          answer: draftAnswer.trim(),
-        })
+        addAnkiCard(
+          createAnkiCard({
+            question: draftQuestion.trim(),
+            answer: draftAnswer.trim(),
+          })
+        )
       );
       toast.success('Carte ajoutée.');
     }
@@ -85,11 +92,12 @@ export function AnkiView() {
     }
     dispatch(
       addAnkiCards(
-        parsed.map((card) => ({
-          id: createId(),
-          question: card.question,
-          answer: card.answer,
-        }))
+        parsed.map((card) =>
+          createAnkiCard({
+            question: card.question,
+            answer: card.answer,
+          })
+        )
       )
     );
     setBulk('');
@@ -105,6 +113,14 @@ export function AnkiView() {
     toast.success('Export .txt téléchargé.');
   };
 
+  const startReview = () => {
+    if (review.dueCount === 0) {
+      toast.message('Aucune carte due pour le moment.');
+      return;
+    }
+    review.start();
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <div className="flex min-w-0 flex-1 flex-col p-5">
@@ -118,10 +134,16 @@ export function AnkiView() {
               Format d&apos;export natif : texte brut, une carte par ligne (Question → Réponse).
             </p>
           </div>
-          <Button type="button" variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4" />
-            Exporter (.txt)
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="accent" onClick={startReview}>
+              <Sparkles className="h-4 w-4" />
+              Réviser ({review.dueCount})
+            </Button>
+            <Button type="button" variant="outline" onClick={handleExport}>
+              <Download className="h-4 w-4" />
+              Exporter (.txt)
+            </Button>
+          </div>
         </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -168,6 +190,18 @@ export function AnkiView() {
       </div>
 
       <BulkImportPanel value={bulk} onChange={setBulk} onImport={handleBulkImport} />
+
+      {review.active ? (
+        <ReviewSession
+          current={review.current}
+          remaining={review.remaining}
+          reviewedCount={review.reviewedCount}
+          revealed={review.revealed}
+          onReveal={review.reveal}
+          onGrade={review.grade}
+          onClose={review.stop}
+        />
+      ) : null}
     </div>
   );
 }
