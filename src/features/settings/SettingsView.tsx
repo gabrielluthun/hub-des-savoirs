@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { verifyGeminiApiKey } from '@/lib/gemini';
 import { Button, Input, Label, Select } from '@/components/ui/primitives';
 import { GEMINI_MODELS } from '@/types';
 import type { GeminiModel, ThemeMode } from '@/types';
@@ -8,6 +10,26 @@ import { useStore } from '@/store/StoreProvider';
 export function SettingsView() {
   const { state, dispatch } = useStore();
   const { settings } = state;
+  const [verifying, setVerifying] = useState(false);
+
+  const handleVerifyApiKey = async () => {
+    if (!settings.apiKey.trim()) {
+      toast.error('Saisissez une clé API.');
+      return;
+    }
+    setVerifying(true);
+    try {
+      await verifyGeminiApiKey({
+        apiKey: settings.apiKey,
+        model: settings.model,
+      });
+      toast.success('Clé API valide — connexion Gemini OK.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Échec de la vérification.');
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-y-auto p-6">
@@ -55,15 +77,12 @@ export function SettingsView() {
           <Button
             type="button"
             variant="secondary"
+            disabled={verifying}
             onClick={() => {
-              if (!settings.apiKey.trim()) {
-                toast.error('Saisissez une clé API.');
-                return;
-              }
-              toast.success('Clé API enregistrée localement.');
+              void handleVerifyApiKey();
             }}
           >
-            Vérifier l&apos;enregistrement
+            {verifying ? 'Vérification…' : 'Vérifier la clé API'}
           </Button>
         </section>
 
