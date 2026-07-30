@@ -5,6 +5,7 @@ import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
 import { MarkdownEditor } from '@/features/docs/MarkdownEditor';
 import { OutlinePanel } from '@/features/docs/OutlinePanel';
+import { TagEditor } from '@/features/docs/components/editor/TagEditor';
 import { hashContent } from '@/features/docs/lib/content-hash';
 import {
   buildGoogleDocsEmbedUrl,
@@ -50,6 +51,7 @@ export function DocsView() {
         title: 'Nouveau document',
         googleDocsUrl: '',
         content: '',
+        tags: [],
         updatedAt: new Date().toISOString(),
       })
     );
@@ -187,23 +189,29 @@ export function DocsView() {
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <input
-            value={activeDoc.title}
-            onChange={(e) => dispatch(updateDoc(activeDoc.id, { title: e.target.value }))}
-            className="w-full bg-transparent font-display text-xl font-semibold outline-none"
+        <div className="space-y-3 border-b border-border px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <input
+              value={activeDoc.title}
+              onChange={(e) => dispatch(updateDoc(activeDoc.id, { title: e.target.value }))}
+              className="w-full bg-transparent font-display text-xl font-semibold outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(deleteDoc(activeDoc.id));
+                toast.success('Document supprimé.');
+              }}
+              className="rounded-lg p-2 text-destructive hover:bg-destructive/10"
+              aria-label="Supprimer le document"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <TagEditor
+            tags={activeDoc.tags ?? []}
+            onChange={(tags) => dispatch(updateDoc(activeDoc.id, { tags }))}
           />
-          <button
-            type="button"
-            onClick={() => {
-              dispatch(deleteDoc(activeDoc.id));
-              toast.success('Document supprimé.');
-            }}
-            className="rounded-lg p-2 text-destructive hover:bg-destructive/10"
-            aria-label="Supprimer le document"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </div>
 
         <DocsToolbar
