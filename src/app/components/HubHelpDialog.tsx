@@ -87,7 +87,8 @@ export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
             <h3 className="font-medium">Aujourd’hui</h3>
             <p className="text-muted-foreground">
               Le bloc en bas de la barre latérale te propose une reprise rapide : cartes Anki
-              dues, dernière liste JetPunk jouée, et un raccourci Plateau si tu as déjà quizé.
+              dues, dernière liste JetPunk, et un raccourci Plateau. Les lignes JetPunk et
+              Plateau disparaissent dès que tu as joué une partie dans la journée.
             </p>
           </section>
 

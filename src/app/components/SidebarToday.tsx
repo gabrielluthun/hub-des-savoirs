@@ -2,7 +2,9 @@ import { Layers, ListChecks, MonitorPlay } from 'lucide-react';
 import {
   countDueAnkiCards,
   findLastJetpunkPlay,
+  hasJetpunkPlayToday,
   hasPlateauHistory,
+  hasPlateauPlayToday,
 } from '@/app/lib/today';
 import { requestNavIntent } from '@/app/nav-intent';
 import { setActiveJetpunkList, setTab } from '@/store/actions';
@@ -17,7 +19,8 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
   const { state, dispatch } = useStore();
   const dueCount = countDueAnkiCards(state);
   const lastJetpunk = findLastJetpunkPlay(state);
-  const showPlateau = hasPlateauHistory(state);
+  const showJetpunk = Boolean(lastJetpunk) && !hasJetpunkPlayToday(state);
+  const showPlateau = hasPlateauHistory(state) && !hasPlateauPlayToday(state);
 
   const go = (tab: TabId) => {
     dispatch(setTab(tab));
@@ -37,7 +40,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
     go('jetpunk');
   };
 
-  const empty = dueCount === 0 && !lastJetpunk && !showPlateau;
+  const empty = dueCount === 0 && !showJetpunk && !showPlateau;
 
   return (
     <div className="rounded-xl bg-secondary/40 px-3 py-3">
@@ -67,7 +70,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
             </li>
           ) : null}
 
-          {lastJetpunk ? (
+          {showJetpunk && lastJetpunk ? (
             <li>
               <button
                 type="button"
@@ -76,7 +79,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
               >
                 <ListChecks className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-foreground">
-                  {lastJetpunk.entry.listTitle}
+                  JetPunk · {lastJetpunk.entry.listTitle}
                 </span>
                 <span className="shrink-0 font-medium text-foreground">Reprendre</span>
               </button>
