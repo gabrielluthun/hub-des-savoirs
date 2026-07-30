@@ -1,6 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
+import { consumeNavIntent, subscribeNavIntent } from '@/app/nav-intent';
+import {
+  buildExistingQuestionKeys,
+  partitionByQuestionDeduplication,
+} from '@/features/anki/lib/import/deduplication';
 import { Historique } from '@/features/jetpunk/Historique';
 import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
@@ -31,6 +36,7 @@ import {
 import { useStore } from '@/store/StoreProvider';
 import {
   selectActiveJetpunkList,
+  selectAnkiCards,
   selectJetpunkHistory,
   selectJetpunkLists,
 } from '@/store/selectors';
@@ -39,11 +45,33 @@ export function JetPunkView() {
   const { state, dispatch } = useStore();
   const lists = selectJetpunkLists(state);
   const activeList = selectActiveJetpunkList(state);
+  const ankiCards = selectAnkiCards(state);
   const history = selectJetpunkHistory(state) ?? [];
   const { exportList, exportAll } = useJetpunkExport();
   const { importFile } = useJetpunkImport(dispatch);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizItems, setQuizItems] = useState<JetPunkItem[] | null>(null);
+
+  useEffect(() => {
+    const tryStartFromSidebar = () => {
+      const intent = consumeNavIntent('jetpunk-quiz');
+      if (!intent) return;
+      const list = lists.find((entry) => entry.id === intent.listId);
+      if (!list) {
+        toast.message('Cette liste JetPunk n’existe plus.');
+        return;
+      }
+      if (!list.items.some((item) => item.answer.trim())) {
+        toast.message('Aucune réponse jouable dans cette liste.');
+        return;
+      }
+      dispatch(setActiveJetpunkList(list.id));
+      setQuizItems(null);
+      setQuizOpen(true);
+    };
+    tryStartFromSidebar();
+    return subscribeNavIntent(tryStartFromSidebar);
+  }, [dispatch, lists]);
 
   const listHistory = useMemo(() => {
     if (!activeList) return [];
@@ -105,10 +133,24 @@ export function JetPunkView() {
       toast.error('Aucun élément transférable (il faut au moins une réponse).');
       return;
     }
-    dispatch(addAnkiCards(cards));
+    const { unique, duplicates } = partitionByQuestionDeduplication(
+      cards,
+      buildExistingQuestionKeys(ankiCards)
+    );
+    if (unique.length === 0) {
+      toast.message(
+        `Tous les doublons ont été ignorés (${duplicates.length} carte${duplicates.length !== 1 ? 's' : ''}).`
+      );
+      return;
+    }
+    dispatch(addAnkiCards(unique));
     dispatch(setTab('anki'));
     toast.success(
-      `${cards.length} carte${cards.length !== 1 ? 's' : ''} Anki créée${cards.length !== 1 ? 's' : ''} (deck « ${cards[0]?.deck} »).`
+      `${unique.length} carte${unique.length !== 1 ? 's' : ''} Anki créée${unique.length !== 1 ? 's' : ''} (deck « ${unique[0]?.deck} »)${
+        duplicates.length > 0
+          ? ` — ${duplicates.length} doublon${duplicates.length !== 1 ? 's' : ''} ignoré${duplicates.length !== 1 ? 's' : ''}`
+          : ''
+      }.`
     );
   };
 
