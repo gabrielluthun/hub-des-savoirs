@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 import type { JetPunkList } from '@/types';
-import { Plus, Trash2 } from 'lucide-react';
+import { Download, Plus, Trash2 } from 'lucide-react';
 
 interface ListSidebarProps {
   lists: JetPunkList[];
@@ -10,6 +10,7 @@ interface ListSidebarProps {
   onSelect: (id: string) => void;
   onAdd: () => void;
   onDelete: (id: string) => void;
+  onExportAll: () => void;
 }
 
 export function ListSidebar({
@@ -18,6 +19,7 @@ export function ListSidebar({
   onSelect,
   onAdd,
   onDelete,
+  onExportAll,
 }: ListSidebarProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -52,14 +54,25 @@ export function ListSidebar({
           </p>
           <h2 className="font-display text-lg font-semibold">JetPunk</h2>
         </div>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="mt-1 rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
-          aria-label="Nouvelle liste"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+        <div className="mt-1 flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={onExportAll}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            aria-label="Exporter toutes les listes"
+            title="Exporter toutes les listes"
+          >
+            <Download className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onAdd}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            aria-label="Nouvelle liste"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {categories.length > 1 ? (
