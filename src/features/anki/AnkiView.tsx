@@ -13,18 +13,20 @@ import { useAnkiCardEditor } from '@/features/anki/hooks/useAnkiCardEditor';
 import { useAnkiFilters } from '@/features/anki/hooks/useAnkiFilters';
 import { useAnkiImportExport } from '@/features/anki/hooks/useAnkiImportExport';
 import { useReviewQueue } from '@/features/anki/hooks/useReviewQueue';
-import { DEFAULT_ANKI_DECK } from '@/features/anki/lib/decks';
+import { deckExists } from '@/features/anki/lib/organization';
+import { decksEqual } from '@/features/anki/lib/decks';
 import { Button, Input } from '@/components/ui/primitives';
-import { deleteAnkiCard, updateAnkiCard } from '@/store/actions';
+import { addAnkiDeck, deleteAnkiCard, removeAnkiDeck, updateAnkiCard } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
-import { selectAnkiCards, selectDocs } from '@/store/selectors';
+import { selectAnkiCards, selectAnkiDecks, selectDocs } from '@/store/selectors';
 
 export function AnkiView() {
   const { state, dispatch } = useStore();
   const cards = selectAnkiCards(state);
+  const registeredDecks = selectAnkiDecks(state);
   const docs = selectDocs(state);
 
-  const filters = useAnkiFilters(cards);
+  const filters = useAnkiFilters(cards, registeredDecks);
   const editor = useAnkiCardEditor({
     dispatch,
     selectedDeck: filters.selectedDeck,
@@ -55,6 +57,39 @@ export function AnkiView() {
     review.start();
   };
 
+  const handleCreateDeck = (name: string) => {
+    if (deckExists(filters.decks, name)) {
+      toast.message(`Le deck « ${name} » existe déjà.`);
+      filters.setSelectedDeck(
+        filters.decks.find((deck) => deck.toLowerCase() === name.toLowerCase()) ?? name
+      );
+      return false;
+    }
+    dispatch(addAnkiDeck(name));
+    filters.setSelectedDeck(name);
+    toast.success(`Deck « ${name} » créé.`);
+    return true;
+  };
+
+  const handleDeleteDeck = (name: string) => {
+    const count = filters.deckCounts[name] ?? 0;
+    const message =
+      count === 0
+        ? `Supprimer le deck « ${name} » ?`
+        : `Supprimer le deck « ${name} » et ses ${count} carte${count > 1 ? 's' : ''} ? Cette action est définitive.`;
+    if (!window.confirm(message)) return;
+
+    dispatch(removeAnkiDeck(name));
+    if (filters.selectedDeck && decksEqual(filters.selectedDeck, name)) {
+      filters.setSelectedDeck(null);
+    }
+    toast.success(
+      count === 0
+        ? `Deck « ${name} » supprimé.`
+        : `Deck « ${name} » et ${count} carte${count > 1 ? 's' : ''} supprimé${count > 1 ? 's' : ''}.`
+    );
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <DeckSidebar
@@ -62,6 +97,8 @@ export function AnkiView() {
         deckCounts={filters.deckCounts}
         selectedDeck={filters.selectedDeck}
         onSelectDeck={filters.setSelectedDeck}
+        onCreateDeck={handleCreateDeck}
+        onDeleteDeck={handleDeleteDeck}
         allTags={filters.allTags}
         selectedTags={filters.selectedTags}
         onToggleTag={filters.toggleTag}
@@ -103,7 +140,7 @@ export function AnkiView() {
             docs={docs}
             loading={aiFromDocs.ai.loading}
             drafts={aiFromDocs.ai.drafts}
-            defaultDeck={filters.selectedDeck ?? DEFAULT_ANKI_DECK}
+            defaultDeck={filters.selectedDeck ?? ''}
             deckSuggestions={filters.decks}
             hasApiKey={Boolean(state.settings.apiKey.trim())}
             onNeedApiKey={aiFromDocs.handleNeedApiKey}
