@@ -5,6 +5,8 @@ interface HistoriqueProps {
   title?: string;
   limit?: number;
   emptyLabel?: string;
+  /** When true, hide the whole block if there are no entries. */
+  hideWhenEmpty?: boolean;
 }
 
 function formatDuration(totalSec: number): string {
@@ -32,8 +34,11 @@ export function Historique({
   title = 'Historique',
   limit,
   emptyLabel = 'Aucune partie jouée pour le moment.',
+  hideWhenEmpty = false,
 }: HistoriqueProps) {
   const visible = limit ? entries.slice(0, limit) : entries;
+
+  if (hideWhenEmpty && visible.length === 0) return null;
 
   return (
     <div>
