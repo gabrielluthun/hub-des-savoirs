@@ -35,6 +35,19 @@ export function getDueCards(cards: AnkiCard[], now = new Date()): AnkiCard[] {
     });
 }
 
+/** Due cards (via dueAt), then Fisher–Yates shuffle for the review session. */
+export function getShuffledDueCards(cards: AnkiCard[], now = new Date()): AnkiCard[] {
+  const due = getDueCards(cards, now);
+  const next = [...due];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = next[i]!;
+    next[i] = next[j]!;
+    next[j] = tmp;
+  }
+  return next;
+}
+
 export function applySrsGrade(
   card: AnkiCard,
   grade: SrsGrade,
