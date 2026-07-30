@@ -49,22 +49,23 @@ export function ListSidebar({
 
   return (
     <div className="flex h-full w-full shrink-0 flex-col border-b border-border bg-background md:w-[260px] md:border-b-0 md:border-r">
-      <div className="flex items-start justify-between px-4 pb-3 pt-5">
-        <div>
+      <div className="flex items-start justify-between gap-2 px-4 pb-3 pt-5">
+        <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             Listes
           </p>
           <h2 className="font-display text-lg font-semibold">JetPunk</h2>
         </div>
-        <div className="mt-1 flex items-center gap-0.5">
+        <div className="mt-1 flex shrink-0 items-center gap-0.5">
           <button
             type="button"
             onClick={onToggleImport}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
             aria-label="Importer des listes"
-            title="Importer des listes"
+            title="Importer des listes JSON"
           >
             <Upload className="h-4 w-4" />
+            <span className="hidden sm:inline md:hidden lg:inline">Import</span>
           </button>
           <button
             type="button"
@@ -80,6 +81,7 @@ export function ListSidebar({
             onClick={onAdd}
             className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
             aria-label="Nouvelle liste"
+            title="Nouvelle liste"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -104,7 +106,7 @@ export function ListSidebar({
         </div>
       ) : null}
 
-      <div className="flex max-h-40 gap-1 overflow-x-auto px-2 pb-3 md:max-h-none md:flex-1 md:flex-col md:space-y-1 md:overflow-y-auto md:pb-4">
+      <div className="flex max-h-48 gap-1 overflow-x-auto px-2 pb-3 md:max-h-none md:flex-1 md:flex-col md:space-y-1 md:overflow-y-auto md:pb-4">
         {visibleLists.length === 0 ? (
           <p className="px-3 py-2 text-xs text-muted-foreground">
             Aucune liste dans cette catégorie.
@@ -112,11 +114,12 @@ export function ListSidebar({
         ) : (
           visibleLists.map((list) => {
             const active = list.id === activeListId;
+            const count = list.items.length;
             return (
               <div
                 key={list.id}
                 className={cn(
-                  'group flex min-w-[160px] items-center gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors md:min-w-0 md:w-full',
+                  'group flex min-w-[180px] items-center gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors md:min-w-0 md:w-full',
                   active ? 'bg-secondary' : 'hover:bg-secondary/50'
                 )}
               >
@@ -125,9 +128,11 @@ export function ListSidebar({
                   onClick={() => onSelect(list.id)}
                   className="min-w-0 flex-1 py-2 pr-1 text-left"
                 >
-                  <p className="truncate text-sm font-medium">{list.title}</p>
+                  <p className="truncate text-sm font-medium">
+                    {list.title.trim() || 'Sans titre'}
+                  </p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {list.category} • {list.items.length} items
+                    {list.category} • {count} élément{count !== 1 ? 's' : ''}
                   </p>
                 </button>
                 <button

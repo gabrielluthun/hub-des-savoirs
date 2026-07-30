@@ -46,6 +46,7 @@ export function QuizLaunchBar({
   onStartFocus,
 }: QuizLaunchBarProps) {
   const playableCount = items.filter((item) => item.answer.trim()).length;
+  const focusDisabled = focusCount === 0;
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -98,48 +99,56 @@ export function QuizLaunchBar({
               </option>
             ))}
           </Select>
-        ) : null}
+        ) : (
+          <span className="text-xs text-muted-foreground">Sans limite</span>
+        )}
       </div>
       <Button
         type="button"
         onClick={() => {
           if (playableCount === 0) {
-            toast.error('Ajoutez au moins une réponse.');
+            toast.error('Ajoute au moins une réponse.');
             return;
           }
           onStartFull();
         }}
       >
         <Play className="h-4 w-4" />
-        Démarrer le quiz
+        Démarrer
       </Button>
       <Button
         type="button"
         variant="secondary"
+        disabled={focusDisabled}
+        title={
+          focusDisabled
+            ? 'Joue quelques parties pour débloquer le focus sur les manques.'
+            : `Relancer les ${focusCount} items souvent manqués`
+        }
         onClick={() => {
-          if (focusCount === 0) {
-            toast.message(
-              'Pas encore assez de données : joue quelques parties pour cibler les manques.'
-            );
-            return;
-          }
+          if (focusDisabled) return;
           onStartFocus();
         }}
       >
         <Crosshair className="h-4 w-4" />
-        Focus manquées ({focusCount})
+        Focus ({focusCount})
       </Button>
-      <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
-        {previousBest !== null ? (
-          <span className="tabular-nums">
+      {previousBest !== null ? (
+        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+          <span className="tabular-nums" title="Meilleur score sur cette liste">
             Record {previousBest}/{historyTotalFallback}
           </span>
-        ) : null}
-        <span className="inline-flex items-center gap-2 tabular-nums">
-          <Target className="h-4 w-4" />
-          {lastScore} / {playableCount}
-        </span>
-      </div>
+          <span
+            className="inline-flex items-center gap-1.5 tabular-nums"
+            title="Dernière partie : score / total"
+          >
+            <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>
+              Dernière {lastScore}/{historyTotalFallback}
+            </span>
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }

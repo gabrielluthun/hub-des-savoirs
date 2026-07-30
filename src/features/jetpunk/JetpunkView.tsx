@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Historique } from '@/features/jetpunk/Historique';
+import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
 import { ImportPanel } from '@/features/jetpunk/components/import/ImportPanel';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
 import { QuizLaunchBar } from '@/features/jetpunk/components/QuizLaunchBar';
@@ -78,7 +79,7 @@ export function JetPunkView() {
     dispatch(
       addJetpunkList({
         id: createId(),
-        title: 'Nouvelle liste',
+        title: '',
         category: 'Général',
         durationSec: 90,
         items: [{ id: createId(), prompt: '', answer: '' }],
@@ -87,6 +88,11 @@ export function JetPunkView() {
   };
 
   const handleDeleteList = (id: string) => {
+    const list = lists.find((entry) => entry.id === id);
+    const label = list?.title?.trim() || 'cette liste';
+    if (!window.confirm(`Supprimer « ${label} » ? Cette action est définitive.`)) {
+      return;
+    }
     dispatch(deleteJetpunkList(id));
     toast.success('Liste supprimée.');
   };
@@ -116,10 +122,12 @@ export function JetPunkView() {
         <ListSidebar {...sidebarProps} activeListId={null} />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
           {importPanel}
-          <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-            Aucune liste sélectionnée.
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <p>Aucune liste sélectionnée.</p>
+            <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
           </div>
         </div>
+        <JetpunkHelp />
       </div>
     );
   }
@@ -131,13 +139,27 @@ export function JetPunkView() {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
         {importPanel}
 
-        <input
-          value={activeList.title}
-          onChange={(e) =>
-            dispatch(updateJetpunkList(activeList.id, { title: e.target.value }))
-          }
-          className="mb-4 w-full bg-transparent font-display text-2xl font-semibold outline-none"
-        />
+        <div className="mb-3 flex items-start gap-2">
+          <input
+            value={activeList.title}
+            onChange={(e) =>
+              dispatch(updateJetpunkList(activeList.id, { title: e.target.value }))
+            }
+            placeholder="Nom de la liste"
+            className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => exportList(activeList)}
+            title="Exporter cette liste en JSON"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Exporter cette liste</span>
+          </Button>
+        </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Input
@@ -147,7 +169,7 @@ export function JetPunkView() {
               dispatch(updateJetpunkList(activeList.id, { category: e.target.value }))
             }
             placeholder="Catégorie"
-            className="h-8 w-auto rounded-full px-3 text-xs"
+            className="h-8 w-auto min-w-[7rem] rounded-full px-3 text-xs"
           />
           <datalist id="jetpunk-categories">
             {[...new Set(lists.map((list) => list.category.trim()).filter(Boolean))]
@@ -157,17 +179,9 @@ export function JetPunkView() {
               ))}
           </datalist>
           <span className="text-xs text-muted-foreground">
-            {activeList.items.length} élément{activeList.items.length !== 1 ? 's' : ''}
+            {activeList.items.length} élément
+            {activeList.items.length !== 1 ? 's' : ''}
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => exportList(activeList)}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Exporter .json
-          </Button>
         </div>
 
         <QuizLaunchBar
@@ -226,6 +240,7 @@ export function JetPunkView() {
             entries={listHistory}
             title="Historique de cette liste"
             limit={10}
+            hideWhenEmpty
           />
         </div>
       </div>
@@ -245,6 +260,8 @@ export function JetPunkView() {
           }}
         />
       ) : null}
+
+      {!quizOpen ? <JetpunkHelp /> : null}
     </div>
   );
 }
