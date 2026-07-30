@@ -1,5 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import { applySrsGrade, getDueCards } from '@/features/anki/lib/srs/schedule';
+import {
+  applySrsGrade,
+  getDueCards,
+  getShuffledDueCards,
+} from '@/features/anki/lib/srs/schedule';
 import type { SrsGrade } from '@/features/anki/lib/srs/grades';
 import type { AnkiCard } from '@/types';
 
@@ -25,7 +29,7 @@ export function useReviewQueue(
   const remaining = queue.length;
 
   const start = useCallback(() => {
-    const due = getDueCards(cards);
+    const due = getShuffledDueCards(cards);
     setQueueIds(due.map((card) => card.id));
     setRevealed(false);
     setReviewedCount(0);

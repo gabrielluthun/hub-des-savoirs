@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { consumeNavIntent, subscribeNavIntent } from '@/app/nav-intent';
 import { BulkImportPanel } from '@/features/anki/BulkImportPanel';
 import { CardEditor } from '@/features/anki/CardEditor';
 import { CardList } from '@/features/anki/CardList';
@@ -66,6 +68,19 @@ export function AnkiView() {
     }
     review.start();
   };
+
+  useEffect(() => {
+    const tryStartFromSidebar = () => {
+      if (consumeNavIntent() !== 'anki-review') return;
+      if (review.dueCount === 0) {
+        toast.message('Aucune carte due pour ce filtre.');
+        return;
+      }
+      review.start();
+    };
+    tryStartFromSidebar();
+    return subscribeNavIntent(tryStartFromSidebar);
+  }, [review.dueCount, review.start]);
 
   const handleCreateDeck = (name: string) => {
     if (deckExists(filters.decks, name)) {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useEndOnVisibilityHidden } from '@/features/jetpunk/hooks/useEndOnVisibilityHidden';
 import { useQuizClock } from '@/features/jetpunk/hooks/useQuizClock';
+import { answerMatchesGuess } from '@/features/jetpunk/lib/answer-match';
 import {
   computeItemMissStats,
   pickFocusItems,
@@ -20,14 +21,6 @@ interface QuizRunnerProps {
   recentAttempts: JetPunkHistoryEntry[];
   onFinish: (result: QuizResult) => void;
   onClose: () => void;
-}
-
-function normalize(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .toLowerCase();
 }
 
 function formatClock(totalSec: number): string {
@@ -115,11 +108,8 @@ export function QuizRunner({
   }, [playing, allFound]);
 
   const tryMatch = (raw: string) => {
-    const guess = normalize(raw);
-    if (!guess) return false;
-
     const match = playableItems.find(
-      (item) => !foundIds.has(item.id) && normalize(item.answer) === guess
+      (item) => !foundIds.has(item.id) && answerMatchesGuess(item.answer, raw)
     );
     if (!match) return false;
 

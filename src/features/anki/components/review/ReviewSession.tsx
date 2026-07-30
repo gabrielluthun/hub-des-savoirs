@@ -47,6 +47,7 @@ export function ReviewSession({
             <ReviewCardFace
               question={current.question}
               answer={current.answer}
+              deck={current.deck}
               mnemonic={current.mnemonic}
               revealed={revealed}
             />
