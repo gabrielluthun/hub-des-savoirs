@@ -15,7 +15,7 @@ export function DeckField({ value, onChange, suggestions = [] }: DeckFieldProps)
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Choisir ou saisir un deck…"
+        placeholder="Histoire ou Histoire::Capétiens…"
         list={listId}
       />
       <datalist id={listId}>
