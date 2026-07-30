@@ -55,15 +55,6 @@ export function CardEditor({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Mnémotechnique (optionnel)</Label>
-        <Textarea
-          value={mnemonic}
-          onChange={(e) => onMnemonicChange(e.target.value)}
-          placeholder="Astuce pour mémoriser…"
-          className="min-h-[72px]"
-        />
-      </div>
-      <div className="space-y-1.5">
         <Label>Deck</Label>
         <Input
           value={deck}
@@ -78,7 +69,16 @@ export function CardEditor({
         </datalist>
       </div>
       <div className="space-y-1.5">
-        <Label>Tags</Label>
+        <Label>Mnémotechnique (optionnel)</Label>
+        <Textarea
+          value={mnemonic}
+          onChange={(e) => onMnemonicChange(e.target.value)}
+          placeholder="Astuce pour mémoriser…"
+          className="min-h-[72px]"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Tags (optionnel)</Label>
         <TagPicker tags={tags} onChange={onTagsChange} suggestions={tagSuggestions} />
       </div>
       <div className="flex gap-2">
