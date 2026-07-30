@@ -90,6 +90,7 @@ export const addJetpunkHistory = (entry: {
   durationSec: number;
   elapsedSec: number;
   playedAt: string;
+  foundIds?: string[];
 }) => ({ type: 'ADD_JETPUNK_HISTORY' as const, entry });
 
 export const addGameHistory = (entry: {
