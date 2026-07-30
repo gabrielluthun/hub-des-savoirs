@@ -59,6 +59,28 @@ export async function generateJson<T>(params: GeminiGenerateParams): Promise<T> 
   return JSON.parse(text) as T;
 }
 
+/** Lightweight check: GET model metadata with the provided key. */
+export async function verifyGeminiApiKey(params: {
+  apiKey: string;
+  model: GeminiModel;
+}): Promise<void> {
+  const apiKey = params.apiKey.trim();
+  if (!apiKey) {
+    throw new Error('Clé API Gemini manquante.');
+  }
+
+  const url = `${GEMINI_BASE}/models/${params.model}?key=${encodeURIComponent(apiKey)}`;
+  const response = await fetch(url);
+
+  if (response.ok) return;
+
+  const errorText = await response.text();
+  if (response.status === 400 || response.status === 403 || response.status === 401) {
+    throw new Error('Clé API refusée ou modèle inaccessible.');
+  }
+  throw new Error(`Erreur Gemini (${response.status}) : ${errorText.slice(0, 160)}`);
+}
+
 export async function generateQuizQuestions(params: {
   apiKey: string;
   model: GeminiModel;
