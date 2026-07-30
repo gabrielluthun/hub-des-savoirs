@@ -1,6 +1,7 @@
 interface ReviewCardFaceProps {
   question: string;
   answer: string;
+  deck?: string;
   mnemonic?: string;
   revealed: boolean;
 }
@@ -8,11 +9,19 @@ interface ReviewCardFaceProps {
 export function ReviewCardFace({
   question,
   answer,
+  deck = '',
   mnemonic = '',
   revealed,
 }: ReviewCardFaceProps) {
+  const deckLabel = deck.trim();
+
   return (
     <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-border bg-card px-6 py-10 text-center">
+      {deckLabel ? (
+        <p className="mb-3 max-w-md truncate text-xs text-muted-foreground" title={deckLabel}>
+          {deckLabel}
+        </p>
+      ) : null}
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         {revealed ? 'Réponse' : 'Question'}
       </p>
