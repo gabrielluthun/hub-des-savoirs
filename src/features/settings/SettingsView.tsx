@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { downloadJsonFile } from '@/lib/export';
 import { verifyGeminiApiKey } from '@/lib/gemini';
+import { parseHubBackup, serializeHubBackup } from '@/lib/hub-backup';
 import { Button, Input, Label, Select } from '@/components/ui/primitives';
 import { GEMINI_MODELS } from '@/types';
 import type { GeminiModel, ThemeMode } from '@/types';
-import { updateSettings } from '@/store/actions';
+import { hydrate, updateSettings } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 
 export function SettingsView() {
   const { state, dispatch } = useStore();
   const { settings } = state;
   const [verifying, setVerifying] = useState(false);
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   const handleVerifyApiKey = async () => {
     if (!settings.apiKey.trim()) {
@@ -28,6 +31,27 @@ export function SettingsView() {
       toast.error(error instanceof Error ? error.message : 'Échec de la vérification.');
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const handleExportBackup = () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadJsonFile(`hub-du-savoir-backup-${stamp}.json`, serializeHubBackup(state));
+    toast.success('Sauvegarde exportée (inclut la clé API si renseignée).');
+  };
+
+  const handleImportBackup = async (file: File) => {
+    try {
+      const raw = await file.text();
+      const next = parseHubBackup(raw);
+      const confirmed = window.confirm(
+        'Remplacer tout le Hub (docs, Anki, JetPunk, historiques, paramètres) par cette sauvegarde ? Cette action est immédiate.'
+      );
+      if (!confirmed) return;
+      dispatch(hydrate(next));
+      toast.success('Sauvegarde restaurée.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Import impossible.');
     }
   };
 
@@ -84,6 +108,37 @@ export function SettingsView() {
           >
             {verifying ? 'Vérification…' : 'Vérifier la clé API'}
           </Button>
+        </section>
+
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          <h2 className="font-display text-lg font-semibold">Sauvegarde</h2>
+          <p className="text-sm text-muted-foreground">
+            Exporte ou restaure l’état complet du Hub (docs, cartes, listes, historiques,
+            réglages). Contient ta clé API si renseigné, à ne PAS partager.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={handleExportBackup}>
+              Exporter la sauvegarde
+            </Button>
+            <input
+              ref={backupInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                if (file) void handleImportBackup(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => backupInputRef.current?.click()}
+            >
+              Restaurer une sauvegarde
+            </Button>
+          </div>
         </section>
 
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
