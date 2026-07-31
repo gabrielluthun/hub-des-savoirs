@@ -1,16 +1,9 @@
+import { isTauriRuntime } from '@/lib/utils';
+
 export interface ConfirmOptions {
   title?: string;
   okLabel?: string;
   cancelLabel?: string;
-}
-
-function isTauriRuntime(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    ('__TAURI_INTERNALS__' in window ||
-      '__TAURI__' in window ||
-      Boolean(import.meta.env.TAURI_ENV_PLATFORM))
-  );
 }
 
 /**

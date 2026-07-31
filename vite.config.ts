@@ -30,6 +30,16 @@ export default defineConfig({
     watch: {
       ignored: ['**/src-tauri/**', '**/.toolchain/**'],
     },
+    // Browser CORS blocks docs.google.com/export; proxy in Vite dev only.
+    proxy: {
+      '/api/gdoc-export': {
+        target: 'https://docs.google.com',
+        changeOrigin: true,
+        secure: true,
+        followRedirects: true,
+        rewrite: (p) => p.replace(/^\/api\/gdoc-export/, ''),
+      },
+    },
   },
   build: {
     target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13',
