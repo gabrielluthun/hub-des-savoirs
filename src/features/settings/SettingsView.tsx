@@ -65,9 +65,6 @@ export function SettingsView() {
             Configuration
           </p>
           <h1 className="font-display text-2xl font-semibold">Paramètres</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Clé API, modèle Gemini, thème et modules — tout reste en local.
-          </p>
         </div>
 
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
@@ -79,11 +76,8 @@ export function SettingsView() {
               autoComplete="off"
               value={settings.apiKey}
               onChange={(e) => dispatch(updateSettings({ apiKey: e.target.value }))}
-              placeholder="AIza…"
+              placeholder="Insérer la clé API ici"
             />
-            <p className="text-xs text-muted-foreground">
-              Stockée uniquement dans localStorage (`gk-hub-state-v1`).
-            </p>
           </div>
           <div className="space-y-1.5">
             <Label>Modèle</Label>
@@ -115,8 +109,7 @@ export function SettingsView() {
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-lg font-semibold">Sauvegarde</h2>
           <p className="text-sm text-muted-foreground">
-            Exporte ou restaure l’état complet du Hub (docs, cartes, listes, historiques,
-            réglages). Contient ta clé API si renseigné, à ne PAS partager.
+            Exporte ou restaure l’état complet du Hub : docs, cartes, listes, historiques, paramètres.
           </p>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={handleExportBackup}>

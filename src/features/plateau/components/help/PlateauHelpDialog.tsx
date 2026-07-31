@@ -40,7 +40,7 @@ export function PlateauHelpDialog({ open, onClose }: PlateauHelpDialogProps) {
           <section className="space-y-2">
             <p className="text-muted-foreground">
               Le Plateau génère un <span className="text-foreground">quiz IA</span> à partir de
-              tes notes Google Docs, cartes Anki ou listes JetPunk — style « maître du quiz ».
+              tes notes Google Docs, cartes Anki ou listes JetPunk.
             </p>
           </section>
 
@@ -87,8 +87,8 @@ export function PlateauHelpDialog({ open, onClose }: PlateauHelpDialogProps) {
           <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
             <p className="font-medium text-foreground">Astuce</p>
             <p className="mt-1">
-              Plus tes notes et listes sont précises, meilleures sont les questions. Un deck Anki
-              ou une liste JetPunk ciblée donne souvent un meilleur quiz qu’« tout le Hub ».
+              Plus tes notes et listes sont précises, meilleures sont les questions. <br /> Un deck Anki
+              ou une liste JetPunk ciblée donne souvent un meilleur quiz que de sélectionner « Toutes les ressources ».
             </p>
           </section>
         </div>
