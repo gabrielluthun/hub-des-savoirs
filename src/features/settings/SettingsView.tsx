@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { confirmAction } from '@/lib/confirm';
-import { downloadJsonFile } from '@/lib/export';
+import { saveJsonFile } from '@/lib/export';
 import { verifyGeminiApiKey } from '@/lib/gemini';
 import { parseHubBackup, serializeHubBackup } from '@/lib/hub-backup';
 import { checkForAppUpdate, downloadAndInstallAppUpdate } from '@/lib/updater';
@@ -40,10 +40,18 @@ export function SettingsView() {
     }
   };
 
-  const handleExportBackup = () => {
+  const handleExportBackup = async () => {
     const stamp = new Date().toISOString().slice(0, 10);
-    downloadJsonFile(`hub-des-savoirs-backup-${stamp}.json`, serializeHubBackup(state));
-    toast.success('Sauvegarde exportée (inclut la clé API si renseignée).');
+    try {
+      const result = await saveJsonFile(
+        `hub-des-savoirs-backup-${stamp}.json`,
+        serializeHubBackup(state)
+      );
+      if (result === 'cancelled') return;
+      toast.success('Sauvegarde exportée.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export impossible.');
+    }
   };
 
   const handleImportBackup = async (file: File) => {
@@ -151,7 +159,13 @@ export function SettingsView() {
             Exporte ou restaure l’état complet du Hub : docs, cartes, listes, historiques, paramètres.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={handleExportBackup}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                void handleExportBackup();
+              }}
+            >
               Exporter la sauvegarde
             </Button>
             <input
