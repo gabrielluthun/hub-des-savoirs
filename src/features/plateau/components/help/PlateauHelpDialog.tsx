@@ -7,6 +7,8 @@ interface PlateauHelpDialogProps {
   onClose: () => void;
 }
 
+const P = 'text-muted-foreground';
+
 export function PlateauHelpDialog({ open, onClose }: PlateauHelpDialogProps) {
   if (!open) return null;
 
@@ -36,59 +38,74 @@ export function PlateauHelpDialog({ open, onClose }: PlateauHelpDialogProps) {
           </Button>
         </div>
 
-        <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
-          <section className="space-y-2">
-            <p className="text-muted-foreground">
+        <div className="space-y-10 overflow-y-auto px-5 py-6 text-sm leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">À quoi sert le Plateau</h2>
+            <p className={P}>
               Le Plateau génère un <span className="text-foreground">quiz IA</span> à partir de
-              tes notes Google Docs, cartes Anki ou listes JetPunk.
+              tes notes Google Docs, de tes cartes Anki ou de tes listes JetPunk.
+            </p>
+            <p className={P}>
+              Tu révises ainsi le contenu que tu as déjà saisi dans le Hub, sous forme de
+              questions variées.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Avant de lancer</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                Une <span className="text-foreground">clé API Gemini</span> est requise
-                (Paramètres).
-              </li>
-              <li>
-                Choisis le <span className="text-foreground">nombre</span> de questions et la{' '}
-                <span className="text-foreground">difficulté</span>.
-              </li>
-              <li>
-                Sélectionne la <span className="text-foreground">source</span> : tout le Hub, ou
-                seulement certains docs / decks / listes.
-              </li>
-              <li>
-                Coche les <span className="text-foreground">types de questions</span> voulus
-                (QCM, réponse libre, etc.).
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Avant de lancer</h2>
+            <p className={P}>
+              Une <span className="text-foreground">clé API Gemini</span> est indispensable.
+            </p>
+            <p className={P}>
+              Renseigne-la dans Paramètres, puis vérifie que le modèle répond bien.
+            </p>
+            <p className={P}>
+              Choisis ensuite le <span className="text-foreground">nombre</span> de questions et
+              la <span className="text-foreground">difficulté</span>.
+            </p>
+            <p className={P}>
+              Tu peux cibler <span className="text-foreground">toutes les ressources</span> du
+              Hub, ou seulement certains documents, decks Anki ou listes JetPunk.
+            </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Pendant & après</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                Réponds question par question ; le score se met à jour en direct.
-              </li>
-              <li>
-                En fin de partie, tu vois le bilan et tu peux{' '}
-                <span className="text-foreground">rejouer</span> ou ouvrir la source d’une
-                question.
-              </li>
-              <li>
-                L’historique en bas mémorise tes scores. Les faits récents sont évités pour
-                limiter les répétitions.
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Types de questions</h2>
+            <p className={P}>
+              Coche les <span className="text-foreground">types de questions</span> que tu veux
+              voir apparaître.
+            </p>
+            <p className={P}>
+              QCM, réponse libre, vrai / faux ou listes, selon ce qui te convient.
+            </p>
           </section>
 
-          <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
-            <p className="font-medium text-foreground">Astuce</p>
-            <p className="mt-1">
-              Plus tes notes et listes sont précises, meilleures sont les questions. <br /> Un deck Anki
-              ou une liste JetPunk ciblée donne souvent un meilleur quiz que de sélectionner « Toutes les ressources ».
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Pendant et après la partie</h2>
+            <p className={P}>Réponds question par question.</p>
+            <p className={P}>
+              Le score se met à jour au fur et à mesure, pour que tu suives ta progression en
+              direct.
+            </p>
+            <p className={P}>
+              En fin de partie, tu obtiens un bilan et tu peux{' '}
+              <span className="text-foreground">rejouer</span>, ou ouvrir la source d’une
+              question.
+            </p>
+            <p className={P}>
+              L’historique en bas mémorise tes scores et limite les répétitions d’une session à
+              l’autre.
+            </p>
+          </section>
+
+          <section className="space-y-4 rounded-xl bg-secondary/40 px-4 py-4">
+            <h2 className="font-display text-lg font-semibold text-foreground">Astuce</h2>
+            <p className={P}>
+              Plus tes notes et listes sont précises, meilleures sont les questions.
+            </p>
+            <p className={P}>
+              Un deck Anki ou une liste JetPunk ciblée donne souvent un meilleur quiz que
+              « Toutes les ressources ».
             </p>
           </section>
         </div>
