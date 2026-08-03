@@ -38,7 +38,7 @@ export function ImportMarkdownButton({ onImported, onError }: ImportMarkdownButt
       />
       <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
         <FileText className="h-4 w-4" />
-        Importer .md
+        Importer depuis l&apos;ordinateur
       </Button>
     </>
   );
