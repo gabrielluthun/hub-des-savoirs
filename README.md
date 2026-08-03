@@ -59,6 +59,17 @@ Déclencheurs :
 
 Prérequis GitHub : Settings → Actions → General → Workflow permissions → **Read and write**.
 
+### Updater desktop (signatures)
+
+L’app desktop vérifie `latest.json` sur la dernière GitHub Release publiée (pas une draft).
+
+Secrets GitHub requis pour signer les artefacts updater :
+- `TAURI_SIGNING_PRIVATE_KEY` — contenu de la clé privée (`~/.tauri/hub-des-savoirs.key`)
+- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — mot de passe de cette clé
+
+La clé publique est déjà dans `src-tauri/tauri.conf.json` (`plugins.updater.pubkey`).
+Après un publish CI, **publier la draft Release** pour que `…/releases/latest/download/latest.json` soit servi.
+
 ## Modules
 
 | Onglet | Rôle |
@@ -68,7 +79,7 @@ Prérequis GitHub : Settings → Actions → General → Workflow permissions �
 | **JetPunk** | Listes catégorisées, alias de réponses, quiz chronométré, stats d’oublis, historique, import/export JSON, envoi vers onglet Anki |
 | **Quizypedia** | Placeholder (activable dans Paramètres → Modules) |
 | **Plateau** | Quiz IA (QCM, libre, vrai/faux, liste) à partir de docs, decks Anki et/ou listes JetPunk ; difficulté, anti-répétition, historique, sons optionnels |
-| **Paramètres** | Clé API + vérification modèle Gemini, thème, modules, sons, **sauvegarde complète** |
+| **Paramètres** | Clé API + vérification modèle Gemini, thème, modules, sons, **sauvegarde complète**, mises à jour (desktop) |
 
 ## Données & sauvegarde
 
