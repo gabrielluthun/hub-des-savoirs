@@ -207,9 +207,11 @@ export function DocsView() {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="space-y-3 border-b border-border px-4 py-3">
           <div className="flex items-center gap-3">
+            <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
             <input
               value={activeDoc.title}
               onChange={(e) => dispatch(updateDoc(activeDoc.id, { title: e.target.value }))}
+              aria-label="Nom du document"
               className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none"
             />
             <DocsHelp />
@@ -262,7 +264,7 @@ export function DocsView() {
             <div className="flex flex-1 items-center justify-center p-4">
               {docId ? (
                 <iframe
-                  title="Google Docs"
+                  title="Aperçu du document lié à l'URL"
                   src={buildGoogleDocsEmbedUrl(docId)}
                   className="h-full w-full rounded-xl border border-border bg-card"
                 />

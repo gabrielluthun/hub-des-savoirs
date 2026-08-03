@@ -17,7 +17,7 @@ export function SyncButton({ onClick, loading = false, disabled = false }: SyncB
       aria-busy={loading}
     >
       <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-      Rafraîchir
+      Synchroniser
     </Button>
   );
 }

@@ -20,7 +20,8 @@ const FIELD_GUIDE = [
   {
     name: 'Deck',
     required: true,
-    description: 'Le paquet où ranger la carte (ex. Histoire, ou Histoire::Louis XIV pour un sous-deck).',
+    description:
+      'Le paquet où ranger la carte (ex. Histoire, ou Histoire::Louis XIV pour un sous-deck).',
   },
   {
     name: 'Mnémotechnique',
@@ -91,6 +92,8 @@ const EXAMPLES = [
   },
 ] as const;
 
+const P = 'text-muted-foreground';
+
 export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
   if (!open) return null;
 
@@ -120,58 +123,66 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
           </Button>
         </div>
 
-        <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
-          <section className="space-y-2">
-            <p className="text-muted-foreground">
+        <div className="space-y-10 overflow-y-auto px-5 py-6 text-sm leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">À quoi sert Anki</h2>
+            <p className={P}>
               Ici tu crées des <span className="text-foreground">cartes de révision</span> : une
-              question d’un côté, la réponse de l’autre. Tu peux les saisir une par une, ou les
-              importer / exporter en fichier <span className="text-foreground">.txt</span> pour
-              gagner du temps.
+              question d’un côté, la réponse de l’autre.
+            </p>
+            <p className={P}>
+              Tu peux les saisir une par une, ou les importer / exporter en fichier{' '}
+              <span className="text-foreground">.txt</span> pour gagner du temps.
+            </p>
+            <p className={P}>
+              La révision espacée te propose d’abord les cartes à revoir aujourd’hui, selon ton
+              filtre actuel.
             </p>
           </section>
 
-          <section className="space-y-3">
-            <div>
-              <h3 className="font-medium">Une ligne = une carte</h3>
-              <p className="mt-1 text-muted-foreground">
-                Chaque ligne du fichier (ou du collage à droite) décrit une carte. Les champs sont
-                séparés par un <span className="text-foreground">point-virgule</span> :
-              </p>
-            </div>
-            <p className="rounded-xl bg-secondary/60 px-3 py-2.5 font-mono text-xs leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Une ligne = une carte</h2>
+            <p className={P}>
+              Chaque ligne du fichier (ou du collage à droite) décrit une carte.
+            </p>
+            <p className={P}>
+              Les champs sont séparés par un{' '}
+              <span className="text-foreground">point-virgule</span> :
+            </p>
+
+            <p className="rounded-xl bg-secondary/60 px-3.5 py-3 font-mono text-xs leading-relaxed">
               Question;Réponse;Nom du deck;Mnémotechnique;Tags
             </p>
-            <div className="space-y-2.5">
+
+            <div className="space-y-4">
               {FIELD_GUIDE.map((field) => (
-                <div key={field.name} className="flex gap-3">
-                  <div className="w-[7.5rem] shrink-0">
+                <div key={field.name} className="space-y-4">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <p className="font-medium">{field.name}</p>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       {field.required ? 'Obligatoire' : 'Optionnel'}
                     </p>
                   </div>
-                  <p className="text-muted-foreground">{field.description}</p>
+                  <p className={P}>{field.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="space-y-3">
-            <div>
-              <h3 className="font-medium">Exemples concrets</h3>
-              <p className="mt-1 text-muted-foreground">
-                Copie-colle ces lignes telles quelles pour tester l’import.
-              </p>
-            </div>
-            <div className="space-y-3">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Exemples concrets</h2>
+            <p className={P}>Copie-colle ces lignes telles quelles pour tester l’import.</p>
+            <p className={P}>Chaque bloc détaille ce que signifie chaque champ.</p>
+
+            <div className="space-y-4">
               {EXAMPLES.map((example) => (
-                <div key={example.line} className="rounded-xl border border-border px-3.5 py-3">
+                <div key={example.line} className="space-y-4 rounded-xl border border-border px-4 py-4">
                   <p className="font-medium">{example.title}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{example.why}</p>
-                  <p className="mt-2 break-all rounded-lg bg-secondary/50 px-2.5 py-2 font-mono text-xs leading-relaxed">
+                  <p className="text-xs leading-relaxed text-muted-foreground">{example.why}</p>
+                  <p className="break-all rounded-lg bg-secondary/50 px-3 py-2.5 font-mono text-xs leading-relaxed">
                     {example.line}
                   </p>
-                  <dl className="mt-2.5 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                  <dl className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
                     {example.parts.map((part) => (
                       <div key={`${example.line}-${part.label}`}>
                         <dt className="inline font-medium text-foreground">{part.label} : </dt>
@@ -184,47 +195,49 @@ export function AnkiHelpDialog({ open, onClose }: AnkiHelpDialogProps) {
             </div>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Dans l’interface</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                <span className="text-foreground">Nouvelle carte</span> sert à saisir une carte à
-                la main.
-              </li>
-              <li>
-                <span className="text-foreground">Importer .txt</span> et{' '}
-                <span className="text-foreground">Coller en masse</span> permettent l'ajout de plusieurs cartes à la fois.
-              </li>
-              <li>
-                <span className="text-foreground">Exporter .txt</span> exporte les cartes affichées à l'écran.
-              </li>
-              <li>
-                <span className="text-foreground">Réviser</span> lance une session sur les cartes à
-                revoir aujourd’hui, toujours selon ta sélection actuelle.
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Dans l’interface</h2>
+            <p className={P}>
+              <span className="text-foreground">Nouvelle carte</span> sert à saisir une carte à
+              la main.
+            </p>
+            <p className={P}>
+              <span className="text-foreground">Importer .txt</span> et{' '}
+              <span className="text-foreground">Coller en masse</span> permettent d’ajouter
+              plusieurs cartes d’un coup.
+            </p>
+            <p className={P}>
+              <span className="text-foreground">Exporter .txt</span> exporte les cartes
+              actuellement affichées à l’écran (selon tes filtres).
+            </p>
+            <p className={P}>
+              <span className="text-foreground">Réviser</span> lance une session sur les cartes à
+              revoir aujourd’hui, dans le périmètre de ta sélection actuelle.
+            </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Vers JetPunk</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                Le bouton <span className="text-foreground">Vers JetPunk</span> transforme les
-                cartes affichées en une liste de quiz (question → indice, réponse → réponse).
-              </li>
-              <li>
-                Un deck <span className="text-foreground">Thème::Liste</span> devient la
-                catégorie et le titre de la liste (ex. Géographie::Capitales).
-              </li>
-              <li>C’est une copie : tes cartes Anki restent en place.</li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Vers JetPunk</h2>
+            <p className={P}>
+              Le bouton <span className="text-foreground">Vers JetPunk</span> transforme les
+              cartes affichées en une liste de quiz.
+            </p>
+            <p className={P}>La question devient l’indice, la réponse reste la réponse.</p>
+            <p className={P}>
+              Un deck <span className="text-foreground">Thème::Liste</span> devient la catégorie
+              et le titre de la liste (ex. Géographie::Capitales).
+            </p>
+            <p className={P}>C’est une copie : tes cartes Anki restent en place.</p>
           </section>
 
-          <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
-            <p className="font-medium text-foreground">Astuce</p>
-            <p className="mt-1">
-              Si tu réimportes une carte dont la question existe déjà (même en changeant majuscules,
-              accents ou ponctuation), elle est ignorée pour éviter les doublons.
+          <section className="space-y-4 rounded-xl bg-secondary/40 px-4 py-4">
+            <h2 className="font-display text-lg font-semibold text-foreground">Astuce</h2>
+            <p className={P}>
+              Si tu réimportes une carte dont la question existe déjà, elle est ignorée pour
+              éviter les doublons.
+            </p>
+            <p className={P}>
+              Cela reste vrai même si tu changes majuscules, accents ou ponctuation.
             </p>
           </section>
         </div>

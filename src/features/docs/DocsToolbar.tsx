@@ -55,7 +55,7 @@ export function DocsToolbar({
         />
         <Button type="button" variant="secondary" onClick={onImport}>
           <CloudDownload className="h-4 w-4" />
-          Importer contenu
+          Vers Éditeur
         </Button>
         <SyncButton onClick={onRefresh} loading={syncLoading} disabled={!url.trim()} />
         <ImportMarkdownButton
@@ -78,9 +78,9 @@ export function DocsToolbar({
       <div className="flex flex-wrap items-center gap-2">
         {(
           [
-            ['editor', 'Éditeur'],
-            ['preview', 'Aperçu'],
-            ['gdocs', 'Google Docs'],
+            ['editor', 'Éditeur Markdown'],
+            ['preview', 'Aperçu Markdown'],
+            ['gdocs', 'Aperçu du document lié à l\'URL'],
           ] as const
         ).map(([id, label]) => (
           <button

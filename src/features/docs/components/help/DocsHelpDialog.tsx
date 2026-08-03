@@ -7,6 +7,8 @@ interface DocsHelpDialogProps {
   onClose: () => void;
 }
 
+const P = 'text-muted-foreground';
+
 export function DocsHelpDialog({ open, onClose }: DocsHelpDialogProps) {
   if (!open) return null;
 
@@ -36,79 +38,94 @@ export function DocsHelpDialog({ open, onClose }: DocsHelpDialogProps) {
           </Button>
         </div>
 
-        <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
-          <section className="space-y-2">
-            <p className="text-muted-foreground">
-              Ici tu ranges tes <span className="text-foreground">notes</span> : texte local en
-              Markdown, ou contenu importé depuis un{' '}
-              <span className="text-foreground">Google Doc</span>. Ces notes servent de source
-              pour Plateau et la génération Anki.
+        <div className="space-y-10 overflow-y-auto px-5 py-6 text-sm leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">À quoi sert cet onglet ?</h2>
+            <p className={P}>
+              Ici tu ranges tes <span className="text-foreground">notes</span> : du texte local en
+              Markdown, ou du contenu importé depuis un{' '}
+              <span className="text-foreground">Google Doc</span>.
+            </p>
+            <p className={P}>
+              Ces notes deviennent ensuite des sources pour Plateau (quiz IA) et pour la
+              génération de cartes Anki depuis un document.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Créer un document</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                Le <span className="text-foreground">+</span> dans la barre latérale crée une
-                note vide.
-              </li>
-              <li>
-                Donne-lui un <span className="text-foreground">titre</span> (éditable en haut) et
-                des <span className="text-foreground">tags</span> pour filtrer.
-              </li>
-              <li>
-                La corbeille dans la liste (au survol){' '}
-                <span className="text-foreground">supprime</span> le document : confirmation
-                demandée.
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Créer un document</h2>
+            <p className={P}>
+              Le bouton <span className="text-foreground">+</span> dans la barre latérale du module
+              crée une note vide.
+            </p>
+            <p className={P}>
+              Donne-lui ensuite un <span className="text-foreground">titre</span> (éditable en
+              haut) et des <span className="text-foreground">tags</span> pour la retrouver plus
+              facilement.
+            </p>
+            <p className={P}>
+              Pour supprimer un document, survole-le dans la liste puis utilise la corbeille.
+            </p>
+            <p className={P}>
+              Une confirmation te sera demandée avant la suppression définitive.
+            </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Google Docs</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                Colle l’URL du document, puis{' '}
-                <span className="text-foreground">Importer contenu</span>.
-              </li>
-              <li>
-                <span className="text-foreground">Rafraîchir</span> reprend la version en ligne
-                (avec confirmation si tu as modifié localement).
-              </li>
-              <li>
-                L’onglet <span className="text-foreground">Google Docs</span> affiche l’aperçu
-                intégré quand l’URL est valide.
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Google Docs</h2>
+            <p className={P}>
+              Colle l’URL du document dans le champ prévu, puis clique sur{' '}
+              <span className="text-foreground">Vers Éditeur</span>.
+            </p>
+            <p className={P}>
+              Le Doc Google est converti en Markdown et remplit l’onglet Éditeur.
+            </p>
+            <p className={P}>
+              <span className="text-foreground">Actualiser local</span> remplace ta version locale
+              par la version en ligne.
+            </p>
+            <p className={P}>
+              Si tu as modifié le contenu localement, une confirmation te prévient avant
+              d’écraser tes changements.
+            </p>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Éditeur & plan</h3>
-            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
-              <li>
-                <span className="text-foreground">Éditeur</span> : Markdown local, sauvegardé
-                automatiquement sur cet appareil.
-              </li>
-              <li>
-                <span className="text-foreground">Aperçu</span> : rendu HTML du Markdown.
-              </li>
-              <li>
-                Le <span className="text-foreground">Plan</span> à droite liste les titres (#,
-                ##…) pour naviguer vite.
-              </li>
-              <li>
-                <span className="text-foreground">Importer .md</span> charge un fichier Markdown
-                depuis ton disque.
-              </li>
-            </ul>
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Éditeur et plan</h2>
+            <p className={P}>
+              L’onglet <span className="text-foreground">Éditeur</span> sert à écrire en Markdown.
+            </p>
+            <p className={P}>Tout est sauvegardé automatiquement sur cet appareil.</p>
+            <p className={P}>
+              L’onglet <span className="text-foreground">Aperçu</span> montre le rendu HTML de ton
+              Markdown.
+            </p>
+            <p className={P}>
+              À droite, le <span className="text-foreground">Plan</span> liste les titres (#,
+              ##…) pour naviguer rapidement dans un long document.
+            </p>
           </section>
 
-          <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
-            <p className="font-medium text-foreground">Astuce</p>
-            <p className="mt-1">
-              « Générer un quiz IA » t’envoie vers Plateau avec tes notes comme source. Pour des
-              cartes Anki, utilise plutôt « IA depuis Docs » dans l’onglet Anki.
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Doc lié et import fichier</h2>
+            <p className={P}>
+              Quand l’URL est valide, l’onglet <span className="text-foreground">Doc lié</span>{' '}
+              affiche un aperçu intégré du document original.
+            </p>
+            <p className={P}>
+              Tu peux aussi charger un fichier depuis ton disque avec{' '}
+              <span className="text-foreground">Importer depuis l’ordinateur</span>.
+            </p>
+          </section>
+
+          <section className="space-y-4 rounded-xl bg-secondary/40 px-4 py-4">
+            <h2 className="font-display text-lg font-semibold text-foreground">Astuce</h2>
+            <p className={P}>
+              « Générer un quiz IA » t’envoie vers Plateau avec tes notes comme source.
+            </p>
+            <p className={P}>
+              Pour créer des cartes Anki à partir d’un document, utilise plutôt « IA depuis Docs »
+              dans l’onglet Anki.
             </p>
           </section>
         </div>
