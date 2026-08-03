@@ -7,7 +7,6 @@ export const STORAGE_KEY = 'gk-hub-state-v1';
 
 export function createDefaultState(): AppState {
   const docId = createId();
-  const listId = createId();
   const now = new Date().toISOString();
 
   return {
@@ -40,37 +39,8 @@ export function createDefaultState(): AppState {
     activeDocId: docId,
     ankiCards: [],
     ankiDecks: [],
-    jetpunkLists: [
-      {
-        id: listId,
-        title: 'Capitales du monde',
-        category: 'Géographie',
-        durationSec: 90,
-        items: [
-          { id: createId(), prompt: 'France', answer: 'Paris' },
-          { id: createId(), prompt: 'Allemagne', answer: 'Berlin' },
-          { id: createId(), prompt: 'Espagne', answer: 'Madrid' },
-          { id: createId(), prompt: 'Italie', answer: 'Rome' },
-          { id: createId(), prompt: 'Japon', answer: 'Tokyo' },
-          { id: createId(), prompt: 'Canada', answer: 'Ottawa' },
-          { id: createId(), prompt: 'Brésil', answer: 'Brasilia' },
-          { id: createId(), prompt: 'Australie', answer: 'Canberra' },
-        ],
-      },
-      {
-        id: createId(),
-        title: 'Rois de France (sélection)',
-        category: 'Histoire',
-        durationSec: 90,
-        items: [
-          { id: createId(), prompt: 'Roi couronné en 987', answer: 'Hugues Capet' },
-          { id: createId(), prompt: 'Roi dit le Saint', answer: 'Louis IX' },
-          { id: createId(), prompt: 'Roi du château de Versailles', answer: 'Louis XIV' },
-          { id: createId(), prompt: 'Dernier roi de France', answer: 'Louis-Philippe' },
-        ],
-      },
-    ],
-    activeJetpunkListId: listId,
+    jetpunkLists: [],
+    activeJetpunkListId: null,
     jetpunkHistory: [],
     gameHistory: [],
   };
