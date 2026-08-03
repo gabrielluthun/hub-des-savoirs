@@ -12,17 +12,21 @@ function formatDate(iso: string): string {
   }
 }
 
+const MAX_VISIBLE_ENTRIES = 5;
+
 export function GameHistory({ entries }: GameHistoryProps) {
+  const visible = entries.slice(0, MAX_VISIBLE_ENTRIES);
+
   return (
     <div>
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Dernières parties
       </p>
-      {entries.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aucune partie jouée pour le moment.</p>
       ) : (
         <div className="space-y-2">
-          {entries.map((entry) => (
+          {visible.map((entry) => (
             <div
               key={entry.id}
               className="flex items-center justify-between rounded-xl border border-border px-4 py-3"
