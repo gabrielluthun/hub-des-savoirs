@@ -6,33 +6,7 @@ interface HubHelpDialogProps {
   onClose: () => void;
 }
 
-const MODULES = [
-  {
-    name: 'Google Docs',
-    description:
-      'Notes Google Docs importées, et sous format Markdown. Elles servent de source pour Plateau et la génération Anki.',
-  },
-  {
-    name: 'Anki',
-    description:
-      'Cartes question / réponse avec révision espacée. Filtre par deck, import / export .txt, transfert JetPunk.',
-  },
-  {
-    name: 'JetPunk',
-    description:
-      'Quiz de listes à retrouver au clavier, avec chrono ou sans limite de temps.',
-  },
-  {
-    name: 'Plateau',
-    description:
-      'Quiz généré par IA à partir de tes docs, cartes ou listes (QCM, libre, etc.).',
-  },
-  {
-    name: 'Paramètres',
-    description:
-      'Clé API Gemini, modèle, thème, Quizypedia, et sauvegarde / restauration complète du Hub.',
-  },
-] as const;
+const P = 'text-muted-foreground';
 
 export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
   if (!open) return null;
@@ -63,41 +37,107 @@ export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
           </Button>
         </div>
 
-        <div className="space-y-6 overflow-y-auto px-5 py-5 text-sm leading-relaxed">
-          <section className="space-y-2">
-            <p className="text-muted-foreground">
+        <div className="space-y-10 overflow-y-auto px-5 py-6 text-sm leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">En deux mots</h2>
+            <p className={P}>
               Hub des Savoirs regroupe tes notes et tes quiz{' '}
-              <span className="text-foreground">en local</span> : rien n’est envoyé ailleurs,
-              sauf les appels Gemini quand tu lances une génération IA.
+              <span className="text-foreground">sur cet appareil</span>.
+            </p>
+            <p className={P}>
+              Tes données restent locales : rien n’est envoyé ailleurs, sauf les appels à Gemini
+              lorsque tu lances une génération IA.
+            </p>
+            <p className={P}>
+              La barre latérale te permet de passer d’un module à l’autre.
+            </p>
+            <p className={P}>
+              Sur ordinateur, tu peux la replier en rail d’icônes avec la flèche en haut de la
+              barre.
             </p>
           </section>
 
-          <section className="space-y-3">
-            <h3 className="font-medium">Les modules</h3>
-            <div className="space-y-3">
-              {MODULES.map((module) => (
-                <div key={module.name} className="flex gap-3">
-                  <p className="w-[7.5rem] shrink-0 font-medium">{module.name}</p>
-                  <p className="text-muted-foreground">{module.description}</p>
-                </div>
-              ))}
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Les modules</h2>
+
+            <div className="space-y-4">
+              <p className="font-medium">Google Docs</p>
+              <p className={P}>
+                C’est ton espace de notes : texte local en Markdown, ou contenu importé depuis un
+                Google Doc.
+              </p>
+              <p className={P}>
+                Ces notes alimentent ensuite Plateau et la génération de cartes Anki.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="font-medium">Anki</p>
+              <p className={P}>
+                Tu y crées des cartes question / réponse avec révision espacée.
+              </p>
+              <p className={P}>
+                Tu peux filtrer par deck, importer ou exporter un fichier .txt, et envoyer une
+                sélection vers JetPunk.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="font-medium">JetPunk</p>
+              <p className={P}>
+                Des listes à retrouver au clavier, en mode chronométré ou sans limite de temps.
+              </p>
+              <p className={P}>
+                Idéal pour mémoriser des séries (capitales, dates, noms…).
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="font-medium">Plateau</p>
+              <p className={P}>
+                Un quiz généré par IA à partir de tes docs, cartes Anki ou listes JetPunk.
+              </p>
+              <p className={P}>
+                Plusieurs formats sont possibles : QCM, réponse libre, vrai / faux, listes.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="font-medium">Paramètres</p>
+              <p className={P}>
+                Clé API Gemini, modèle, thème, Quizypedia, sons du Plateau, et sauvegarde /
+                restauration complète du Hub.
+              </p>
+              <p className={P}>
+                Sur l’app desktop, tu y trouves aussi la vérification des mises à jour.
+              </p>
             </div>
           </section>
 
-          <section className="space-y-2">
-            <h3 className="font-medium">Aujourd’hui</h3>
-            <p className="text-muted-foreground">
-              Le bloc en bas de la barre latérale te propose une reprise rapide : cartes Anki
-              dues, dernière liste JetPunk, et un raccourci Plateau. Les lignes JetPunk et
-              Plateau disparaissent dès que tu as joué une partie dans la journée.
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl font-semibold">Aujourd’hui</h2>
+            <p className={P}>
+              En bas de la barre latérale, le bloc « Aujourd’hui » propose une reprise rapide.
+            </p>
+            <p className={P}>
+              Tu y vois les cartes Anki dues, un raccourci vers ta dernière liste JetPunk, et un
+              lancement Plateau.
+            </p>
+            <p className={P}>
+              Les lignes JetPunk et Plateau disparaissent dès que tu as joué une partie dans la
+              journée.
             </p>
           </section>
 
-          <section className="rounded-xl bg-secondary/40 px-3.5 py-3 text-muted-foreground">
-            <p className="font-medium text-foreground">Astuce</p>
-            <p className="mt-1">
-              Anki et JetPunk ont chacun leur propre « Comment ça marche ? » pour le détail
-              (formats d’import, modes de jeu, transferts entre modules).
+          <section className="space-y-4 rounded-xl bg-secondary/40 px-4 py-4">
+            <h2 className="font-display text-lg font-semibold text-foreground">Astuce</h2>
+            <p className={P}>
+              Anki, JetPunk, Google Docs et Plateau ont chacun leur propre « Comment ça marche ? »
+              dans l’onglet concerné.
+            </p>
+            <p className={P}>
+              Ouvre-le pour le détail des formats d’import, des modes de jeu et des transferts
+              entre modules.
             </p>
           </section>
         </div>
