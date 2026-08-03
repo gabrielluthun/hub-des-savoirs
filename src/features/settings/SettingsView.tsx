@@ -4,6 +4,8 @@ import { confirmAction } from '@/lib/confirm';
 import { downloadJsonFile } from '@/lib/export';
 import { verifyGeminiApiKey } from '@/lib/gemini';
 import { parseHubBackup, serializeHubBackup } from '@/lib/hub-backup';
+import { checkForAppUpdate, downloadAndInstallAppUpdate } from '@/lib/updater';
+import { isTauriRuntime } from '@/lib/utils';
 import { Button, Input, Label, Select } from '@/components/ui/primitives';
 import { GEMINI_MODELS } from '@/types';
 import type { GeminiModel, ThemeMode } from '@/types';
@@ -14,7 +16,10 @@ export function SettingsView() {
   const { state, dispatch } = useStore();
   const { settings } = state;
   const [verifying, setVerifying] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [installingUpdate, setInstallingUpdate] = useState(false);
   const backupInputRef = useRef<HTMLInputElement>(null);
+  const isDesktop = isTauriRuntime();
 
   const handleVerifyApiKey = async () => {
     if (!settings.apiKey.trim()) {
@@ -54,6 +59,40 @@ export function SettingsView() {
       toast.success('Sauvegarde restaurée.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Import impossible.');
+    }
+  };
+
+  const handleCheckUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const result = await checkForAppUpdate();
+      if (result.status === 'unavailable') {
+        toast.message('Mises à jour disponibles uniquement dans l’app desktop.');
+        return;
+      }
+      if (result.status === 'up-to-date') {
+        toast.success('Vous êtes à jour.');
+        return;
+      }
+      if (result.status === 'error') {
+        toast.error(result.message);
+        return;
+      }
+
+      const confirmed = await confirmAction(
+        `Une nouvelle version (${result.version}) est disponible. Télécharger et installer maintenant ?`,
+        { title: 'Mise à jour disponible', okLabel: 'Installer' }
+      );
+      if (!confirmed) return;
+
+      setInstallingUpdate(true);
+      const install = await downloadAndInstallAppUpdate();
+      if (!install.ok) {
+        toast.error(install.message);
+      }
+    } finally {
+      setCheckingUpdate(false);
+      setInstallingUpdate(false);
     }
   };
 
@@ -191,6 +230,29 @@ export function SettingsView() {
             />
           </label>
         </section>
+
+        {isDesktop ? (
+          <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+            <h2 className="font-display text-lg font-semibold">Mises à jour</h2>
+            <p className="text-sm text-muted-foreground">
+              Vérifie les mises à jour disponibles et propose l’installation.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={checkingUpdate || installingUpdate}
+              onClick={() => {
+                void handleCheckUpdate();
+              }}
+            >
+              {installingUpdate
+                ? 'Installation…'
+                : checkingUpdate
+                  ? 'Vérification…'
+                  : 'Vérifier les mises à jour'}
+            </Button>
+          </section>
+        ) : null}
       </div>
     </div>
   );
