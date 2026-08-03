@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { UpdateHistoryDialog } from '@/features/settings/components/UpdateHistoryDialog';
 import { confirmAction } from '@/lib/confirm';
 import { saveJsonFile } from '@/lib/export';
 import { verifyGeminiApiKey } from '@/lib/gemini';
@@ -18,6 +19,7 @@ export function SettingsView() {
   const [verifying, setVerifying] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [installingUpdate, setInstallingUpdate] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const isDesktop = isTauriRuntime();
 
@@ -154,6 +156,36 @@ export function SettingsView() {
         </section>
 
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          <h2 className="font-display text-lg font-semibold">Mises à jour</h2>
+          <p className="text-sm text-muted-foreground">
+            {isDesktop
+              ? 'Vérifie les mises à jour disponibles et consulte l’historique des versions.'
+              : 'Consulte l’historique des versions. L’installation automatique est réservée à l’app desktop.'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {isDesktop ? (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={checkingUpdate || installingUpdate}
+                onClick={() => {
+                  void handleCheckUpdate();
+                }}
+              >
+                {installingUpdate
+                  ? 'Installation…'
+                  : checkingUpdate
+                    ? 'Vérification…'
+                    : 'Vérifier les mises à jour'}
+              </Button>
+            ) : null}
+            <Button type="button" variant="outline" onClick={() => setHistoryOpen(true)}>
+              Historique
+            </Button>
+          </div>
+        </section>
+
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-lg font-semibold">Sauvegarde</h2>
           <p className="text-sm text-muted-foreground">
             Exporte ou restaure l’état complet du Hub : docs, cartes, listes, historiques, paramètres.
@@ -244,30 +276,9 @@ export function SettingsView() {
             />
           </label>
         </section>
-
-        {isDesktop ? (
-          <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
-            <h2 className="font-display text-lg font-semibold">Mises à jour</h2>
-            <p className="text-sm text-muted-foreground">
-              Vérifie les mises à jour disponibles et propose l’installation.
-            </p>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={checkingUpdate || installingUpdate}
-              onClick={() => {
-                void handleCheckUpdate();
-              }}
-            >
-              {installingUpdate
-                ? 'Installation…'
-                : checkingUpdate
-                  ? 'Vérification…'
-                  : 'Vérifier les mises à jour'}
-            </Button>
-          </section>
-        ) : null}
       </div>
+
+      <UpdateHistoryDialog open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </div>
   );
 }

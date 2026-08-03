@@ -109,7 +109,7 @@ export function HubHelpDialog({ open, onClose }: HubHelpDialogProps) {
                 restauration complète du Hub.
               </p>
               <p className={P}>
-                Sur l’app desktop, tu y trouves aussi la vérification des mises à jour.
+                Tu y trouves aussi la vérification des mises à jour et son historique.
               </p>
             </div>
           </section>

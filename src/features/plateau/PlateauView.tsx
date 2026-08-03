@@ -197,7 +197,7 @@ export function PlateauView() {
               Rubrique spéciale
             </p>
             <div className="mt-0.5 flex flex-wrap items-center gap-3">
-              <h1 className="font-display text-3xl font-semibold">Le Maître du Quiz TV</h1>
+              <h1 className="font-display text-3xl font-semibold">Le Plateau</h1>
               <PlateauHelp />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">

@@ -79,7 +79,7 @@ export function GameResults({
             Résultats
           </p>
           <h2 className="font-display text-xl font-semibold sm:text-2xl">
-            Le Maître du Quiz TV
+            Le Plateau
           </h2>
         </div>
       </header>

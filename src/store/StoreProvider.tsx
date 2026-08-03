@@ -3,11 +3,13 @@ import {
   useContext,
   useEffect,
   useReducer,
+  useRef,
   type Dispatch,
   type ReactNode,
 } from 'react';
 import type { AppAction, AppState } from '@/types';
 import { loadState, saveState } from '@/lib/storage';
+import { applyThemeMode } from '@/lib/theme';
 import { appReducer } from '@/store/reducer';
 
 interface StoreContextValue {
@@ -19,15 +21,16 @@ const StoreContext = createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, undefined, loadState);
+  const isFirstThemeApply = useRef(true);
 
   useEffect(() => {
     saveState(state);
   }, [state]);
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('dark', 'light');
-    root.classList.add(state.settings.theme === 'light' ? 'light' : 'dark');
+    const animate = !isFirstThemeApply.current;
+    isFirstThemeApply.current = false;
+    applyThemeMode(state.settings.theme, { animate });
   }, [state.settings.theme]);
 
   return (

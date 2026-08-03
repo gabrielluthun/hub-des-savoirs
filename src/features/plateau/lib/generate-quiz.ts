@@ -5,6 +5,7 @@ import {
   shuffleQuestionOptions,
 } from '@/features/plateau/lib/anti-repeat';
 import { buildQuizPrompt } from '@/features/plateau/lib/build-quiz-prompt';
+import { groundQuestionsInContext } from '@/features/plateau/lib/ground-answers';
 import { normalizeGeneratedQuestions } from '@/features/plateau/lib/normalize-questions';
 import { ALL_QUESTION_TYPES } from '@/features/plateau/lib/question-types';
 import type {
@@ -54,8 +55,10 @@ export async function generateQuizQuestions(params: {
     questionTypes,
     requestCount
   );
-  const fresh = filterRepeatedQuestions(normalized, excludeFacts);
-  const pool = fresh.length > 0 ? fresh : normalized;
+  const grounded = groundQuestionsInContext(normalized, params.context);
+  const usable = grounded.length > 0 ? grounded : normalized;
+  const fresh = filterRepeatedQuestions(usable, excludeFacts);
+  const pool = fresh.length > 0 ? fresh : usable;
   const questions = shuffleCopy(pool)
     .map(shuffleQuestionOptions)
     .slice(0, params.count);

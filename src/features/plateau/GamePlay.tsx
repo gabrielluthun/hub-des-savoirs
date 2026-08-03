@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { ListAnswerPanel } from '@/features/plateau/components/ListAnswerPanel';
+import { PlayActions } from '@/features/plateau/components/PlayActions';
+import { QuestionFeedback } from '@/features/plateau/components/QuestionFeedback';
 import type {
   PlateauAnswerRecord,
   PlateauGameResult,
@@ -7,9 +9,11 @@ import type {
 import { scoreFromAnswers } from '@/features/plateau/lib/game-result';
 import {
   answersMatch,
+  answersMatchLoose,
   findMatchingListItem,
   QUESTION_TYPE_LABELS,
 } from '@/features/plateau/lib/question-types';
+import { useQuestionTimer } from '@/features/plateau/hooks/useQuestionTimer';
 import { Button, Input } from '@/components/ui/primitives';
 import type { GeneratedQuestion } from '@/types';
 
@@ -33,10 +37,12 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
   const [foundItems, setFoundItems] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
   const [wasCorrect, setWasCorrect] = useState(false);
-  const [remaining, setRemaining] = useState(30);
   const recordsRef = useRef<PlateauAnswerRecord[]>([]);
   const startedAtRef = useRef(Date.now());
   const recordedIndexRef = useRef<number | null>(null);
+  const foundItemsRef = useRef<string[]>([]);
+  const selectedRef = useRef<string | null>(null);
+  const typedRef = useRef('');
 
   const current = questions[index];
   const listItems = current?.answers ?? [];
@@ -48,14 +54,9 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       current.options.length >= 2
   );
 
-  useEffect(() => {
-    if (!current || revealed) return;
-    setRemaining(questionDuration(current));
-    const timer = window.setInterval(() => {
-      setRemaining((value) => value - 1);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [index, revealed, current]);
+  foundItemsRef.current = foundItems;
+  selectedRef.current = selected;
+  typedRef.current = typed;
 
   const playTone = (ok: boolean) => {
     if (!soundEnabled) return;
@@ -74,15 +75,14 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     }
   };
 
-  const appendRecord = (record: PlateauAnswerRecord) => {
-    if (recordedIndexRef.current === index) return;
-    recordedIndexRef.current = index;
-    recordsRef.current = [...recordsRef.current, record];
-  };
-
   const settle = (ok: boolean, userAnswer: string) => {
     if (!current || revealed) return;
-    appendRecord({ question: current, correct: ok, userAnswer });
+    if (recordedIndexRef.current === index) return;
+    recordedIndexRef.current = index;
+    recordsRef.current = [
+      ...recordsRef.current,
+      { question: current, correct: ok, userAnswer },
+    ];
     setSelected(userAnswer);
     setRevealed(true);
     setWasCorrect(ok);
@@ -96,21 +96,34 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     }
   };
 
-  useEffect(() => {
-    if (remaining > 0 || revealed || !current) return;
+  const handleTimeout = () => {
+    if (!current) return;
     if (isList) {
-      const ok = foundItems.length === listItems.length && listItems.length > 0;
-      settle(ok, foundItems.join(', ') || '—');
+      const found = foundItemsRef.current;
+      const ok = found.length === listItems.length && listItems.length > 0;
+      settle(ok, found.join(', ') || 'Temps écoulé');
       return;
     }
-    settle(false, selected ?? (typed.trim() || '—'));
-    // settle intentionally closes over latest answer fields
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, revealed, current, isList, foundItems.length, listItems.length]);
+    settle(
+      false,
+      selectedRef.current ?? (typedRef.current.trim() || 'Temps écoulé')
+    );
+  };
+
+  const remaining = useQuestionTimer({
+    questionKey: index,
+    durationSec: current ? questionDuration(current) : 30,
+    paused: revealed || !current,
+    onTimeout: handleTimeout,
+  });
 
   const checkAnswer = (value: string) => {
     if (revealed || !current || isList) return;
-    settle(answersMatch(value, current.answer), value);
+    const ok =
+      current.type === 'libre'
+        ? answersMatchLoose(value, current.answer)
+        : answersMatch(value, current.answer);
+    settle(ok, value);
   };
 
   const submitListGuess = () => {
@@ -127,6 +140,15 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
     if (next.length >= listItems.length) {
       settle(true, next.join(', '));
     }
+  };
+
+  const skipQuestion = () => {
+    if (revealed || !current) return;
+    if (isList && foundItems.length > 0) {
+      settle(false, foundItems.join(', ') || 'Passé');
+      return;
+    }
+    settle(false, 'Passé');
   };
 
   const finish = () => {
@@ -154,6 +176,12 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
   };
 
   if (!current) return null;
+
+  const feedbackTitle = wasCorrect
+    ? 'Bonne réponse !'
+    : isList
+      ? `Éléments : ${listItems.join(', ')}`
+      : `Réponse : ${current.answer}`;
 
   return (
     <div className="mx-auto w-full max-w-2xl rounded-2xl border border-border bg-card p-6">
@@ -227,25 +255,24 @@ export function GamePlay({ questions, soundEnabled, onFinish, onAbort }: GamePla
       ) : null}
 
       {revealed ? (
-        <div className="mt-5 rounded-xl bg-secondary/60 p-4 text-sm">
-          <p className="font-medium">
-            {wasCorrect
-              ? 'Bonne réponse !'
-              : isList
-                ? `Éléments : ${listItems.join(', ')}`
-                : `Réponse : ${current.answer}`}
-          </p>
-          <p className="mt-1 text-muted-foreground">{current.explanation}</p>
-          <div className="mt-4 flex gap-2">
-            <Button type="button" onClick={goNext}>
-              {index + 1 >= questions.length ? 'Voir les résultats' : 'Question suivante'}
-            </Button>
-            <Button type="button" variant="ghost" onClick={onAbort}>
-              Abandonner
-            </Button>
-          </div>
-        </div>
-      ) : null}
+        <QuestionFeedback title={feedbackTitle} explanation={current.explanation}>
+          <PlayActions
+            revealed
+            isLast={index + 1 >= questions.length}
+            onSkip={skipQuestion}
+            onNext={goNext}
+            onAbort={onAbort}
+          />
+        </QuestionFeedback>
+      ) : (
+        <PlayActions
+          revealed={false}
+          isLast={index + 1 >= questions.length}
+          onSkip={skipQuestion}
+          onNext={goNext}
+          onAbort={onAbort}
+        />
+      )}
     </div>
   );
 }
