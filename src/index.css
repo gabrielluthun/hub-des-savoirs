@@ -91,3 +91,31 @@ pre,
   background: hsl(var(--muted));
   border-radius: 999px;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.4s;
+    animation-timing-function: ease;
+  }
+
+  /* Fallback when View Transitions API is unavailable */
+  html.theme-animate,
+  html.theme-animate body,
+  html.theme-animate #root {
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  html.theme-animate #root * {
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease,
+      border-color 0.35s ease,
+      fill 0.35s ease,
+      stroke 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+}
