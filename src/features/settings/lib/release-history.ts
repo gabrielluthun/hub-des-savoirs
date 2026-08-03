@@ -15,6 +15,35 @@ export interface ReleaseHistoryEntry {
  */
 export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
   {
+    version: 'v1.3.0',
+    changes: [
+      {
+        keyword: 'Sidebar',
+        description: 'menu latéral pliable en rail d’icônes',
+      },
+      {
+        keyword: 'Sauvegarde',
+        description: 'choix de l’emplacement à l’export',
+      },
+      {
+        keyword: 'Plateau',
+        description: 'matching plus souple, réponses ancrées au document, bouton Passer',
+      },
+      {
+        keyword: 'Thème',
+        description: 'animation à la bascule clair / sombre',
+      },
+      {
+        keyword: 'Paramètres',
+        description: 'ajout d\'un historique des mises à jour',
+      },
+      {
+        keyword: 'Docs',
+        description: 'libellés et textes d’aide clarifiés',
+      },
+    ],
+  },
+  {
     version: 'v1.2.0',
     changes: [
       {
