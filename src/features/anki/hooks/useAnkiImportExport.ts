@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import type { SkippedDuplicate } from '@/features/anki/components/import/DeduplicationReport';
 import {
-  buildExistingQuestionKeys,
+  findDuplicateOf,
   partitionByQuestionDeduplication,
 } from '@/features/anki/lib/import/deduplication';
 import { createAnkiCard } from '@/features/anki/lib/srs/card-factory';
@@ -31,7 +32,7 @@ export function useAnkiImportExport(params: {
   const [deduplicationReport, setDeduplicationReport] = useState<{
     added: number;
     skipped: number;
-    skippedQuestions: string[];
+    skippedDuplicates: SkippedDuplicate[];
   } | null>(null);
 
   const importParsedCards = (parsed: ImportableAnkiCard[]) => {
@@ -40,10 +41,7 @@ export function useAnkiImportExport(params: {
       return;
     }
 
-    const { unique, duplicates } = partitionByQuestionDeduplication(
-      parsed,
-      buildExistingQuestionKeys(cards)
-    );
+    const { unique, duplicates } = partitionByQuestionDeduplication(parsed, cards);
 
     if (unique.length > 0) {
       dispatch(
@@ -61,10 +59,19 @@ export function useAnkiImportExport(params: {
       );
     }
 
+    const sourcePool = [...cards, ...unique];
+    const skippedDuplicates: SkippedDuplicate[] = duplicates.map((card) => {
+      const match = findDuplicateOf(card, sourcePool);
+      return {
+        question: card.question,
+        ...(match?.deck ? { existingDeck: match.deck } : {}),
+      };
+    });
+
     setDeduplicationReport({
       added: unique.length,
       skipped: duplicates.length,
-      skippedQuestions: duplicates.map((card) => card.question),
+      skippedDuplicates,
     });
 
     if (unique.length === 0) {
