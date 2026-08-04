@@ -63,6 +63,7 @@ export function AnkiView() {
     model: state.settings.model,
     dispatch,
     importParsedCards: io.importParsedCards,
+    existingCards: cards,
   });
 
   const review = useReviewQueue(filters.reviewScope, (cardId, patch) => {
