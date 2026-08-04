@@ -25,7 +25,7 @@ export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
       {
         keyword: 'Anki',
         description:
-          'détection améliorée des doublons, plafond de génération de cartes fixéà 250',
+          'détection améliorée des doublons, plafond de génération de cartes fixé à 250',
       },
       {
         keyword: 'JetPunk',
