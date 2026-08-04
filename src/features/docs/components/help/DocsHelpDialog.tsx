@@ -102,7 +102,7 @@ export function DocsHelpDialog({ open, onClose }: DocsHelpDialogProps) {
             </p>
             <p className={P}>
               À droite, le <span className="text-foreground">Plan</span> liste les titres (#,
-              ##…) pour naviguer rapidement dans un long document.
+              ##…). Cliquez un titre pour aller directement à cette section.
             </p>
           </section>
 
