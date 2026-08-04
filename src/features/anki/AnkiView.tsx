@@ -254,7 +254,7 @@ export function AnkiView() {
           <DeduplicationReport
             added={io.deduplicationReport.added}
             skipped={io.deduplicationReport.skipped}
-            skippedQuestions={io.deduplicationReport.skippedQuestions}
+            skippedDuplicates={io.deduplicationReport.skippedDuplicates}
             onDismiss={io.dismissDeduplicationReport}
           />
         ) : null}
