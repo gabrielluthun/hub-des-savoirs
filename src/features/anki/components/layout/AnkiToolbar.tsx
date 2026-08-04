@@ -46,6 +46,7 @@ export function AnkiToolbar({
     <>
       <div className="mb-4 space-y-3">
         <div className="flex items-center gap-3">
+          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
           {selectedDeck ? (
             <input
               value={draftName}
@@ -80,7 +81,7 @@ export function AnkiToolbar({
           </Button>
           <Button type="button" variant="secondary" size="sm" onClick={onToggleAiPanel}>
             <Sparkles className="h-3.5 w-3.5" />
-            {showAiPanel ? 'Masquer IA' : 'IA depuis Docs'}
+            {showAiPanel ? 'Masquer' : 'Générer par IA'}
           </Button>
           <TxtImportButton onFile={onTxtFile} />
           <Button type="button" variant="outline" size="sm" onClick={onExport}>

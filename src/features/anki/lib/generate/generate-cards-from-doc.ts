@@ -1,5 +1,9 @@
-import { buildAnkiCardsPrompt } from '@/features/anki/lib/generate/build-cards-prompt';
-import { DECK_PATH_SEP } from '@/features/anki/lib/decks';
+import {
+  buildAnkiCardsPrompt,
+  type ExistingCardForPrompt,
+} from '@/features/anki/lib/generate/build-cards-prompt';
+import { deckLeafLabel, decksEqual } from '@/features/anki/lib/decks';
+import { normalizeQuestion } from '@/features/anki/lib/import/deduplication';
 import { generateJson } from '@/lib/gemini';
 import type { GeminiModel } from '@/types';
 
@@ -7,6 +11,25 @@ export interface GeneratedAnkiDraft {
   question: string;
   answer: string;
   mnemonic: string;
+  /** Source excerpt for human review — not persisted on save. */
+  quote: string;
+}
+
+export interface ExistingAnkiCardRef extends ExistingCardForPrompt {
+  deck?: string;
+}
+
+function cardsForDeck(
+  existingCards: ExistingAnkiCardRef[] | undefined,
+  deckName: string
+): ExistingCardForPrompt[] {
+  if (!existingCards?.length) return [];
+  return existingCards
+    .filter((card) => card.deck == null || decksEqual(card.deck, deckName))
+    .map((card) => ({
+      question: card.question,
+      answer: card.answer,
+    }));
 }
 
 export async function generateAnkiCardsFromDoc(params: {
@@ -16,6 +39,8 @@ export async function generateAnkiCardsFromDoc(params: {
   content: string;
   count: number;
   deckName: string;
+  /** Existing cards; those with matching deck (or no deck) feed anti-doublons. */
+  existingCards?: ExistingAnkiCardRef[];
 }): Promise<GeneratedAnkiDraft[]> {
   if (!params.content.trim()) {
     throw new Error('Le document sélectionné est vide.');
@@ -24,15 +49,15 @@ export async function generateAnkiCardsFromDoc(params: {
     throw new Error('Indique un deck cible avant de générer.');
   }
 
-  const leaf =
-    params.deckName.split(DECK_PATH_SEP).filter(Boolean).at(-1)?.trim() ||
-    params.deckName;
+  const leaf = deckLeafLabel(params.deckName) || params.deckName.trim();
+  const existingForPrompt = cardsForDeck(params.existingCards, params.deckName);
 
   const prompt = buildAnkiCardsPrompt({
     docTitle: params.docTitle,
     content: params.content,
     count: params.count,
     deckName: params.deckName,
+    existingCards: existingForPrompt,
   });
 
   const result = await generateJson<{ cards: GeneratedAnkiDraft[] }>({
@@ -48,18 +73,29 @@ export async function generateAnkiCardsFromDoc(params: {
     );
   }
 
-  const cards = result.cards
-    .map((card) => ({
-      question: String(card.question ?? '').trim(),
-      answer: String(card.answer ?? '').trim(),
-      mnemonic: String(card.mnemonic ?? '').trim(),
-    }))
-    .filter((card) => card.question && card.answer)
-    .slice(0, params.count);
+  const seen = new Set(
+    existingForPrompt.map((card) => normalizeQuestion(card.question)).filter(Boolean)
+  );
+
+  const cards: GeneratedAnkiDraft[] = [];
+  for (const card of result.cards) {
+    const question = String(card.question ?? '').trim();
+    const answer = String(card.answer ?? '').trim();
+    const mnemonic = String(card.mnemonic ?? '').trim();
+    const quote = String(card.quote ?? '').trim();
+    if (!question || !answer) continue;
+
+    const key = normalizeQuestion(question);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+
+    cards.push({ question, answer, mnemonic, quote });
+    if (cards.length >= params.count) break;
+  }
 
   if (cards.length === 0) {
     throw new Error(
-      `Aucune carte liée à « ${leaf} » dans ce document. Choisis un autre doc, ou un deck plus large.`
+      `Aucune carte nouvelle liée à « ${leaf} » (doublons ou hors sujet). Élargis le deck ou choisis un autre doc.`
     );
   }
 

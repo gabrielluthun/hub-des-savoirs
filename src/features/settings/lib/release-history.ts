@@ -15,6 +15,20 @@ export interface ReleaseHistoryEntry {
  */
 export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
   {
+    version: 'v1.3.1',
+    changes: [
+      {
+        keyword: 'Anki',
+        description:
+          'génération IA améliorée, ajout du libellé « Titre », et liste masquée pendant la génération',
+      },
+      {
+        keyword: 'JetPunk',
+        description: 'ajout du libellé Titre',
+      },
+    ],
+  },
+  {
     version: 'v1.3.0',
     changes: [
       {

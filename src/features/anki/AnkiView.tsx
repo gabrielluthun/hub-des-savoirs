@@ -63,6 +63,7 @@ export function AnkiView() {
     model: state.settings.model,
     dispatch,
     importParsedCards: io.importParsedCards,
+    existingCards: cards,
   });
 
   const review = useReviewQueue(filters.reviewScope, (cardId, patch) => {
@@ -280,14 +281,16 @@ export function AnkiView() {
           </div>
         ) : null}
 
-        <CardList
-          cards={filters.scopedCards}
-          onEdit={editor.openEdit}
-          onDelete={(id) => {
-            dispatch(deleteAnkiCard(id));
-            toast.success('Carte supprimée.');
-          }}
-        />
+        {!aiFromDocs.showAiPanel ? (
+          <CardList
+            cards={filters.scopedCards}
+            onEdit={editor.openEdit}
+            onDelete={(id) => {
+              dispatch(deleteAnkiCard(id));
+              toast.success('Carte supprimée.');
+            }}
+          />
+        ) : null}
       </div>
 
       <BulkImportPanel
