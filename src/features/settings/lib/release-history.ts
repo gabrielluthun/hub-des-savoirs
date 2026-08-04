@@ -15,6 +15,25 @@ export interface ReleaseHistoryEntry {
  */
 export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
   {
+    version: 'v1.3.2',
+    changes: [
+      {
+        keyword: 'Docs',
+        description:
+          'import Google Docs en HTML→Markdown (titres conservés) et navigation Plan → éditeur',
+      },
+      {
+        keyword: 'Anki',
+        description:
+          'détection améliorée des doublons, plafond de génération de cartes fixéà 250',
+      },
+      {
+        keyword: 'JetPunk',
+        description: 'transfert vers Anki avec la même détection de quasi-doublons',
+      },
+    ],
+  },
+  {
     version: 'v1.3.1',
     changes: [
       {
