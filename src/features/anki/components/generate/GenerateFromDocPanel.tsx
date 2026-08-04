@@ -81,7 +81,7 @@ export function GenerateFromDocPanel({
         <h3 className="font-display text-lg font-semibold">Depuis un document</h3>
         <p className="mt-1 text-xs text-muted-foreground">
           Gemini crée des cartes Q/R (+ mnémotechnique) à partir d’une note Docs, en
-          ciblant le thème du deck.
+          ciblant le thème du deck, avec citation source pour vérification.
         </p>
       </div>
 
