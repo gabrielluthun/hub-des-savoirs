@@ -20,7 +20,7 @@ export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
       {
         keyword: 'Docs',
         description:
-          'import Google Docs en HTML→Markdown (titres conservés) et navigation Plan → éditeur',
+          'import Google Docs désormais en format Markdown, et navigation Plan → Éditeur',
       },
       {
         keyword: 'Anki',
