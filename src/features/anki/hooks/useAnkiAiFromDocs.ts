@@ -14,8 +14,11 @@ export function useAnkiAiFromDocs(params: {
   model: GeminiModel;
   dispatch: Dispatch;
   importParsedCards: (parsed: ImportableAnkiCard[]) => void;
+  /** All Anki cards — used to avoid regenerating duplicates in the target deck. */
+  existingCards: { question: string; answer: string; deck: string }[];
 }) {
-  const { docs, apiKey, model, dispatch, importParsedCards } = params;
+  const { docs, apiKey, model, dispatch, importParsedCards, existingCards } =
+    params;
   const [showAiPanel, setShowAiPanel] = useState(false);
   const ai = useGenerateCards();
 
@@ -48,6 +51,7 @@ export function useAnkiAiFromDocs(params: {
         doc,
         count: generateParams.count,
         deckName: deck,
+        existingCards,
       });
       toast.success(
         `${generated.length} carte${generated.length > 1 ? 's' : ''} générée${generated.length > 1 ? 's' : ''}.`
