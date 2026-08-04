@@ -53,6 +53,14 @@ export function GeneratePreviewList({
                       {draft.mnemonic}
                     </span>
                   ) : null}
+                  {draft.quote ? (
+                    <span className="mt-1 flex gap-1.5 border-l-2 border-border pl-2 text-[11px] text-muted-foreground/70">
+                      <span className="shrink-0 font-medium text-muted-foreground">
+                        Source :
+                      </span>
+                      <span className="min-w-0">{draft.quote}</span>
+                    </span>
+                  ) : null}
                 </span>
               </label>
             </li>
