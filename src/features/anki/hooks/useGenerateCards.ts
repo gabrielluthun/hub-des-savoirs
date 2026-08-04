@@ -16,6 +16,7 @@ export function useGenerateCards() {
       doc: HubDocument;
       count: number;
       deckName: string;
+      existingCards?: { question: string; answer: string; deck?: string }[];
     }) => {
       setLoading(true);
       try {
@@ -26,6 +27,7 @@ export function useGenerateCards() {
           content: params.doc.content,
           count: params.count,
           deckName: params.deckName,
+          existingCards: params.existingCards,
         });
         setDrafts(cards);
         return cards;
