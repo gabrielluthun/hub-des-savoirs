@@ -190,13 +190,15 @@ export function JetPunkView() {
       <ListSidebar {...sidebarProps} activeListId={activeList.id} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
-        <div className="mb-3 flex items-start gap-2">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
           <input
             value={activeList.title}
             onChange={(e) =>
               dispatch(updateJetpunkList(activeList.id, { title: e.target.value }))
             }
             placeholder="Nom de la liste"
+            aria-label="Nom de la liste"
             className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
           />
           <div className="flex shrink-0 flex-wrap gap-2">
