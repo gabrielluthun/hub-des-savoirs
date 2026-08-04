@@ -124,7 +124,7 @@ export function DocsHelpDialog({ open, onClose }: DocsHelpDialogProps) {
               « Générer un quiz IA » t’envoie vers Plateau avec tes notes comme source.
             </p>
             <p className={P}>
-              Pour créer des cartes Anki à partir d’un document, utilise plutôt « IA depuis Docs »
+              Pour créer des cartes Anki à partir d’un document, utilise plutôt « Générer par IA »
               dans l’onglet Anki.
             </p>
           </section>
