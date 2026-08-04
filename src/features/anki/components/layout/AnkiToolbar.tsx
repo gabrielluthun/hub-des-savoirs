@@ -81,7 +81,7 @@ export function AnkiToolbar({
           </Button>
           <Button type="button" variant="secondary" size="sm" onClick={onToggleAiPanel}>
             <Sparkles className="h-3.5 w-3.5" />
-            {showAiPanel ? 'Masquer IA' : 'IA depuis Docs'}
+            {showAiPanel ? 'Masquer' : 'Générer par IA'}
           </Button>
           <TxtImportButton onFile={onTxtFile} />
           <Button type="button" variant="outline" size="sm" onClick={onExport}>
