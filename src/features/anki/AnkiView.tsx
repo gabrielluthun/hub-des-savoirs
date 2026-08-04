@@ -281,14 +281,16 @@ export function AnkiView() {
           </div>
         ) : null}
 
-        <CardList
-          cards={filters.scopedCards}
-          onEdit={editor.openEdit}
-          onDelete={(id) => {
-            dispatch(deleteAnkiCard(id));
-            toast.success('Carte supprimée.');
-          }}
-        />
+        {!aiFromDocs.showAiPanel ? (
+          <CardList
+            cards={filters.scopedCards}
+            onEdit={editor.openEdit}
+            onDelete={(id) => {
+              dispatch(deleteAnkiCard(id));
+              toast.success('Carte supprimée.');
+            }}
+          />
+        ) : null}
       </div>
 
       <BulkImportPanel
