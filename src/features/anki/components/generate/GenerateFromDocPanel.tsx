@@ -78,7 +78,7 @@ export function GenerateFromDocPanel({
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Génération IA
         </p>
-        <h3 className="font-display text-lg font-semibold">Depuis un document</h3>
+        <h3 className="font-display text-lg font-semibold">Depuis un document Google Docs</h3>
         <p className="mt-1 text-xs text-muted-foreground">
           Gemini crée des cartes Q/R (+ mnémotechnique) à partir d’une note Docs, en
           ciblant le thème du deck, avec citation source pour vérification.
