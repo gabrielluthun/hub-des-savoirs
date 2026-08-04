@@ -46,6 +46,7 @@ export function AnkiToolbar({
     <>
       <div className="mb-4 space-y-3">
         <div className="flex items-center gap-3">
+          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
           {selectedDeck ? (
             <input
               value={draftName}
