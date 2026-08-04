@@ -3,7 +3,10 @@ import {
   type ExistingCardForPrompt,
 } from '@/features/anki/lib/generate/build-cards-prompt';
 import { deckLeafLabel, decksEqual } from '@/features/anki/lib/decks';
-import { normalizeQuestion } from '@/features/anki/lib/import/deduplication';
+import {
+  areCardsDuplicates,
+  normalizeQuestion,
+} from '@/features/anki/lib/import/deduplication';
 import { generateJson } from '@/lib/gemini';
 import type { GeminiModel } from '@/types';
 
@@ -73,10 +76,6 @@ export async function generateAnkiCardsFromDoc(params: {
     );
   }
 
-  const seen = new Set(
-    existingForPrompt.map((card) => normalizeQuestion(card.question)).filter(Boolean)
-  );
-
   const cards: GeneratedAnkiDraft[] = [];
   for (const card of result.cards) {
     const question = String(card.question ?? '').trim();
@@ -86,8 +85,15 @@ export async function generateAnkiCardsFromDoc(params: {
     if (!question || !answer) continue;
 
     const key = normalizeQuestion(question);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
+    if (!key) continue;
+
+    const candidate = { question, answer };
+    if (
+      existingForPrompt.some((existing) => areCardsDuplicates(candidate, existing)) ||
+      cards.some((existing) => areCardsDuplicates(candidate, existing))
+    ) {
+      continue;
+    }
 
     cards.push({ question, answer, mnemonic, quote });
     if (cards.length >= params.count) break;
