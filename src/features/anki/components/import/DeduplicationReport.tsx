@@ -1,14 +1,20 @@
+export type SkippedDuplicate = {
+  question: string;
+  /** Deck where this question already exists. */
+  existingDeck?: string;
+};
+
 interface DeduplicationReportProps {
   added: number;
   skipped: number;
-  skippedQuestions?: string[];
+  skippedDuplicates?: SkippedDuplicate[];
   onDismiss: () => void;
 }
 
 export function DeduplicationReport({
   added,
   skipped,
-  skippedQuestions = [],
+  skippedDuplicates = [],
   onDismiss,
 }: DeduplicationReportProps) {
   if (skipped === 0 && added === 0) return null;
@@ -25,15 +31,16 @@ export function DeduplicationReport({
               ? ` · ${skipped} doublon${skipped > 1 ? 's' : ''} ignoré${skipped > 1 ? 's' : ''}`
               : ''}
           </p>
-          {skippedQuestions.length > 0 ? (
+          {skippedDuplicates.length > 0 ? (
             <ul className="mt-2 max-h-24 space-y-1 overflow-y-auto text-xs text-muted-foreground">
-              {skippedQuestions.slice(0, 8).map((question) => (
-                <li key={question} className="truncate">
-                  · {question}
+              {skippedDuplicates.slice(0, 8).map((item) => (
+                <li key={item.question} className="truncate">
+                  · {item.question}
+                  {item.existingDeck ? ` → ${item.existingDeck}` : ''}
                 </li>
               ))}
-              {skippedQuestions.length > 8 ? (
-                <li>… et {skippedQuestions.length - 8} de plus</li>
+              {skippedDuplicates.length > 8 ? (
+                <li>… et {skippedDuplicates.length - 8} de plus</li>
               ) : null}
             </ul>
           ) : null}
