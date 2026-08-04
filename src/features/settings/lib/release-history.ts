@@ -20,7 +20,7 @@ export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
       {
         keyword: 'Anki',
         description:
-          'génération IA améliorée, et ajout du libellé Titre',
+          'génération IA améliorée, ajout du libellé « Titre », et liste masquée pendant la génération',
       },
       {
         keyword: 'JetPunk',
