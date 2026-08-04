@@ -2,10 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { consumeNavIntent, subscribeNavIntent } from '@/app/nav-intent';
-import {
-  buildExistingQuestionKeys,
-  partitionByQuestionDeduplication,
-} from '@/features/anki/lib/import/deduplication';
+import { partitionByQuestionDeduplication } from '@/features/anki/lib/import/deduplication';
 import { Historique } from '@/features/jetpunk/Historique';
 import { JetpunkHelp } from '@/features/jetpunk/components/help/JetpunkHelpDialog';
 import { ItemMissStats } from '@/features/jetpunk/components/ItemMissStats';
@@ -138,10 +135,7 @@ export function JetPunkView() {
       toast.error('Aucun élément transférable (il faut au moins une réponse).');
       return;
     }
-    const { unique, duplicates } = partitionByQuestionDeduplication(
-      cards,
-      buildExistingQuestionKeys(ankiCards)
-    );
+    const { unique, duplicates } = partitionByQuestionDeduplication(cards, ankiCards);
     if (unique.length === 0) {
       toast.message(
         `Tous les doublons ont été ignorés (${duplicates.length} carte${duplicates.length !== 1 ? 's' : ''}).`

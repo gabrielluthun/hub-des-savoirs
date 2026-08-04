@@ -1,3 +1,4 @@
+import { htmlToMarkdown } from '@/features/docs/lib/html-to-markdown';
 import { isTauriRuntime } from '@/lib/utils';
 
 export function extractGoogleDocId(url: string): string | null {
@@ -6,11 +7,12 @@ export function extractGoogleDocId(url: string): string | null {
 }
 
 export function buildGoogleDocsExportUrl(docId: string): string {
+  // HTML keeps heading styles; plain txt strips them.
   // In Vite dev, proxy through the local server to avoid browser CORS.
   if (import.meta.env.DEV && !isTauriRuntime()) {
-    return `/api/gdoc-export/document/d/${docId}/export?format=txt`;
+    return `/api/gdoc-export/document/d/${docId}/export?format=html`;
   }
-  return `https://docs.google.com/document/d/${docId}/export?format=txt`;
+  return `https://docs.google.com/document/d/${docId}/export?format=html`;
 }
 
 export function buildGoogleDocsEmbedUrl(docId: string): string {
@@ -45,6 +47,20 @@ function mapImportError(error: unknown): Error {
   return error instanceof Error ? error : new Error(message);
 }
 
+function isDeniedHtmlPage(html: string): boolean {
+  const trimmed = html.trimStart();
+  if (trimmed.includes('<title>Google Accounts</title>')) return true;
+  // A real Docs export is a full HTML document; a tiny HTML shell is usually an error page.
+  if (
+    (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) &&
+    html.length < 400 &&
+    !/<h[1-6]|class="title"|doc-content/i.test(html)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export async function importGoogleDocText(url: string): Promise<string> {
   const docId = extractGoogleDocId(url);
   if (!docId) {
@@ -66,22 +82,21 @@ export async function importGoogleDocText(url: string): Promise<string> {
     );
   }
 
-  const text = await response.text();
-  if (!text.trim()) {
+  const html = await response.text();
+  if (!html.trim()) {
     throw new Error('Le document importé est vide.');
   }
 
-  // Google sometimes returns an HTML login / denial page with HTTP 200.
-  const trimmed = text.trimStart();
-  if (
-    trimmed.startsWith('<!DOCTYPE') ||
-    trimmed.startsWith('<html') ||
-    trimmed.includes('<title>Google Accounts</title>')
-  ) {
+  if (isDeniedHtmlPage(html)) {
     throw new Error(
       "Impossible d'importer le document. Vérifiez que le partage est public ou « Toute personne disposant du lien »."
     );
   }
 
-  return text;
+  const markdown = htmlToMarkdown(html);
+  if (!markdown.trim()) {
+    throw new Error('Le document importé est vide.');
+  }
+
+  return markdown;
 }

@@ -105,13 +105,16 @@ export function GenerateFromDocPanel({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Nombre de cartes</Label>
+          <Label>
+            Maximum de cartes à générer{' '}
+            <span className="text-xs font-normal text-muted-foreground">(max. 250)</span>
+          </Label>
           <Input
             type="number"
             min={1}
-            max={30}
+            max={250}
             value={count}
-            onChange={(e) => setCount(Math.min(30, Math.max(1, Number(e.target.value) || 1)))}
+            onChange={(e) => setCount(Math.min(250, Math.max(1, Number(e.target.value) || 1)))}
             disabled={loading}
           />
         </div>

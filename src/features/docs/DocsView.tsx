@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
-import { MarkdownEditor } from '@/features/docs/MarkdownEditor';
+import {
+  MarkdownEditor,
+  type MarkdownEditorHandle,
+} from '@/features/docs/MarkdownEditor';
 import { OutlinePanel } from '@/features/docs/OutlinePanel';
 import { TagEditor } from '@/features/docs/components/editor/TagEditor';
 import { DocsHelp } from '@/features/docs/components/help/DocsHelpDialog';
@@ -32,6 +35,7 @@ export function DocsView() {
   const [pane, setPane] = useState<DocsPane>('editor');
   const [savingLabel, setSavingLabel] = useState('Sauvegardé');
   const [syncLoading, setSyncLoading] = useState(false);
+  const editorRef = useRef<MarkdownEditorHandle>(null);
 
   const localHash = useLocalContentHash(activeDoc?.content ?? '');
   const syncStatus = useDocSyncStatus(activeDoc?.contentHash, localHash);
@@ -243,13 +247,17 @@ export function DocsView() {
         <div className="flex min-h-0 flex-1">
           {pane === 'editor' && (
             <>
-              <div className="min-w-0 flex-1">
+              <div className="min-h-0 min-w-0 flex-1">
                 <MarkdownEditor
+                  ref={editorRef}
                   value={activeDoc.content}
                   onChange={(content) => dispatch(updateDoc(activeDoc.id, { content }))}
                 />
               </div>
-              <OutlinePanel content={activeDoc.content} />
+              <OutlinePanel
+                content={activeDoc.content}
+                onNavigate={(line) => editorRef.current?.scrollToLine(line)}
+              />
             </>
           )}
 
