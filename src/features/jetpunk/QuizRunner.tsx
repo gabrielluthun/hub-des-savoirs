@@ -165,7 +165,7 @@ export function QuizRunner({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
-      <header className="shrink-0 border-b border-border px-4 py-3 sm:px-6">
+      <header className="shrink-0 border-b border-border px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -248,7 +248,7 @@ export function QuizRunner({
         </div>
       </div>
 
-      <footer className="shrink-0 border-t border-border px-4 py-3 sm:px-6">
+      <footer className="shrink-0 border-t border-border px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl justify-center">
           <Button type="button" variant="ghost" onClick={() => endQuiz(false)}>
             Terminer

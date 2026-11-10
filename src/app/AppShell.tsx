@@ -26,7 +26,7 @@ export function AppShell() {
     <div className="flex h-full min-h-0 bg-background text-foreground">
       <Sidebar mobileOpen={mobileNavOpen} onMobileClose={() => setMobileNavOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-3 border-b border-border px-3 py-2 md:hidden">
+        <header className="flex items-center gap-3 border-b border-border px-3 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden">
           <button
             type="button"
             onClick={() => setMobileNavOpen(true)}
@@ -37,7 +37,7 @@ export function AppShell() {
           </button>
           <p className="font-display text-sm font-semibold">Hub des Savoirs</p>
         </header>
-        <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
+        <main className="min-h-0 min-w-0 flex-1 overflow-hidden pb-[env(safe-area-inset-bottom)]">
           {tab === 'docs' && <DocsView />}
           {tab === 'anki' && <AnkiView />}
           {tab === 'jetpunk' && <JetPunkView />}
