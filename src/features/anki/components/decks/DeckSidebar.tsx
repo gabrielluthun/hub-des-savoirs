@@ -71,7 +71,7 @@ export function DeckSidebar({
             value={deckQuery}
             onChange={(e) => setDeckQuery(e.target.value)}
             placeholder="Filtrer les decks…"
-            className="h-8 text-xs"
+            className="h-8 text-base md:text-xs"
             aria-label="Filtrer les decks"
           />
         </div>

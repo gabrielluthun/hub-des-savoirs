@@ -61,7 +61,7 @@ export function DocumentList({
         <button
           type="button"
           onClick={onAdd}
-          className="mt-1 rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          className="mt-1 rounded-lg p-3 md:p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
           aria-label="Nouveau document"
         >
           <Plus className="h-4 w-4" />

@@ -39,7 +39,7 @@ export function DeckListItem({
             event.stopPropagation();
             onToggleExpand?.();
           }}
-          className="rounded-md p-1 text-muted-foreground hover:text-foreground"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground md:h-auto md:w-auto md:p-1"
           aria-label={expanded ? 'Replier' : 'Déplier'}
           aria-expanded={expanded}
         >
@@ -50,7 +50,7 @@ export function DeckListItem({
           )}
         </button>
       ) : (
-        <span className="inline-block w-6 shrink-0" aria-hidden />
+        <span className="inline-block w-10 shrink-0 md:w-6" aria-hidden />
       )}
       <button
         type="button"
@@ -63,7 +63,7 @@ export function DeckListItem({
       <span className="w-6 shrink-0 text-right tabular-nums text-xs text-muted-foreground">
         {count}
       </span>
-      <div className="flex w-7 shrink-0 justify-center">
+      <div className="flex w-10 shrink-0 justify-center md:w-7">
         {onDelete ? (
           <button
             type="button"
@@ -71,7 +71,7 @@ export function DeckListItem({
               event.stopPropagation();
               onDelete();
             }}
-            className="rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
+            className="rounded-lg p-3 md:p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
             aria-label={`Supprimer le deck ${name}`}
           >
             <Trash2 className="h-3.5 w-3.5" />

@@ -61,7 +61,7 @@ export function TagEditor({ tags, onChange }: TagEditorProps) {
             if (draft.trim()) commit();
           }}
           placeholder={tags.length === 0 ? 'Ajouter un tag…' : 'Tag…'}
-          className="h-8 min-w-[120px] flex-1 border-dashed text-xs"
+          className="h-8 min-w-[120px] flex-1 border-dashed text-base md:text-xs"
         />
       </form>
       <p className="text-[10px] text-muted-foreground">
