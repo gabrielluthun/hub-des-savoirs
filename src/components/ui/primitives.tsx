@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       <input
         ref={ref}
         className={cn(
-          'flex h-10 w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/40',
+          'flex h-10 w-full rounded-xl border border-input bg-card px-3 py-2 text-base text-foreground md:text-sm placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/40',
           className
         )}
         {...props}
@@ -54,7 +54,7 @@ export const Textarea = forwardRef<
     <textarea
       ref={ref}
       className={cn(
-        'flex min-h-[120px] w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/40',
+        'flex min-h-[120px] w-full rounded-xl border border-input bg-card px-3 py-2 text-base text-foreground md:text-sm placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/40',
         className
       )}
       {...props}
@@ -69,7 +69,7 @@ export function Select({
   return (
     <select
       className={cn(
-        'flex h-10 w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/40',
+        'flex h-10 w-full rounded-xl border border-input bg-card px-3 py-2 text-base text-foreground md:text-sm outline-none focus:ring-2 focus:ring-ring/40',
         className
       )}
       {...props}

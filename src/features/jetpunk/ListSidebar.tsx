@@ -97,7 +97,7 @@ export function ListSidebar({
             aria-label="Filtrer par catégorie"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="h-8 text-xs"
+            className="h-8 text-base md:text-xs"
           >
             <option value="all">Toutes les catégories</option>
             {categories.map((category) => (

@@ -62,7 +62,7 @@ export function TagPicker({ tags, onChange, suggestions = [] }: TagPickerProps) 
             if (draft.trim()) commit();
           }}
           placeholder={tags.length === 0 ? 'Tags…' : 'Tag…'}
-          className="h-8 min-w-[100px] flex-1 border-dashed text-xs"
+          className="h-8 min-w-[100px] flex-1 border-dashed text-base md:text-xs"
         />
       </form>
       {unusedSuggestions.length > 0 ? (

@@ -37,7 +37,7 @@ export function BulkImportPanel({
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-4 min-h-[220px] flex-1 font-mono text-xs"
+        className="mt-4 min-h-[220px] flex-1 font-mono text-base md:text-xs"
         placeholder={'Coller ici...'}
       />
       <Button type="button" className="mt-4 w-full" onClick={onImport}>

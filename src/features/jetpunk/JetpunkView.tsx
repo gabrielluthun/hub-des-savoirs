@@ -253,7 +253,7 @@ export function JetPunkView() {
               dispatch(updateJetpunkList(activeList.id, { category: e.target.value }))
             }
             placeholder="Catégorie"
-            className="h-8 w-auto min-w-[7rem] rounded-full px-3 text-xs"
+            className="h-8 w-auto min-w-[7rem] rounded-full px-3 text-base md:text-xs"
           />
           <datalist id="jetpunk-categories">
             {[...new Set(lists.map((list) => list.category.trim()).filter(Boolean))]
