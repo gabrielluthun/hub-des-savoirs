@@ -1,5 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
-import { X } from 'lucide-react';
+import { CircleHelp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Button({
@@ -209,5 +209,28 @@ export function Dialog({
         ) : null}
       </div>
     </div>
+  );
+}
+
+/**
+ * "Comment ça marche ?" pill that opens a module's help. Icon only below xl,
+ * where module headers are too narrow for the label.
+ */
+export function HelpButton({ onClick, className }: { onClick: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Comment ça marche ?"
+      title="Comment ça marche ?"
+      className={cn(
+        'inline-flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full border border-border bg-card text-sm text-muted-foreground shadow-sm transition-colors hover:bg-secondary hover:text-foreground',
+        'xl:h-auto xl:w-auto xl:px-3 xl:py-2',
+        className
+      )}
+    >
+      <CircleHelp className="h-4 w-4" aria-hidden />
+      <span className="hidden xl:inline">Comment ça marche ?</span>
+    </button>
   );
 }

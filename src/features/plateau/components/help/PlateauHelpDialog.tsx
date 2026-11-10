@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { CircleHelp } from 'lucide-react';
-import { Dialog } from '@/components/ui/primitives';
+import { Dialog, HelpButton } from '@/components/ui/primitives';
 
 interface PlateauHelpDialogProps {
   open: boolean;
@@ -98,14 +97,7 @@ interface PlateauHelpButtonProps {
 
 export function PlateauHelpButton({ onClick }: PlateauHelpButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-secondary hover:text-foreground"
-    >
-      <CircleHelp className="h-4 w-4" aria-hidden />
-      Comment ça marche ?
-    </button>
+    <HelpButton onClick={onClick} />
   );
 }
 
