@@ -119,15 +119,16 @@ export function DocsToolbar({
       >
         {(
           [
-            ['editor', 'Éditeur Markdown'],
-            ['preview', 'Aperçu Markdown'],
-            ['gdocs', 'Aperçu du document lié à l\'URL'],
+            ['editor', 'Éditeur Markdown', 'Éditer'],
+            ['preview', 'Aperçu Markdown', 'Aperçu'],
+            ['gdocs', 'Aperçu du document lié à l\'URL', 'Doc'],
           ] as const
-        ).map(([id, label]) => (
+        ).map(([id, label, shortLabel]) => (
           <button
             key={id}
             type="button"
             onClick={() => onPaneChange(id)}
+            title={label}
             className={cn(
               'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
               pane === id
@@ -135,7 +136,9 @@ export function DocsToolbar({
                 : 'bg-secondary text-muted-foreground hover:text-foreground'
             )}
           >
-            {label}
+            {/* Short labels below sm so the three tabs fit on one line. */}
+            <span className="sm:hidden">{shortLabel}</span>
+            <span className="hidden sm:inline">{label}</span>
           </button>
         ))}
 
