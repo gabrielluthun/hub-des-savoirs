@@ -59,14 +59,22 @@ export function CollapsibleSidebar({
   /** User preference, persisted; applies from xl up. */
   const [preferCollapsed, setPreferCollapsed] = useState(readCollapsed);
   const isWide = useMediaQuery('(min-width: 1280px)');
-  // Between md and xl the sidebar is always an icon rail so the module's own
-  // list and content keep a usable width. Below md the drawer ignores this.
-  const collapsed = isWide ? preferCollapsed : true;
+  /** Between md and xl: rail temporarily expanded over the content. */
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  // Between md and xl the sidebar is an icon rail so the module's own list and
+  // content keep a usable width; it expands over the content instead of pushing
+  // it. Below md the drawer ignores this.
+  const collapsed = isWide ? preferCollapsed : !overlayOpen;
+  const overlay = !isWide && overlayOpen;
   const navItems = NAV_ITEMS.filter(
     (item) => item.id !== 'quizypedia' || state.settings.quizypediaEnabled
   );
 
   const toggleCollapsed = () => {
+    if (!isWide) {
+      setOverlayOpen((open) => !open);
+      return;
+    }
     setPreferCollapsed((prev) => {
       const next = !prev;
       try {
@@ -78,9 +86,15 @@ export function CollapsibleSidebar({
     });
   };
 
+  /** Close whatever is temporarily open: the mobile drawer or the rail overlay. */
+  const closeTransient = () => {
+    onMobileClose?.();
+    setOverlayOpen(false);
+  };
+
   const go = (tab: TabId) => {
     dispatch(setTab(tab));
-    onMobileClose?.();
+    closeTransient();
   };
 
   return (
@@ -94,12 +108,26 @@ export function CollapsibleSidebar({
         />
       ) : null}
 
+      {overlay ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 hidden bg-black/40 md:block"
+            aria-label="Replier la barre latérale"
+            onClick={() => setOverlayOpen(false)}
+          />
+          {/* Keeps the rail's 72px in the layout while the sidebar floats above it. */}
+          <div className="hidden w-[72px] shrink-0 md:block" aria-hidden />
+        </>
+      ) : null}
+
       <aside
         className={cn(
           'flex h-full shrink-0 flex-col border-r border-border bg-background transition-[width] duration-200',
           'fixed inset-y-0 left-0 z-50 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:static md:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-          collapsed ? 'w-[240px] md:w-[72px]' : 'w-[240px]'
+          collapsed ? 'w-[240px] md:w-[72px]' : 'w-[240px]',
+          overlay && 'md:fixed md:shadow-2xl'
         )}
       >
         <div
@@ -116,7 +144,7 @@ export function CollapsibleSidebar({
           </div>
           <button
             type="button"
-            className="hidden rounded-lg p-1.5 text-muted-foreground hover:bg-secondary xl:inline-flex"
+            className="hidden rounded-lg p-1.5 text-muted-foreground hover:bg-secondary md:inline-flex"
             onClick={toggleCollapsed}
             aria-label={collapsed ? 'Déplier la barre latérale' : 'Replier la barre latérale'}
             aria-expanded={!collapsed}
@@ -177,7 +205,7 @@ export function CollapsibleSidebar({
 
         <div className={cn('mt-auto space-y-3 border-t border-border p-3', collapsed && 'md:p-2')}>
           <div className={cn(collapsed && 'md:hidden')}>
-            <SidebarToday onNavigate={onMobileClose} />
+            <SidebarToday onNavigate={closeTransient} />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -200,7 +228,7 @@ export function CollapsibleSidebar({
               type="button"
               onClick={() => {
                 setHelpOpen(true);
-                onMobileClose?.();
+                closeTransient();
               }}
               title="Aide"
               className={cn(
