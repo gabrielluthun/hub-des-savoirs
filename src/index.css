@@ -55,6 +55,14 @@ body,
   height: 100%;
 }
 
+/* Follow the visible viewport on mobile browsers whose toolbars shrink and grow
+   (100% would include the hidden address bar on iOS Safari). */
+@supports (height: 100dvh) {
+  #root {
+    height: 100dvh;
+  }
+}
+
 body {
   margin: 0;
   background: hsl(var(--background));
