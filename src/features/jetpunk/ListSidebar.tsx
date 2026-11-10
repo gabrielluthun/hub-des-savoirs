@@ -144,7 +144,7 @@ export function ListSidebar({
                     event.stopPropagation();
                     onDelete(list.id);
                   }}
-                  className="shrink-0 rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
+                  className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
                   aria-label={`Supprimer ${list.title}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
