@@ -119,7 +119,7 @@ export function CollapsibleSidebar({
           </button>
           <button
             type="button"
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary md:hidden"
+            className="rounded-lg p-3 md:p-1.5 text-muted-foreground hover:bg-secondary md:hidden"
             onClick={onMobileClose}
             aria-label="Fermer"
           >

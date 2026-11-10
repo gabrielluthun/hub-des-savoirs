@@ -67,7 +67,7 @@ export function ListSidebar({
         <button
           type="button"
           onClick={onAdd}
-          className="mt-1 shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          className="mt-1 shrink-0 rounded-lg p-3 md:p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
           aria-label="Nouvelle liste"
           title="Nouvelle liste"
         >
@@ -144,7 +144,7 @@ export function ListSidebar({
                     event.stopPropagation();
                     onDelete(list.id);
                   }}
-                  className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
+                  className="shrink-0 rounded-lg p-3 md:p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
                   aria-label={`Supprimer ${list.title}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

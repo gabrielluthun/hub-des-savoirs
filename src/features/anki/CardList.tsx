@@ -56,7 +56,7 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
             <button
               type="button"
               onClick={() => onEdit(card)}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="rounded-lg p-3 md:p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
               aria-label="Modifier la carte"
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -64,7 +64,7 @@ export function CardList({ cards, onEdit, onDelete }: CardListProps) {
             <button
               type="button"
               onClick={() => onDelete(card.id)}
-              className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10"
+              className="rounded-lg p-3 md:p-1.5 text-destructive hover:bg-destructive/10"
               aria-label="Supprimer la carte"
             >
               <Trash2 className="h-3.5 w-3.5" />

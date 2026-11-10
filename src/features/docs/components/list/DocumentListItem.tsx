@@ -56,7 +56,7 @@ export function DocumentListItem({
           event.stopPropagation();
           onDelete(doc.id);
         }}
-        className="mt-1.5 shrink-0 rounded-lg p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
+        className="mt-1.5 shrink-0 rounded-lg p-3 md:p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-visible:opacity-100"
         aria-label={`Supprimer ${doc.title}`}
       >
         <Trash2 className="h-3.5 w-3.5" />
