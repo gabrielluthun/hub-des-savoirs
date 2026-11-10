@@ -1,4 +1,5 @@
-import { CloudDownload, ExternalLink, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, CloudDownload, ExternalLink, Sparkles } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
 import { ImportMarkdownButton } from '@/features/docs/components/toolbar/ImportMarkdownButton';
 import { SyncButton } from '@/features/docs/components/toolbar/SyncButton';
@@ -11,6 +12,8 @@ export type DocsPane = 'editor' | 'preview' | 'gdocs';
 
 interface DocsToolbarProps {
   url: string;
+  /** Whether the document already has content; collapses the source block on mobile. */
+  hasContent: boolean;
   pane: DocsPane;
   savingLabel: string;
   syncStatus: DocSyncStatus;
@@ -29,6 +32,7 @@ interface DocsToolbarProps {
 
 export function DocsToolbar({
   url,
+  hasContent,
   pane,
   savingLabel,
   syncStatus,
@@ -44,9 +48,43 @@ export function DocsToolbar({
   canOpenExternal,
   externalUrl,
 }: DocsToolbarProps) {
+  // Below md the source block and the view tabs are collapsible so the editor starts higher.
+  // Open by default only for an empty document (to paste a URL or import a file).
+  const [sourceOpen, setSourceOpen] = useState(!hasContent);
+
   return (
     <div className="space-y-3 border-b border-border px-4 py-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setSourceOpen((open) => !open)}
+        aria-expanded={sourceOpen}
+        aria-controls="docs-source docs-panes"
+        className="flex min-h-10 w-full items-center justify-between gap-2 rounded-xl text-left md:hidden"
+      >
+        <span className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
+          <CloudDownload className="h-4 w-4 shrink-0 text-muted-foreground" />
+          Google Docs
+        </span>
+        <span className="flex min-w-0 items-center gap-2">
+          <SyncStatusBadge
+            status={syncStatus}
+            lastImportedAt={lastImportedAt}
+            className="whitespace-nowrap"
+          />
+          {/* Not enough room next to the badge on the narrowest phones. */}
+          <span className="hidden whitespace-nowrap text-xs text-muted-foreground min-[380px]:inline">
+            {savingLabel}
+          </span>
+          <ChevronDown
+            className={cn('h-4 w-4 text-muted-foreground transition-transform', sourceOpen && 'rotate-180')}
+          />
+        </span>
+      </button>
+
+      <div
+        id="docs-source"
+        className={cn('flex-wrap items-center gap-2 md:flex', sourceOpen ? 'flex' : 'hidden')}
+      >
         <Input
           value={url}
           onChange={(e) => onUrlChange(e.target.value)}
@@ -75,7 +113,10 @@ export function DocsToolbar({
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div
+        id="docs-panes"
+        className={cn('flex-wrap items-center gap-2 md:flex', sourceOpen ? 'flex' : 'hidden')}
+      >
         {(
           [
             ['editor', 'Éditeur Markdown'],
@@ -103,7 +144,8 @@ export function DocsToolbar({
           Générer un quiz IA
         </Button>
 
-        <div className="ml-auto flex items-center gap-2">
+        {/* Below md, the status and saving label live in the collapsible header. */}
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           <SyncStatusBadge status={syncStatus} lastImportedAt={lastImportedAt} />
           <span className="text-xs text-muted-foreground">{savingLabel}</span>
         </div>
