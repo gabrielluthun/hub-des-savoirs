@@ -129,13 +129,15 @@ interface DialogProps {
   bodyClassName?: string;
   /** Pinned under the body (e.g. a confirm button). */
   footer?: ReactNode;
+  /** Close when the backdrop is clicked (default true). */
+  closeOnBackdrop?: boolean;
   children: ReactNode;
 }
 
 /**
  * Modal with a header (eyebrow, title, close button) and a scrolling body.
  * Full screen below sm, with iOS safe-area insets; centered card from sm up.
- * Clicking the backdrop closes it.
+ * Clicking the backdrop closes it unless closeOnBackdrop is false.
  */
 export function Dialog({
   open,
@@ -146,6 +148,7 @@ export function Dialog({
   size = 'lg',
   bodyClassName,
   footer,
+  closeOnBackdrop = true,
   children,
 }: DialogProps) {
   if (!open) return null;
@@ -156,7 +159,7 @@ export function Dialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      onClick={onClose}
+      onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className={cn(
