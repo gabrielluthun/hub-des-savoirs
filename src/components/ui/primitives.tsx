@@ -127,6 +127,8 @@ interface DialogProps {
   size?: keyof typeof DIALOG_WIDTHS;
   /** Extra classes for the scrolling body (spacing, typography). */
   bodyClassName?: string;
+  /** Pinned under the body (e.g. a confirm button). */
+  footer?: ReactNode;
   children: ReactNode;
 }
 
@@ -143,6 +145,7 @@ export function Dialog({
   eyebrow,
   size = 'lg',
   bodyClassName,
+  footer,
   children,
 }: DialogProps) {
   if (!open) return null;
@@ -188,12 +191,19 @@ export function Dialog({
 
         <div
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6',
+            !footer && 'pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6',
             bodyClassName
           )}
         >
           {children}
         </div>
+
+        {footer ? (
+          <div className="shrink-0 border-t border-border px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>
   );
