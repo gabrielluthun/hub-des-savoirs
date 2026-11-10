@@ -169,11 +169,7 @@ export function JetpunkHelp() {
 
   return (
     <>
-      <div className="pointer-events-none fixed bottom-4 right-4 z-40">
-        <div className="pointer-events-auto">
-          <JetpunkHelpButton onClick={() => setOpen(true)} />
-        </div>
-      </div>
+      <JetpunkHelpButton onClick={() => setOpen(true)} />
       <JetpunkHelpDialog open={open} onClose={() => setOpen(false)} />
     </>
   );

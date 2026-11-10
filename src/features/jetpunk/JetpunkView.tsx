@@ -181,9 +181,11 @@ export function JetPunkView() {
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
             <p>Aucune liste sélectionnée.</p>
             <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
+            <div className="mt-2">
+              <JetpunkHelp />
+            </div>
           </div>
         </div>
-        <JetpunkHelp />
       </div>
     );
   }
@@ -242,6 +244,7 @@ export function JetPunkView() {
               <Download className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Exporter cette liste</span>
             </Button>
+            <JetpunkHelp />
           </div>
         </div>
 
@@ -345,7 +348,6 @@ export function JetPunkView() {
         />
       ) : null}
 
-      {!quizOpen ? <JetpunkHelp /> : null}
     </div>
   );
 }
