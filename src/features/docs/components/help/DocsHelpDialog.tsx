@@ -43,7 +43,8 @@ export function DocsHelpDialog({ open, onClose }: DocsHelpDialogProps) {
           facilement.
         </p>
         <p className={P}>
-          Pour supprimer un document, survole-le dans la liste puis utilise la corbeille.
+          Pour supprimer un document, utilise la corbeille à côté de son nom dans la liste
+          (avec une souris, elle apparaît au survol).
         </p>
         <p className={P}>
           Une confirmation te sera demandée avant la suppression définitive.

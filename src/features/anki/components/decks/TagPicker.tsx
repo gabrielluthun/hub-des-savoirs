@@ -47,7 +47,7 @@ export function TagPicker({ tags, onChange, suggestions = [] }: TagPickerProps) 
             <button
               type="button"
               onClick={() => onChange(removeTag(tags, tag))}
-              className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+              className="relative rounded-full p-0.5 text-muted-foreground after:absolute after:-inset-3 after:content-[''] hover:bg-background hover:text-foreground md:after:hidden"
               aria-label={`Retirer ${formatTagLabel(tag)}`}
             >
               <X className="h-3 w-3" />

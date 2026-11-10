@@ -26,6 +26,7 @@ export function TxtImportButton({ onFile }: TxtImportButtonProps) {
         type="button"
         variant="outline"
         size="sm"
+        className="h-10 md:h-8"
         onClick={() => inputRef.current?.click()}
       >
         <FileText className="h-3.5 w-3.5" />

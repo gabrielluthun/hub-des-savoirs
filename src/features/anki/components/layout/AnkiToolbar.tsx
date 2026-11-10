@@ -79,7 +79,7 @@ export function AnkiToolbar({
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          <Button type="button" variant="accent" size="sm" onClick={onStartReview}>
+          <Button type="button" variant="accent" size="sm" className="h-10 md:h-8" onClick={onStartReview}>
             <Sparkles className="h-3.5 w-3.5" />
             Réviser ({dueCount})
           </Button>
@@ -87,7 +87,7 @@ export function AnkiToolbar({
             type="button"
             variant="outline"
             size="sm"
-            className="sm:hidden"
+            className="h-10 w-10 sm:hidden"
             onClick={() => setMoreOpen((open) => !open)}
             aria-expanded={showMore}
             aria-controls="anki-toolbar-more"
@@ -100,12 +100,12 @@ export function AnkiToolbar({
             id="anki-toolbar-more"
             className={cn('w-full flex-wrap gap-1.5 sm:contents', showMore ? 'flex' : 'hidden')}
           >
-            <Button type="button" variant="secondary" size="sm" onClick={onToggleAiPanel}>
+            <Button type="button" variant="secondary" size="sm" className="h-10 md:h-8" onClick={onToggleAiPanel}>
               <Sparkles className="h-3.5 w-3.5" />
               {showAiPanel ? 'Masquer' : 'Générer par IA'}
             </Button>
             <TxtImportButton onFile={onTxtFile} />
-            <Button type="button" variant="outline" size="sm" onClick={onExport}>
+            <Button type="button" variant="outline" size="sm" className="h-10 md:h-8" onClick={onExport}>
               <Download className="h-3.5 w-3.5" />
               Exporter .txt
             </Button>
@@ -113,6 +113,7 @@ export function AnkiToolbar({
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 md:h-8"
               disabled={transferCount === 0}
               onClick={onTransferToJetpunk}
               title="Créer une liste JetPunk (catégorie ← thème du deck Parent::Liste)"

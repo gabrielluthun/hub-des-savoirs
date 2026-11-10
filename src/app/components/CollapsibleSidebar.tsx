@@ -22,17 +22,27 @@ import type { TabId } from '@/types';
 
 const STORAGE_KEY = 'hub-sidebar-collapsed';
 
+/** Display name of each tab, shared by the sidebar and the mobile header. */
+export const TAB_LABELS: Record<TabId, string> = {
+  docs: 'Google Docs',
+  anki: 'Anki',
+  jetpunk: 'JetPunk',
+  quizypedia: 'Quizypedia',
+  plateau: 'Plateau',
+  settings: 'Paramètres',
+};
+
 const NAV_ITEMS: {
   id: TabId;
   label: string;
   icon: typeof BookOpen;
   badge?: string;
 }[] = [
-  { id: 'docs', label: 'Google Docs', icon: BookOpen },
-  { id: 'anki', label: 'Anki', icon: Layers },
-  { id: 'jetpunk', label: 'JetPunk', icon: ListChecks },
-  { id: 'quizypedia', label: 'Quizypedia', icon: HelpCircle },
-  { id: 'plateau', label: 'Plateau', icon: MonitorPlay, badge: 'IA' },
+  { id: 'docs', label: TAB_LABELS.docs, icon: BookOpen },
+  { id: 'anki', label: TAB_LABELS.anki, icon: Layers },
+  { id: 'jetpunk', label: TAB_LABELS.jetpunk, icon: ListChecks },
+  { id: 'quizypedia', label: TAB_LABELS.quizypedia, icon: HelpCircle },
+  { id: 'plateau', label: TAB_LABELS.plateau, icon: MonitorPlay, badge: 'IA' },
 ];
 
 function readCollapsed(): boolean {
@@ -212,7 +222,7 @@ export function CollapsibleSidebar({
             <button
               type="button"
               onClick={() => go('settings')}
-              title="Paramètres"
+              title={TAB_LABELS.settings}
               className={cn(
                 'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
                 collapsed && 'md:justify-center md:px-0',
@@ -222,7 +232,7 @@ export function CollapsibleSidebar({
               )}
             >
               <Settings className="h-4 w-4 shrink-0" />
-              <span className={cn('font-medium', collapsed && 'md:hidden')}>Paramètres</span>
+              <span className={cn('font-medium', collapsed && 'md:hidden')}>{TAB_LABELS.settings}</span>
             </button>
             <button
               type="button"

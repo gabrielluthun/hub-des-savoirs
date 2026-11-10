@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Sidebar } from '@/app/Sidebar';
+import { TAB_LABELS } from '@/app/components/CollapsibleSidebar';
 import { AnkiView } from '@/features/anki/AnkiView';
 import { DocsView } from '@/features/docs/DocsView';
 import { JetPunkView } from '@/features/jetpunk/JetpunkView';
@@ -35,7 +36,10 @@ export function AppShell() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <p className="font-display text-sm font-semibold">Hub des Savoirs</p>
+          <p className="min-w-0 truncate font-display text-sm font-semibold">
+            <span className="text-muted-foreground">Hub des Savoirs · </span>
+            {TAB_LABELS[tab]}
+          </p>
         </header>
         <main className="min-h-0 min-w-0 flex-1 overflow-hidden pb-[env(safe-area-inset-bottom)]">
           {tab === 'docs' && <DocsView />}

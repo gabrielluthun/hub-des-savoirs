@@ -228,6 +228,7 @@ export function JetPunkView() {
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 md:h-8"
               onClick={handleTransferToAnki}
               title="Créer des cartes Anki (deck Thème::Liste, ex. Géographie::Capitales)"
             >
@@ -238,6 +239,7 @@ export function JetPunkView() {
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 md:h-8"
               onClick={() => exportList(activeList)}
               title="Exporter cette liste en JSON"
             >
@@ -256,7 +258,7 @@ export function JetPunkView() {
               dispatch(updateJetpunkList(activeList.id, { category: e.target.value }))
             }
             placeholder="Catégorie"
-            className="h-8 w-auto min-w-[7rem] rounded-full px-3 text-base md:text-xs"
+            className="h-10 w-auto min-w-[7rem] md:h-8 rounded-full px-3 text-base md:text-xs"
           />
           <datalist id="jetpunk-categories">
             {[...new Set(lists.map((list) => list.category.trim()).filter(Boolean))]

@@ -63,7 +63,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
               <button
                 type="button"
                 onClick={startAnkiReview}
-                className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary"
+                className="flex min-h-10 w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary md:min-h-0"
               >
                 <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-foreground">
@@ -79,7 +79,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
               <button
                 type="button"
                 onClick={resumeJetpunk}
-                className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary"
+                className="flex min-h-10 w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary md:min-h-0"
               >
                 <ListChecks className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-foreground">
@@ -95,7 +95,7 @@ export function SidebarToday({ onNavigate }: SidebarTodayProps) {
               <button
                 type="button"
                 onClick={() => go('plateau')}
-                className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary"
+                className="flex min-h-10 w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left text-xs transition-colors hover:bg-secondary md:min-h-0"
               >
                 <MonitorPlay className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-foreground">

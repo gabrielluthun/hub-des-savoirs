@@ -40,12 +40,12 @@ export function DeckCreateForm({ onCreate, parentHint = null }: DeckCreateFormPr
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         placeholder={parentHint ? `${parentHint}${DECK_PATH_SEP}Enfant` : 'Nouveau deck…'}
-        className="h-8 flex-1 text-base md:text-xs"
+        className="h-10 flex-1 text-base md:h-8 md:text-xs"
         aria-label="Nom du nouveau deck"
       />
       <button
         type="submit"
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+        className="inline-flex h-10 w-10 shrink-0 md:h-8 md:w-8 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
         aria-label="Créer le deck"
       >
         <Plus className="h-4 w-4" />
