@@ -15,6 +15,15 @@ export interface ReleaseHistoryEntry {
  */
 export const RELEASE_HISTORY: ReleaseHistoryEntry[] = [
   {
+    version: 'v1.4.0',
+    changes: [
+      {
+        keyword: 'Application',
+        description: 'le Hub est désormais utilisable sur téléphone',
+      },
+    ],
+  },
+  {
     version: 'v1.3.2',
     changes: [
       {
