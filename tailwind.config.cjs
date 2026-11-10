@@ -1,3 +1,5 @@
+const plugin = require('tailwindcss/plugin');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
@@ -48,5 +50,11 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // `hover-device:` applies only on screens with a real hover pointer (mouse, trackpad),
+    // so hover-revealed controls stay visible on touch screens.
+    plugin(({ addVariant }) => {
+      addVariant('hover-device', '@media (hover: hover) and (pointer: fine)');
+    }),
+  ],
 };
