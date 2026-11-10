@@ -181,9 +181,11 @@ export function JetPunkView() {
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
             <p>Aucune liste sélectionnée.</p>
             <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
+            <div className="mt-2">
+              <JetpunkHelp />
+            </div>
           </div>
         </div>
-        <JetpunkHelp />
       </div>
     );
   }
@@ -198,11 +200,11 @@ export function JetPunkView() {
 
       <div
         className={cn(
-          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5',
+          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-5',
           mobilePane === 'list' ? 'hidden md:flex' : 'flex'
         )}
       >
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setMobilePane('list')}
@@ -211,7 +213,7 @@ export function JetPunkView() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
+          <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">Titre :</span>
           <input
             value={activeList.title}
             onChange={(e) =>
@@ -219,9 +221,9 @@ export function JetPunkView() {
             }
             placeholder="Nom de la liste"
             aria-label="Nom de la liste"
-            className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
+            className="min-w-[10rem] flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl placeholder:text-muted-foreground/50"
           />
-          <div className="flex shrink-0 flex-wrap gap-2">
+          <div className="ml-auto flex shrink-0 flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
@@ -242,6 +244,7 @@ export function JetPunkView() {
               <Download className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Exporter cette liste</span>
             </Button>
+            <JetpunkHelp />
           </div>
         </div>
 
@@ -345,7 +348,6 @@ export function JetPunkView() {
         />
       ) : null}
 
-      {!quizOpen ? <JetpunkHelp /> : null}
     </div>
   );
 }

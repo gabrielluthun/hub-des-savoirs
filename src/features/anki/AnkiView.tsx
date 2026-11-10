@@ -219,7 +219,7 @@ export function AnkiView() {
           mobilePane === 'decks' ? 'hidden md:flex' : 'flex'
         )}
       >
-        <div className="flex min-w-0 flex-1 flex-col p-5 xl:min-h-0">
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5 xl:min-h-0">
           <button
             type="button"
             onClick={() => setMobilePane('decks')}

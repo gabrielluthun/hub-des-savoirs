@@ -238,12 +238,12 @@ export function DocsView() {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
+            <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">Titre :</span>
             <input
               value={activeDoc.title}
               onChange={(e) => dispatch(updateDoc(activeDoc.id, { title: e.target.value }))}
               aria-label="Nom du document"
-              className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none"
+              className="min-w-0 flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl"
             />
             <DocsHelp />
           </div>

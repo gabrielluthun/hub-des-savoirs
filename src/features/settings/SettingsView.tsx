@@ -107,7 +107,7 @@ export function SettingsView() {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className="h-full overflow-y-auto p-4 sm:p-6">
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">

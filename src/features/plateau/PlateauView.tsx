@@ -189,7 +189,7 @@ export function PlateauView() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className="h-full overflow-y-auto p-4 sm:p-6">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -197,7 +197,7 @@ export function PlateauView() {
               Rubrique spéciale
             </p>
             <div className="mt-0.5 flex flex-wrap items-center gap-3">
-              <h1 className="font-display text-3xl font-semibold">Le Plateau</h1>
+              <h1 className="font-display text-2xl font-semibold sm:text-3xl">Le Plateau</h1>
               <PlateauHelp />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
