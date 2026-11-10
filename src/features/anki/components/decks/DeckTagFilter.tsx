@@ -44,7 +44,7 @@ export function DeckTagFilter({
                 type="button"
                 onClick={() => onToggleTag(tag)}
                 className={cn(
-                  'rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors',
+                  'min-h-9 rounded-full px-3 py-1 text-xs font-medium transition-colors md:min-h-0 md:px-2.5 md:text-[10px]',
                   active
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-secondary text-muted-foreground hover:text-foreground'

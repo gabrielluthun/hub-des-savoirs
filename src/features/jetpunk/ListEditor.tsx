@@ -32,7 +32,7 @@ export function ListEditor({
             </p>
           ) : null}
         </div>
-        <Button type="button" variant="secondary" size="sm" onClick={onAddItem}>
+        <Button type="button" variant="secondary" size="sm" className="h-10 md:h-8" onClick={onAddItem}>
           <Plus className="h-3.5 w-3.5" />
           Ajouter
         </Button>
@@ -62,7 +62,7 @@ export function ListEditor({
             <button
               type="button"
               onClick={() => onDeleteItem(item.id)}
-              className="self-end rounded-lg p-2 text-destructive hover:bg-destructive/10 sm:self-auto"
+              className="self-end rounded-lg p-3 text-destructive md:p-2 hover:bg-destructive/10 sm:self-auto"
               aria-label="Supprimer l'élément"
             >
               <Trash2 className="h-4 w-4" />

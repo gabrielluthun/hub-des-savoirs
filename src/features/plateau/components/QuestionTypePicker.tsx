@@ -25,7 +25,7 @@ export function QuestionTypePicker({ selected, onChange }: QuestionTypePickerPro
               aria-pressed={active}
               onClick={() => onChange(toggleQuestionType(selected, type))}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                'min-h-10 rounded-full border px-3 py-1.5 text-xs transition-colors md:min-h-0',
                 active
                   ? 'border-quiz-accent bg-quiz-accent/15 text-foreground'
                   : 'border-border text-muted-foreground hover:bg-secondary hover:text-foreground'

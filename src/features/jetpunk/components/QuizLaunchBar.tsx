@@ -62,7 +62,7 @@ export function QuizLaunchBar({
             aria-label="Mode chronométré"
             aria-pressed={durationSec > 0}
             className={cn(
-              'rounded-lg p-2 transition-colors',
+              'rounded-lg p-3 transition-colors md:p-2',
               durationSec > 0
                 ? 'bg-secondary text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
@@ -77,7 +77,7 @@ export function QuizLaunchBar({
             aria-label="Mode sans chrono"
             aria-pressed={durationSec <= 0}
             className={cn(
-              'rounded-lg p-2 transition-colors',
+              'rounded-lg p-3 transition-colors md:p-2',
               durationSec <= 0
                 ? 'bg-secondary text-foreground'
                 : 'text-muted-foreground hover:text-foreground'

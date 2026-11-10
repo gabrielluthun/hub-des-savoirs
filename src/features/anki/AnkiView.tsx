@@ -223,7 +223,7 @@ export function AnkiView() {
           <button
             type="button"
             onClick={() => setMobilePane('decks')}
-            className="-ml-1 mb-2 inline-flex items-center gap-1.5 self-start rounded-lg px-2 py-1.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden"
+            className="-ml-1 mb-2 inline-flex items-center gap-1.5 self-start rounded-lg px-2 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden"
           >
             <ArrowLeft className="h-4 w-4" />
             Decks

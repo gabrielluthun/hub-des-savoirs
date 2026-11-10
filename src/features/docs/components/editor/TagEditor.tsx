@@ -46,7 +46,7 @@ export function TagEditor({ tags, onChange }: TagEditorProps) {
             <button
               type="button"
               onClick={() => onChange(removeTag(tags, tag))}
-              className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+              className="relative rounded-full p-0.5 text-muted-foreground after:absolute after:-inset-3 after:content-[''] hover:bg-background hover:text-foreground md:after:hidden"
               aria-label={`Retirer le tag ${formatTagLabel(tag)}`}
             >
               <X className="h-3 w-3" />
