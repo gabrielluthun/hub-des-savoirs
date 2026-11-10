@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Layers } from 'lucide-react';
+import { ArrowLeft, Download, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { consumeNavIntent, subscribeNavIntent } from '@/app/nav-intent';
 import { partitionByQuestionDeduplication } from '@/features/anki/lib/import/deduplication';
@@ -20,7 +20,7 @@ import {
 import { jetpunkListToAnkiCards } from '@/lib/anki-jetpunk-transfer';
 import { confirmAction } from '@/lib/confirm';
 import { Button, Input } from '@/components/ui/primitives';
-import { createId } from '@/lib/utils';
+import { cn, createId } from '@/lib/utils';
 import type { JetPunkItem } from '@/types';
 import {
   addAnkiCards,
@@ -49,6 +49,10 @@ export function JetPunkView() {
   const { importFile } = useJetpunkImport(dispatch);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizItems, setQuizItems] = useState<JetPunkItem[] | null>(null);
+  /** Below md, only one of the list sidebar or the list editor is shown at a time. */
+  const [mobilePane, setMobilePane] = useState<'list' | 'detail'>(() =>
+    activeList ? 'detail' : 'list'
+  );
 
   useEffect(() => {
     const tryStartFromSidebar = () => {
@@ -64,6 +68,7 @@ export function JetPunkView() {
         return;
       }
       dispatch(setActiveJetpunkList(list.id));
+      setMobilePane('detail');
       setQuizItems(null);
       setQuizOpen(true);
     };
@@ -112,6 +117,7 @@ export function JetPunkView() {
         items: [{ id: createId(), prompt: '', answer: '' }],
       })
     );
+    setMobilePane('detail');
   };
 
   const handleDeleteList = (id: string) => {
@@ -155,7 +161,10 @@ export function JetPunkView() {
 
   const sidebarProps = {
     lists,
-    onSelect: (id: string) => dispatch(setActiveJetpunkList(id)),
+    onSelect: (id: string) => {
+      dispatch(setActiveJetpunkList(id));
+      setMobilePane('detail');
+    },
     onAdd: handleAddList,
     onDelete: handleDeleteList,
     onExportAll: () => exportAll(lists),
@@ -167,8 +176,8 @@ export function JetPunkView() {
   if (!activeList) {
     return (
       <div className="flex h-full min-h-0 flex-col md:flex-row">
-        <ListSidebar {...sidebarProps} activeListId={null} />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
+        <ListSidebar {...sidebarProps} activeListId={null} className="flex" />
+        <div className="hidden min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5 md:flex">
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
             <p>Aucune liste sélectionnée.</p>
             <p className="text-xs">Crée une liste (+) ou importe un fichier JSON.</p>
@@ -181,10 +190,27 @@ export function JetPunkView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
-      <ListSidebar {...sidebarProps} activeListId={activeList.id} />
+      <ListSidebar
+        {...sidebarProps}
+        activeListId={activeList.id}
+        className={mobilePane === 'detail' ? 'hidden md:flex' : 'flex'}
+      />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5">
+      <div
+        className={cn(
+          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5',
+          mobilePane === 'list' ? 'hidden md:flex' : 'flex'
+        )}
+      >
         <div className="mb-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMobilePane('list')}
+            className="-ml-1 shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden"
+            aria-label="Retour aux listes"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
           <input
             value={activeList.title}
