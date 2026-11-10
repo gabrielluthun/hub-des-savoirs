@@ -200,7 +200,7 @@ export function JetPunkView() {
 
       <div
         className={cn(
-          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5',
+          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-5',
           mobilePane === 'list' ? 'hidden md:flex' : 'flex'
         )}
       >

@@ -189,7 +189,7 @@ export function PlateauView() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className="h-full overflow-y-auto p-4 sm:p-6">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
