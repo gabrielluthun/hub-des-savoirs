@@ -1,4 +1,5 @@
-import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Button({
@@ -107,5 +108,93 @@ export function Label({
     <label className={cn('text-sm font-medium text-foreground', className)}>
       {children}
     </label>
+  );
+}
+
+const DIALOG_WIDTHS = {
+  md: 'sm:max-w-lg',
+  lg: 'sm:max-w-xl',
+} as const;
+
+interface DialogProps {
+  open: boolean;
+  onClose: () => void;
+  /** Id given to the title, referenced by aria-labelledby. */
+  titleId: string;
+  title: ReactNode;
+  /** Small uppercase label above the title. */
+  eyebrow?: ReactNode;
+  size?: keyof typeof DIALOG_WIDTHS;
+  /** Extra classes for the scrolling body (spacing, typography). */
+  bodyClassName?: string;
+  children: ReactNode;
+}
+
+/**
+ * Modal with a header (eyebrow, title, close button) and a scrolling body.
+ * Full screen below sm, with iOS safe-area insets; centered card from sm up.
+ * Clicking the backdrop closes it.
+ */
+export function Dialog({
+  open,
+  onClose,
+  titleId,
+  title,
+  eyebrow,
+  size = 'lg',
+  bodyClassName,
+  children,
+}: DialogProps) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex bg-background/80 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onClick={onClose}
+    >
+      <div
+        className={cn(
+          'flex h-full w-full flex-col overflow-hidden bg-background',
+          'sm:h-auto sm:max-h-[90dvh] sm:rounded-2xl sm:border sm:border-border sm:shadow-lg',
+          DIALOG_WIDTHS[size]
+        )}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))] sm:pt-4">
+          <div className="min-w-0">
+            {eyebrow ? (
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {eyebrow}
+              </p>
+            ) : null}
+            <h2 id={titleId} className="font-display text-xl font-semibold">
+              {title}
+            </h2>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="h-11 w-11 shrink-0 sm:h-9 sm:w-9"
+          >
+            <X className="h-5 w-5 sm:h-4 sm:w-4" />
+          </Button>
+        </div>
+
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6',
+            bodyClassName
+          )}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }
