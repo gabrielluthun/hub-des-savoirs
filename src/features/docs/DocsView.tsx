@@ -254,7 +254,9 @@ export function DocsView() {
         </div>
 
         <DocsToolbar
+          key={activeDoc.id}
           url={activeDoc.googleDocsUrl}
+          hasContent={activeDoc.content.trim().length > 0}
           pane={pane}
           savingLabel={savingLabel}
           syncStatus={syncStatus}
