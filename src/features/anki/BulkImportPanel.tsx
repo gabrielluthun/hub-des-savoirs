@@ -15,7 +15,7 @@ export function BulkImportPanel({
   onImport,
 }: BulkImportPanelProps) {
   return (
-    <aside className="flex w-full flex-col border-t border-border bg-background p-4 lg:w-[320px] lg:border-l lg:border-t-0">
+    <aside className="flex w-full flex-col border-t border-border bg-background p-4 xl:w-[320px] xl:border-l xl:border-t-0">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Import rapide
       </p>
