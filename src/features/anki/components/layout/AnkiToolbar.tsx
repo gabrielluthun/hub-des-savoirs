@@ -46,7 +46,7 @@ export function AnkiToolbar({
     <>
       <div className="mb-4 space-y-3">
         <div className="flex items-center gap-3">
-          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
+          <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">Titre :</span>
           {selectedDeck ? (
             <input
               value={draftName}
@@ -64,10 +64,10 @@ export function AnkiToolbar({
               }}
               placeholder="Nom du deck"
               aria-label="Nom du deck"
-              className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
+              className="min-w-0 flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl placeholder:text-muted-foreground/50"
             />
           ) : (
-            <h1 className="min-w-0 flex-1 font-display text-2xl font-semibold">
+            <h1 className="min-w-0 flex-1 font-display text-xl font-semibold sm:text-2xl">
               Tous les decks
             </h1>
           )}

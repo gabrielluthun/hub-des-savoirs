@@ -213,7 +213,7 @@ export function JetPunkView() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
+          <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">Titre :</span>
           <input
             value={activeList.title}
             onChange={(e) =>
@@ -221,7 +221,7 @@ export function JetPunkView() {
             }
             placeholder="Nom de la liste"
             aria-label="Nom de la liste"
-            className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none placeholder:text-muted-foreground/50"
+            className="min-w-0 flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl placeholder:text-muted-foreground/50"
           />
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button
