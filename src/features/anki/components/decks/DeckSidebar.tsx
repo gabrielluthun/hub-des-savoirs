@@ -6,6 +6,7 @@ import { DeckTreeRows } from '@/features/anki/components/decks/DeckTreeRows';
 import { useDeckTreeExpand } from '@/features/anki/hooks/useDeckTreeExpand';
 import { buildDeckTree } from '@/features/anki/lib/decks';
 import { Input } from '@/components/ui/primitives';
+import { cn } from '@/lib/utils';
 
 interface DeckSidebarProps {
   decks: string[];
@@ -19,6 +20,7 @@ interface DeckSidebarProps {
   onToggleTag: (tag: string) => void;
   onClearTags: () => void;
   totalCount: number;
+  className?: string;
 }
 
 export function DeckSidebar({
@@ -33,6 +35,7 @@ export function DeckSidebar({
   onToggleTag,
   onClearTags,
   totalCount,
+  className,
 }: DeckSidebarProps) {
   const [deckQuery, setDeckQuery] = useState('');
   const { expanded, toggleExpand } = useDeckTreeExpand(decks, selectedDeck);
@@ -46,7 +49,12 @@ export function DeckSidebar({
   const tree = useMemo(() => buildDeckTree(filteredDecks), [filteredDecks]);
 
   return (
-    <aside className="flex h-full min-h-0 w-full shrink-0 flex-col border-b border-border bg-background md:w-[220px] md:border-b-0 md:border-r">
+    <aside
+      className={cn(
+        'min-h-0 w-full flex-1 flex-col bg-background md:w-[220px] md:flex-none md:shrink-0 md:border-r md:border-border',
+        className
+      )}
+    >
       <div className="shrink-0 px-4 pb-2 pt-5">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Organisation

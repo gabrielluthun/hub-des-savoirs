@@ -13,6 +13,7 @@ interface ListSidebarProps {
   onDelete: (id: string) => void;
   onExportAll: () => void;
   onImportFile: (file: File) => void;
+  className?: string;
 }
 
 export function ListSidebar({
@@ -23,6 +24,7 @@ export function ListSidebar({
   onDelete,
   onExportAll,
   onImportFile,
+  className,
 }: ListSidebarProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -49,7 +51,12 @@ export function ListSidebar({
   }, [lists, categoryFilter]);
 
   return (
-    <div className="flex h-full w-full shrink-0 flex-col border-b border-border bg-background md:w-[260px] md:border-b-0 md:border-r">
+    <div
+      className={cn(
+        'min-h-0 w-full flex-1 flex-col bg-background md:w-[260px] md:flex-none md:shrink-0 md:border-r md:border-border',
+        className
+      )}
+    >
       <div className="flex items-start justify-between gap-2 px-4 pb-3 pt-5">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -102,7 +109,7 @@ export function ListSidebar({
         </div>
       ) : null}
 
-      <div className="flex max-h-48 gap-1 overflow-x-auto px-2 pb-3 md:max-h-none md:flex-1 md:flex-col md:space-y-1 md:overflow-y-auto md:pb-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-2 pb-4">
         {visibleLists.length === 0 ? (
           <p className="px-3 py-2 text-xs text-muted-foreground">
             Aucune liste dans cette catégorie.
@@ -115,7 +122,7 @@ export function ListSidebar({
               <div
                 key={list.id}
                 className={cn(
-                  'group flex min-w-[180px] items-center gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors md:min-w-0 md:w-full',
+                  'group flex w-full min-w-0 items-center gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors',
                   active ? 'bg-secondary' : 'hover:bg-secondary/50'
                 )}
               >

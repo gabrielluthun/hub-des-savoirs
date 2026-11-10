@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
@@ -23,7 +24,7 @@ import {
 } from '@/features/docs/hooks/useDocSync';
 import { confirmAction } from '@/lib/confirm';
 import { renderMarkdownToHtml } from '@/lib/markdown';
-import { createId } from '@/lib/utils';
+import { cn, createId } from '@/lib/utils';
 import { addDoc, deleteDoc, setActiveDoc, setTab, updateDoc } from '@/store/actions';
 import { useStore } from '@/store/StoreProvider';
 import { selectActiveDoc, selectDocs } from '@/store/selectors';
@@ -36,6 +37,15 @@ export function DocsView() {
   const [savingLabel, setSavingLabel] = useState('Sauvegardé');
   const [syncLoading, setSyncLoading] = useState(false);
   const editorRef = useRef<MarkdownEditorHandle>(null);
+  /** Below md, only one of the list or the editor is shown at a time. */
+  const [mobilePane, setMobilePane] = useState<'list' | 'detail'>(() =>
+    activeDoc ? 'detail' : 'list'
+  );
+
+  const handleSelectDoc = (id: string) => {
+    dispatch(setActiveDoc(id));
+    setMobilePane('detail');
+  };
 
   const localHash = useLocalContentHash(activeDoc?.content ?? '');
   const syncStatus = useDocSyncStatus(activeDoc?.contentHash, localHash);
@@ -60,6 +70,7 @@ export function DocsView() {
         updatedAt: new Date().toISOString(),
       })
     );
+    setMobilePane('detail');
   };
 
   const handleImport = async () => {
@@ -183,15 +194,16 @@ export function DocsView() {
 
   if (!activeDoc) {
     return (
-      <div className="flex h-full">
+      <div className="flex h-full min-h-0 flex-col md:flex-row">
         <DocumentList
           docs={docs}
           activeDocId={null}
-          onSelect={(id) => dispatch(setActiveDoc(id))}
+          onSelect={handleSelectDoc}
           onAdd={handleAdd}
           onDelete={handleDeleteDoc}
+          className="flex"
         />
-        <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+        <div className="hidden flex-1 items-center justify-center text-sm text-muted-foreground md:flex">
           Aucun document sélectionné.
         </div>
       </div>
@@ -203,14 +215,28 @@ export function DocsView() {
       <DocumentList
         docs={docs}
         activeDocId={activeDoc.id}
-        onSelect={(id) => dispatch(setActiveDoc(id))}
+        onSelect={handleSelectDoc}
         onAdd={handleAdd}
         onDelete={handleDeleteDoc}
+        className={mobilePane === 'detail' ? 'hidden md:flex' : 'flex'}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div
+        className={cn(
+          'min-h-0 min-w-0 flex-1 flex-col',
+          mobilePane === 'list' ? 'hidden md:flex' : 'flex'
+        )}
+      >
         <div className="space-y-3 border-b border-border px-4 py-3">
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobilePane('list')}
+              className="-ml-1 shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden"
+              aria-label="Retour à la liste des documents"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
             <span className="shrink-0 text-sm text-muted-foreground">Titre :</span>
             <input
               value={activeDoc.title}

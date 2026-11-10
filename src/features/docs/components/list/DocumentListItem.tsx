@@ -21,7 +21,7 @@ export function DocumentListItem({
   return (
     <div
       className={cn(
-        'group flex min-w-[160px] items-start gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors md:min-w-0 md:w-full',
+        'group flex w-full min-w-0 items-start gap-0.5 rounded-xl py-0.5 pl-3 pr-1 transition-colors',
         active ? 'bg-secondary' : 'hover:bg-secondary/50'
       )}
     >
