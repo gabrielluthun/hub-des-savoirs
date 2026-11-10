@@ -213,13 +213,13 @@ export function AnkiView() {
 
       <div
         className={cn(
-          // Stacked (below lg): the cards and the bulk panel scroll together.
-          // Side by side (lg+): each column keeps its own height and the card list scrolls.
-          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain lg:flex-row lg:overflow-hidden',
+          // Stacked (below xl): the cards and the bulk panel scroll together.
+          // Side by side (xl+): each column keeps its own height and the card list scrolls.
+          'min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain xl:flex-row xl:overflow-hidden',
           mobilePane === 'decks' ? 'hidden md:flex' : 'flex'
         )}
       >
-        <div className="flex min-w-0 flex-1 flex-col p-5 lg:min-h-0">
+        <div className="flex min-w-0 flex-1 flex-col p-5 xl:min-h-0">
           <button
             type="button"
             onClick={() => setMobilePane('decks')}

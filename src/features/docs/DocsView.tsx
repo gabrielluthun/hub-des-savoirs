@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { DocumentList } from '@/features/docs/DocumentList';
 import { DocsToolbar, type DocsPane } from '@/features/docs/DocsToolbar';
@@ -58,6 +58,7 @@ export function DocsView() {
   }, [activeDoc]);
 
   const docId = activeDoc ? extractGoogleDocId(activeDoc.googleDocsUrl) : null;
+  const externalUrl = docId ? `https://docs.google.com/document/d/${docId}/edit` : undefined;
 
   const handleAdd = () => {
     dispatch(
@@ -267,7 +268,8 @@ export function DocsView() {
           onPaneChange={setPane}
           onGenerateQuiz={handleGenerateQuiz}
           canOpenExternal={Boolean(docId)}
-          externalUrl={docId ? `https://docs.google.com/document/d/${docId}/edit` : undefined}
+
+        
         />
 
         <div className="flex min-h-0 flex-1">
@@ -297,11 +299,29 @@ export function DocsView() {
           {pane === 'gdocs' && (
             <div className="flex flex-1 items-center justify-center p-4">
               {docId ? (
-                <iframe
-                  title="Aperçu du document lié à l'URL"
-                  src={buildGoogleDocsEmbedUrl(docId)}
-                  className="h-full w-full rounded-xl border border-border bg-card"
-                />
+                <>
+                  {/* The embedded viewer is hard to read and scroll on small screens:
+                      offer to open the document in Google Docs instead. */}
+                  <div className="flex max-w-xs flex-col items-center gap-3 text-center md:hidden">
+                    <p className="text-sm text-muted-foreground">
+                      L’aperçu intégré n’est pas adapté aux petits écrans.
+                    </p>
+                    <a
+                      href={externalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-medium hover:bg-secondary"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Ouvrir dans Google Docs
+                    </a>
+                  </div>
+                  <iframe
+                    title="Aperçu du document lié à l'URL"
+                    src={buildGoogleDocsEmbedUrl(docId)}
+                    className="hidden h-full w-full rounded-xl border border-border bg-card md:block"
+                  />
+                </>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Ajoutez une URL Google Docs valide pour afficher l’aperçu intégré.
