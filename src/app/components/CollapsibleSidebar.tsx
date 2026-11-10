@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { HubHelpDialog } from '@/app/components/HubHelpDialog';
 import { SidebarToday } from '@/app/components/SidebarToday';
+import { useMediaQuery } from '@/lib/use-media-query';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/primitives';
 import { useStore } from '@/store/StoreProvider';
@@ -47,7 +48,7 @@ interface CollapsibleSidebarProps {
   onMobileClose?: () => void;
 }
 
-/** Desktop sidebar with persistable icon-rail collapse. Mobile drawer unchanged. */
+/** Desktop sidebar: icon rail between md and xl, persistable collapse from xl up. Mobile drawer below md. */
 export function CollapsibleSidebar({
   mobileOpen = false,
   onMobileClose,
@@ -55,13 +56,18 @@ export function CollapsibleSidebar({
   const { state, dispatch } = useStore();
   const activeTab = state.settings.activeTab;
   const [helpOpen, setHelpOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(readCollapsed);
+  /** User preference, persisted; applies from xl up. */
+  const [preferCollapsed, setPreferCollapsed] = useState(readCollapsed);
+  const isWide = useMediaQuery('(min-width: 1280px)');
+  // Between md and xl the sidebar is always an icon rail so the module's own
+  // list and content keep a usable width. Below md the drawer ignores this.
+  const collapsed = isWide ? preferCollapsed : true;
   const navItems = NAV_ITEMS.filter(
     (item) => item.id !== 'quizypedia' || state.settings.quizypediaEnabled
   );
 
   const toggleCollapsed = () => {
-    setCollapsed((prev) => {
+    setPreferCollapsed((prev) => {
       const next = !prev;
       try {
         localStorage.setItem(STORAGE_KEY, next ? '1' : '0');
@@ -110,7 +116,7 @@ export function CollapsibleSidebar({
           </div>
           <button
             type="button"
-            className="hidden rounded-lg p-1.5 text-muted-foreground hover:bg-secondary md:inline-flex"
+            className="hidden rounded-lg p-1.5 text-muted-foreground hover:bg-secondary xl:inline-flex"
             onClick={toggleCollapsed}
             aria-label={collapsed ? 'Déplier la barre latérale' : 'Replier la barre latérale'}
             aria-expanded={!collapsed}
