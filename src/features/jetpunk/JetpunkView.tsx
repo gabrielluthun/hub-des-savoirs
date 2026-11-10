@@ -204,7 +204,7 @@ export function JetPunkView() {
           mobilePane === 'list' ? 'hidden md:flex' : 'flex'
         )}
       >
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setMobilePane('list')}
@@ -221,9 +221,9 @@ export function JetPunkView() {
             }
             placeholder="Nom de la liste"
             aria-label="Nom de la liste"
-            className="min-w-0 flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl placeholder:text-muted-foreground/50"
+            className="min-w-[10rem] flex-1 bg-transparent font-display text-xl font-semibold outline-none sm:text-2xl placeholder:text-muted-foreground/50"
           />
-          <div className="flex shrink-0 flex-wrap gap-2">
+          <div className="ml-auto flex shrink-0 flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
