@@ -9,7 +9,7 @@ export function OutlinePanel({ content, onNavigate }: OutlinePanelProps) {
   const outline = extractOutline(content);
 
   return (
-    <aside className="hidden h-full min-h-0 w-[200px] shrink-0 flex-col border-l border-border bg-background lg:flex">
+    <aside className="hidden h-full min-h-0 w-[200px] shrink-0 flex-col border-l border-border bg-background xl:flex">
       <p className="shrink-0 px-4 pb-3 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Plan
       </p>
